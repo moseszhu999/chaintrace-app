@@ -112,10 +112,12 @@ export default async function PassportPage() {
                     {proof.business_name} · {proof.batch_id} · {new Date(proof.created_at).toLocaleString()}
                     <br />
                     <span className="hash-value">{shortHash(proof.file_hash)}</span>
+                    <br />
+                    <Link href={`/proof-index/${proof.id}`} className="inline-link">Open indexed proof</Link>
                     {proof.demo_url && (
                       <>
                         <br />
-                        <Link href={proof.demo_url} className="inline-link">Open demo proof</Link>
+                        <Link href={proof.demo_url} className="inline-link">Open legacy demo link</Link>
                       </>
                     )}
                     {proof.transaction_hash && (
