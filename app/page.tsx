@@ -44,6 +44,21 @@ function buildDemoProofUrl(proofDraft: ProofDraft): string {
   return `/demo-proof?${params.toString()}`;
 }
 
+async function saveProofMetadata(payload: Record<string, unknown>) {
+  const response = await fetch("/api/proofs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to save proof metadata.");
+  }
+
+  return response.json();
+}
+
 export default function Home() {
   const [proofType, setProofType] = useState<ProofType>("product");
   const [title, setTitle] = useState("Vietnam Coffee Batch Proof");
@@ -60,6 +75,7 @@ export default function Home() {
   const [txHash, setTxHash] = useState<`0x${string}` | "">("");
   const [proofId, setProofId] = useState<bigint | null>(null);
   const [isAnchoring, setIsAnchoring] = useState(false);
+  const [isSavingDemo, setIsSavingDemo] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,7 +161,7 @@ export default function Home() {
     }
   }
 
-  function handleCreateDemoProof() {
+  async function handleCreateDemoProof() {
     setError("");
 
     if (!proofDraft) {
@@ -153,7 +169,30 @@ export default function Home() {
       return;
     }
 
-    window.location.href = buildDemoProofUrl(proofDraft);
+    const demoUrl = buildDemoProofUrl(proofDraft);
+
+    try {
+      setIsSavingDemo(true);
+      setChainStatus("Saving demo proof metadata...");
+      await saveProofMetadata({
+        proofMode: "demo",
+        proofType: proofDraft.proofType,
+        title: proofDraft.title,
+        businessName: proofDraft.businessName,
+        batchId: proofDraft.batchId,
+        fileName: proofDraft.fileName,
+        fileHash: proofDraft.fileHash,
+        note: proofDraft.note,
+        walletAddress: walletAddress || null,
+        demoUrl,
+      });
+      window.location.href = demoUrl;
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Failed to save demo proof metadata.");
+      setChainStatus("");
+    } finally {
+      setIsSavingDemo(false);
+    }
   }
 
   async function handleAnchorProof() {
@@ -196,7 +235,24 @@ export default function Home() {
 
       const event = await waitForProofRegistered(hash);
       setProofId(event.proofId);
-      setChainStatus(`Proof confirmed. Shareable proof ID: ${event.proofId.toString()}.`);
+
+      await saveProofMetadata({
+        proofMode: "onchain",
+        proofType: proofDraft.proofType,
+        title: proofDraft.title,
+        businessName: proofDraft.businessName,
+        batchId: proofDraft.batchId,
+        fileName: proofDraft.fileName,
+        fileHash: proofDraft.fileHash,
+        note: proofDraft.note,
+        walletAddress,
+        chainId: 11155111,
+        contractAddress: proofRegistryAddress,
+        transactionHash: hash,
+        onchainProofId: event.proofId.toString(),
+      });
+
+      setChainStatus(`Proof confirmed and indexed. Shareable proof ID: ${event.proofId.toString()}.`);
     } catch (caught) {
       setError(getReadableError(caught));
       setChainStatus("");
@@ -216,6 +272,7 @@ export default function Home() {
         </p>
         <div className="hero-actions">
           <a href="#create-proof" className="primary-button">Create proof</a>
+          <a href="/passport" className="secondary-button">Business passport</a>
           <a href="https://github.com/moseszhu999/chaintrace-protocol" className="secondary-button" target="_blank" rel="noreferrer">
             Protocol repo
           </a>
@@ -368,8 +425,8 @@ export default function Home() {
                     "Use Demo Proof for gas-free testing. Use Anchor proof only when you need a real Ethereum Sepolia transaction."}
                 </span>
                 <div className="chain-actions">
-                  <button type="button" className="secondary-button button-reset" onClick={handleCreateDemoProof} disabled={!demoProofUrl}>
-                    Demo proof no gas
+                  <button type="button" className="secondary-button button-reset" onClick={handleCreateDemoProof} disabled={!demoProofUrl || isSavingDemo}>
+                    {isSavingDemo ? "Saving..." : "Demo proof no gas"}
                   </button>
                   <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet}>
                     {walletAddress ? "Wallet connected" : "Connect wallet"}
