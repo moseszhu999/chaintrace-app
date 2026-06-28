@@ -1,11 +1,11 @@
-import { demoWorkspace } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function TasksView({ zh }: { zh: boolean }) {
-  const { riskGaps, tasks } = demoWorkspace;
+export function TasksView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+  const { riskGaps, tasks } = workspace;
 
   return (
     <section className="workspace">
