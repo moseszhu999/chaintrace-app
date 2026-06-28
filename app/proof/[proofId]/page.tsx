@@ -5,6 +5,9 @@ import { getBaseSepoliaExplorerAddressUrl, proofRegistryAddress } from "@/lib/ch
 import { shortHash } from "@/lib/hash";
 import { getProofById } from "@/lib/publicChain";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function formatTimestamp(timestamp: bigint): string {
   return new Date(Number(timestamp) * 1000).toLocaleString("en-US", {
     year: "numeric",
@@ -16,6 +19,11 @@ function formatTimestamp(timestamp: bigint): string {
   });
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return "Unable to read this proof from the ChainTrace ProofRegistry contract.";
+}
+
 export default async function PublicProofPage({
   params,
 }: {
@@ -23,7 +31,78 @@ export default async function PublicProofPage({
 }) {
   const { proofId } = await params;
   const proofIdBigInt = BigInt(proofId);
-  const proof = await getProofById(proofIdBigInt);
+
+  let proof;
+
+  try {
+    proof = await getProofById(proofIdBigInt);
+  } catch (error) {
+    return (
+      <main className="page-shell">
+        <section className="hero">
+          <div className="eyebrow">ChainTrace Public Proof</div>
+          <h1>Proof #{proofId} could not be loaded.</h1>
+          <p>
+            The app could not read this proof from Base Sepolia. The proof ID may not exist yet,
+            or the public RPC endpoint may be temporarily unavailable.
+          </p>
+          <div className="hero-actions">
+            <Link href="/" className="primary-button">Create your own proof</Link>
+            <a
+              href={getBaseSepoliaExplorerAddressUrl(proofRegistryAddress)}
+              className="secondary-button"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View contract
+            </a>
+          </div>
+        </section>
+
+        <section className="workspace single-column">
+          <article className="panel proof-card public-proof-card">
+            <div className="proof-card-header">
+              <div>
+                <span className="proof-type">not loaded</span>
+                <h3>Proof read failed</h3>
+              </div>
+              <div className="status-pill error-pill">Needs check</div>
+            </div>
+
+            <dl className="proof-details">
+              <div>
+                <dt>Requested proof ID</dt>
+                <dd>#{proofId}</dd>
+              </div>
+              <div>
+                <dt>Registry</dt>
+                <dd>
+                  <a
+                    href={getBaseSepoliaExplorerAddressUrl(proofRegistryAddress)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-link"
+                    title={proofRegistryAddress}
+                  >
+                    {shortHash(proofRegistryAddress)}
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt>Error</dt>
+                <dd>{getErrorMessage(error)}</dd>
+              </div>
+            </dl>
+
+            <p className="proof-note">
+              If you just submitted a transaction, wait a few seconds and refresh. If this keeps failing,
+              the actual proof ID may be different from #{proofId}. Use the proof ID shown after a confirmed transaction.
+            </p>
+          </article>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="page-shell">
