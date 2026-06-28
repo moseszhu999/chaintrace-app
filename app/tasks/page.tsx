@@ -1,15 +1,13 @@
 import { TasksView } from "@/components/workspace/TasksView";
-import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { getIsZhRequest } from "@/lib/request-locale";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
+import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
 
 export default async function TaskCenterPage() {
-  const zh = await getIsZhRequest();
-  const workspace = await getWorkspaceSnapshot();
+  const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceShell zh={zh} active="tasks" workspace={workspace}>
+    <WorkspaceFrame zh={zh} active="tasks" workspace={workspace}>
       <TasksView zh={zh} workspace={workspace} />
-    </WorkspaceShell>
+    </WorkspaceFrame>
   );
 }
