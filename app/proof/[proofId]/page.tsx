@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ProofVerifier } from "@/components/ProofVerifier";
+import { SharePanel } from "@/components/SharePanel";
 import { getBaseSepoliaExplorerAddressUrl, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { shortHash } from "@/lib/hash";
 import { getProofById } from "@/lib/publicChain";
@@ -114,6 +116,11 @@ export default async function PublicProofPage({
             ChainTrace stores hashes and references, not sensitive business files. To verify a document,
             recalculate its SHA-256 hash and compare it with the file hash shown on this page.
           </p>
+
+          <div className="proof-tools">
+            <SharePanel proofId={proofId} />
+            <ProofVerifier expectedHash={proof.fileHash} />
+          </div>
         </article>
       </section>
     </main>
