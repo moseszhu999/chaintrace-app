@@ -16,6 +16,20 @@ const proofTypes: { label: string; value: ProofType; description: string }[] = [
   { label: "Acceptance Proof", value: "acceptance", description: "Prove buyer acceptance or confirmation." },
 ];
 
+function getReadableError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.toLowerCase().includes("insufficient funds")) {
+    return "Insufficient SepoliaETH for gas. Add a little more Ethereum Sepolia test ETH to this wallet, then try Anchor proof again.";
+  }
+
+  if (message.toLowerCase().includes("user rejected") || message.includes("4001")) {
+    return "Transaction rejected in wallet.";
+  }
+
+  return message || "Failed to anchor proof on-chain.";
+}
+
 export default function Home() {
   const [proofType, setProofType] = useState<ProofType>("product");
   const [title, setTitle] = useState("Vietnam Coffee Batch Proof");
@@ -112,7 +126,7 @@ export default function Home() {
       setChainStatus("Wallet connected.");
     } catch (caught) {
       setChainStatus("");
-      setError(caught instanceof Error ? caught.message : "Failed to connect wallet.");
+      setError(getReadableError(caught));
     }
   }
 
@@ -158,7 +172,7 @@ export default function Home() {
       setProofId(event.proofId);
       setChainStatus(`Proof confirmed. Shareable proof ID: ${event.proofId.toString()}.`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Failed to anchor proof on-chain.");
+      setError(getReadableError(caught));
       setChainStatus("");
     } finally {
       setIsAnchoring(false);
