@@ -39,17 +39,20 @@ function normalizeProof(rawProof: unknown): ChainTraceProof {
     throw new Error("ProofRegistry returned an unexpected proof shape.");
   }
 
-  return {
-    submitter,
-    fileHash,
-    proofType,
-    uri,
-    metadataHash,
-    timestamp,
-  };
+  return { submitter, fileHash, proofType, uri, metadataHash, timestamp };
+}
+
+export async function ensureProofRegistryIsDeployed(): Promise<void> {
+  const bytecode = await publicClient.getBytecode({ address: proofRegistryAddress });
+
+  if (!bytecode || bytecode === "0x") {
+    throw new Error(`No contract code found at ${proofRegistryAddress} on Base Sepolia.`);
+  }
 }
 
 export async function getProofById(proofId: bigint): Promise<ChainTraceProof> {
+  await ensureProofRegistryIsDeployed();
+
   const rawProof = await publicClient.readContract({
     address: proofRegistryAddress,
     abi: proofRegistryAbi,
@@ -60,12 +63,29 @@ export async function getProofById(proofId: bigint): Promise<ChainTraceProof> {
   return normalizeProof(rawProof);
 }
 
+export async function getProofIdsByFileHash(fileHash: `0x${string}`): Promise<bigint[]> {
+  await ensureProofRegistryIsDeployed();
+
+  return publicClient.readContract({
+    address: proofRegistryAddress,
+    abi: proofRegistryAbi,
+    functionName: "getProofIdsByFileHash",
+    args: [fileHash],
+  }) as Promise<bigint[]>;
+}
+
 export async function waitForProofRegistered(txHash: `0x${string}`): Promise<{
   proofId: bigint;
   submitter: `0x${string}`;
   fileHash: `0x${string}`;
 }> {
+  await ensureProofRegistryIsDeployed();
+
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+  if (receipt.status !== "success") {
+    throw new Error("The proof transaction was mined but reverted.");
+  }
 
   const logs = parseEventLogs({
     abi: proofRegistryAbi,
@@ -76,7 +96,7 @@ export async function waitForProofRegistered(txHash: `0x${string}`): Promise<{
   const event = logs[0];
 
   if (!event) {
-    throw new Error("ProofRegistered event was not found in the transaction receipt.");
+    throw new Error("The transaction succeeded but did not emit ProofRegistered. Check that the configured address is the ProofRegistry contract on Base Sepolia.");
   }
 
   return {
