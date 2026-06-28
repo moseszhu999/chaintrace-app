@@ -226,9 +226,9 @@ export const dictionary = {
       copyFailed: "无法自动复制，请手动选择并复制链接。",
     },
   },
-} as const;
+} satisfies Record<Locale, Record<string, Record<string, string>>>;
 
-export type Dictionary = typeof dictionary.en;
+export type Dictionary = (typeof dictionary)[Locale];
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionary[locale];
