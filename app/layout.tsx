@@ -17,12 +17,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const navItems = [
     { href: "/product", label: zh ? "产品架构" : "Product" },
-    { href: "/project-plan", label: zh ? "项目计划" : "Plan" },
-    { href: "/platform", label: zh ? "角色痛点" : "Roles" },
+    { href: "/proof-pack-builder", label: zh ? "Builder" : "Builder" },
+    { href: "/risk-dashboard", label: zh ? "风险看板" : "Risks" },
     { href: "/cases", label: zh ? "场景案例" : "Cases" },
-    { href: "/receivable-pack", label: zh ? "证明包" : "Proof Packs" },
     { href: "/passport", label: zh ? "企业档案" : "Passports" },
-    { href: "/#create-proof", label: zh ? "创建证明" : "Create" },
+    { href: "/project-plan", label: zh ? "计划" : "Plan" },
   ];
 
   return (
