@@ -16,15 +16,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const zh = locale === "zh-CN";
 
   const navItems = [
-    { href: "/app-demo", label: zh ? "App Demo" : "App Demo" },
-    { href: "/assistant", label: zh ? "助手中心" : "Assistant OS" },
-    { href: "/assistant/memory", label: zh ? "记忆" : "Memory" },
-    { href: "/assistant/approvals", label: zh ? "审批" : "Approvals" },
-    { href: "/customer-workspace", label: zh ? "工作台" : "Workspace" },
-    { href: "/scenario-flow", label: zh ? "流程" : "Flow" },
-    { href: "/user-value", label: zh ? "用户价值" : "Value" },
-    { href: "/function-architecture", label: zh ? "架构" : "Architecture" },
-    { href: "/risk-dashboard", label: zh ? "风险" : "Risks" },
+    { href: "/#product", label: zh ? "产品" : "Product" },
+    { href: "/#workflow", label: zh ? "流程" : "Workflow" },
+    { href: "/#security", label: zh ? "权限边界" : "Security" },
+    { href: "/verify/uy-beef-cn-2026-0001", label: zh ? "公开验证" : "Public verify" },
+    { href: "/login", label: zh ? "登录" : "Login" },
+    { href: "/dashboard", label: zh ? "工作台" : "Workspace" },
   ];
 
   return (
@@ -99,7 +96,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                   minHeight: 36,
                   padding: "0 12px",
                   borderRadius: 999,
-                  color: "#4d443b",
+                  color: item.href === "/dashboard" ? "#fff" : "#4d443b",
+                  background: item.href === "/dashboard" ? "#111827" : "transparent",
                   fontSize: 14,
                   fontWeight: 850,
                 }}
