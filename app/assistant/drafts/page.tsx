@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
 import { ApprovalsView } from "@/components/workspace/ApprovalsView";
 import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { normalizeLocale } from "@/lib/i18n";
+import { getIsZhRequest } from "@/lib/request-locale";
 
 export default async function AssistantDraftsPage() {
-  const cookieStore = await cookies();
-  const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
-  const zh = locale === "zh-CN";
+  const zh = await getIsZhRequest();
 
   return (
     <WorkspaceShell zh={zh} active="approvals" actionSlot={<a className="secondary-button" href="/assistant">{zh ? "返回助手" : "Back to assistant"}</a>}>
