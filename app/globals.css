@@ -57,6 +57,10 @@ button:disabled {
   box-shadow: var(--shadow);
 }
 
+.product-hero {
+  margin-bottom: 22px;
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -154,9 +158,99 @@ button:disabled {
 .future-chain-box span,
 .share-box p,
 .verify-box p,
-.verify-warning {
+.verify-warning,
+.product-strip p,
+.pack-step-card p,
+.proof-flow-card span {
   color: var(--muted);
   line-height: 1.6;
+}
+
+.product-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 22px 0;
+}
+
+.product-strip article {
+  min-height: 150px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: 0 12px 34px rgba(20, 17, 12, 0.04);
+}
+
+.product-strip span,
+.pack-step-card span {
+  display: inline-flex;
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-strip strong {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.product-strip p,
+.pack-step-card p {
+  margin: 0;
+}
+
+.product-showcase {
+  margin: 22px 0;
+}
+
+.pack-step-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pack-step-card {
+  display: grid;
+  gap: 10px;
+  min-height: 170px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: #fffaf0;
+  color: var(--foreground);
+  text-align: left;
+}
+
+.pack-step-card.active,
+.pack-step-card:hover {
+  border-color: rgba(29, 107, 59, 0.36);
+  background: rgba(29, 107, 59, 0.06);
+  box-shadow: 0 12px 28px rgba(29, 107, 59, 0.08);
+}
+
+.pack-step-card strong {
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.proof-flow-card {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid rgba(29, 107, 59, 0.2);
+  border-radius: 18px;
+  background: rgba(29, 107, 59, 0.07);
+}
+
+.preview-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 0;
 }
 
 .workspace {
@@ -463,9 +557,15 @@ dd {
   }
 
   .principles-grid,
+  .product-strip,
   .workspace,
-  .share-box {
+  .share-box,
+  .preview-actions {
     grid-template-columns: 1fr;
+  }
+
+  .pack-step-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .proof-card-header,
@@ -475,5 +575,11 @@ dd {
 
   .proof-card-header {
     display: grid;
+  }
+}
+
+@media (max-width: 560px) {
+  .pack-step-grid {
+    grid-template-columns: 1fr;
   }
 }
