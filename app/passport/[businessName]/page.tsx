@@ -18,6 +18,15 @@ type ProofRow = {
   created_at: string;
 };
 
+const supplyChainProofTypes = [
+  { key: "product", label: "Product", description: "Origin, batch, or authenticity proof" },
+  { key: "shipment", label: "Shipment", description: "Shipping and logistics evidence" },
+  { key: "invoice", label: "Invoice", description: "Invoice existence and payment evidence" },
+  { key: "inspection", label: "Inspection", description: "Quality control and inspection evidence" },
+  { key: "delivery", label: "Delivery", description: "Delivery or warehouse receipt proof" },
+  { key: "acceptance", label: "Acceptance", description: "Buyer acceptance or confirmation proof" },
+];
+
 async function loadBusinessProofs(businessName: string): Promise<ProofRow[]> {
   const databaseUrl = process.env.DATABASE_URL;
 
@@ -60,6 +69,13 @@ function buildTrustSummary(args: {
   return `${args.businessName} has indexed ${args.proofCount} public ChainTrace proof record${args.proofCount === 1 ? "" : "s"}, including ${args.demoCount} gas-free demo proof${args.demoCount === 1 ? "" : "s"} and ${args.onchainCount} on-chain anchored proof${args.onchainCount === 1 ? "" : "s"}. Current proof types: ${args.proofTypes}.`;
 }
 
+function countByProofType(proofs: ProofRow[]): Record<string, number> {
+  return proofs.reduce<Record<string, number>>((accumulator, proof) => {
+    accumulator[proof.proof_type] = (accumulator[proof.proof_type] ?? 0) + 1;
+    return accumulator;
+  }, {});
+}
+
 export default async function BusinessPassportPage({
   params,
 }: {
@@ -79,6 +95,7 @@ export default async function BusinessPassportPage({
     onchainCount,
     proofTypes,
   });
+  const proofTypeCounts = countByProofType(proofs);
 
   return (
     <main className="page-shell">
@@ -133,6 +150,39 @@ export default async function BusinessPassportPage({
           <div className="proof-tools">
             <SharePanel path={passportPath} />
           </div>
+        </article>
+
+        <article className="panel proof-card public-proof-card">
+          <div className="proof-card-header">
+            <div>
+              <span className="proof-type">supply chain dashboard</span>
+              <h3>Proof type dashboard</h3>
+            </div>
+            <div className="status-pill">Composition</div>
+          </div>
+
+          <dl className="proof-details">
+            {supplyChainProofTypes.map((item) => {
+              const count = proofTypeCounts[item.key] ?? 0;
+              return (
+                <div key={item.key}>
+                  <dt>{item.label}</dt>
+                  <dd>
+                    <strong>{count} proof{count === 1 ? "" : "s"}</strong>
+                    <br />
+                    {item.description}
+                    <br />
+                    <span>{count > 0 ? "Evidence present in this passport." : "No indexed evidence yet."}</span>
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+
+          <p className="proof-note">
+            This dashboard helps buyers and financiers see whether a business has evidence across the whole trade flow:
+            product, shipment, invoice, inspection, delivery, and acceptance.
+          </p>
         </article>
 
         <article className="panel proof-card public-proof-card">
