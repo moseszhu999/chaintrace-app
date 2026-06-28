@@ -327,6 +327,12 @@ textarea:focus {
   font-weight: 900;
 }
 
+.status-pill.warning {
+  border-color: rgba(161, 29, 29, 0.24);
+  background: #fff0ef;
+  color: var(--error);
+}
+
 .proof-details {
   display: grid;
   gap: 0;
