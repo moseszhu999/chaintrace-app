@@ -1,13 +1,15 @@
 import { TasksView } from "@/components/workspace/TasksView";
 import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
 import { getIsZhRequest } from "@/lib/request-locale";
+import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
 
 export default async function TaskCenterPage() {
   const zh = await getIsZhRequest();
+  const workspace = await getWorkspaceSnapshot();
 
   return (
-    <WorkspaceShell zh={zh} active="tasks" actionSlot={<a className="primary-button" href="/assistant">{zh ? "让助手生成草稿" : "Ask assistant to draft"}</a>}>
-      <TasksView zh={zh} />
+    <WorkspaceShell zh={zh} active="tasks" workspace={workspace}>
+      <TasksView zh={zh} workspace={workspace} />
     </WorkspaceShell>
   );
 }
