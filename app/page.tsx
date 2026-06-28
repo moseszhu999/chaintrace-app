@@ -93,13 +93,13 @@ export default function Home() {
 
   const proofTemplates = useMemo<Record<ProofType, { title: string; note: string }>>(
     () => ({
-      order: { title: zh ? "咖啡出口订单证明" : "Coffee Export Order Proof", note: zh ? "该证明用于锚定订单、销售合同或应收账款基础文件的哈希。后续可用同一个批次 / 订单号补齐发票、发货、质检、交付和验收证据。" : "This proof anchors the hash of a purchase order, sales contract, or receivable basis document. Use the same batch / order ID to add invoice, shipment, inspection, delivery, and acceptance evidence next." },
-      product: { title: zh ? "产品批次真实性证明" : "Product Batch Authenticity Proof", note: zh ? "该证明用于锚定产品批次、产地或真实性证据。产品证明可增强企业档案，但不计入应收账款证明包的六个必需槽位。" : "This proof anchors product batch, origin, or authenticity evidence. Product proof enriches the business passport, but it is not one of the six required receivable pack slots." },
-      shipment: { title: zh ? "发货与物流证明" : "Shipment and Logistics Proof", note: zh ? "该证明用于锚定发货单、运单、承运交接或物流记录。它是应收账款证明包的必需证据之一。" : "This proof anchors a shipping note, waybill, carrier handoff, or logistics record. It is one required slot in the receivable proof pack." },
-      invoice: { title: zh ? "发票存在性证明" : "Invoice Existence Proof", note: zh ? "该证明用于锚定发票文件哈希和公开元数据，证明发票在某个时间点已经存在。" : "This proof anchors the invoice file hash and public metadata, proving that the invoice existed at a specific time." },
-      inspection: { title: zh ? "质检报告证明" : "Quality Inspection Proof", note: zh ? "该证明用于锚定质检报告、验货记录或测试结果，降低买家和资金方对货物质量的不确定性。" : "This proof anchors an inspection report, QC record, or test result, reducing uncertainty for buyers and financiers." },
-      delivery: { title: zh ? "交付或入库回执证明" : "Delivery Receipt Proof", note: zh ? "该证明用于锚定交付回执、入库回执或 POD 交付证明，说明货物已经完成交付环节。" : "This proof anchors a delivery receipt, warehouse receipt, or proof of delivery, showing that the delivery step is complete." },
-      acceptance: { title: zh ? "买家验收证明" : "Buyer Acceptance Proof", note: zh ? "该证明用于锚定买家验收、确认记录或签收审批。缺少验收时，应收账款证明包通常不应显示 Ready。" : "This proof anchors buyer acceptance, confirmation, or signed approval. Without acceptance evidence, the receivable pack should usually remain Missing evidence." },
+      order: { title: zh ? "咖啡出口订单证明" : "Coffee Export Order Proof", note: zh ? "订单是供应链故事的起点：谁向谁采购、采购什么、对应哪个批次或合同。先把这个事实固定下来，后续发票、发货、质检、交付、验收才有共同锚点。" : "The order is the start of the supply-chain story: who is buying from whom, what is being purchased, and which batch or contract it belongs to. Anchor this fact first, then connect invoice, shipment, inspection, delivery, and acceptance evidence to the same ID." },
+      product: { title: zh ? "产品批次真实性证明" : "Product Batch Authenticity Proof", note: zh ? "该证明用于说明供应链上真实存在的产品批次、产地或真实性证据。它增强企业档案和货物可信度，但不计入应收账款证明包的六个必需槽位。" : "This proof shows that a real product batch, origin claim, or authenticity record exists in the supply chain. It enriches the business passport and product trust, but it is not one of the six required receivable pack slots." },
+      shipment: { title: zh ? "发货与物流证明" : "Shipment and Logistics Proof", note: zh ? "发货证明说明货物已经离开上游节点，进入物流流转。它把供应链从纸面订单推进到真实移动，是证明包里的关键事实节点。" : "Shipment proof shows that goods have left the upstream node and entered logistics flow. It moves the supply chain from paper order to real movement, making it a key fact node in the proof pack." },
+      invoice: { title: zh ? "发票存在性证明" : "Invoice Existence Proof", note: zh ? "发票证明把供应链事实转化为应收账款主张：不是只说货在流转，而是说明这笔交易已经形成可追踪的收款凭据。" : "Invoice proof turns supply-chain activity into a receivable claim: not only that goods are moving, but that this transaction has created a traceable payment document." },
+      inspection: { title: zh ? "质检报告证明" : "Quality Inspection Proof", note: zh ? "质检证明回答供应链里最常见的问题：货是不是合格、是否符合约定标准。它降低买家、资金方和后续节点的不确定性。" : "Inspection proof answers one of the most common supply-chain questions: whether the goods meet the agreed standard. It reduces uncertainty for buyers, financiers, and downstream nodes." },
+      delivery: { title: zh ? "交付或入库回执证明" : "Delivery Receipt Proof", note: zh ? "交付证明说明货物已经到达下游节点或买方指定位置。供应链故事到这里不再只是运输中，而是进入履约完成阶段。" : "Delivery proof shows that goods reached a downstream node or buyer-designated location. At this point, the supply-chain story moves from in-transit to fulfilled delivery." },
+      acceptance: { title: zh ? "买家验收证明" : "Buyer Acceptance Proof", note: zh ? "验收证明是供应链事实闭环的最后一块：买家确认收到并接受。缺少验收时，证明包通常不应显示 Ready。" : "Acceptance proof closes the supply-chain fact loop: the buyer confirms receipt and acceptance. Without acceptance, the proof pack should usually remain Missing evidence." },
     }),
     [zh]
   );
@@ -130,15 +130,15 @@ export default function Home() {
   const isReceivablePackSlot = currentPackPosition >= 0;
 
   const storyCards = [
-    { title: zh ? "把文件变成可信信号" : "Turn files into trust signals", text: zh ? "订单、发票、物流单、质检报告，不再只是散落在微信、邮箱和 ERP 里的附件。" : "Orders, invoices, shipping records, and QC reports stop being scattered attachments in WeChat, email, or ERP." },
-    { title: zh ? "把六类证据装进一个证明包" : "Assemble six evidence types into one pack", text: zh ? "围绕同一个批次 / 订单号自动聚合，清楚告诉别人 Ready 还是 Missing evidence。" : "Group everything around the same batch / order ID and clearly show Ready or Missing evidence." },
-    { title: zh ? "把企业变成可分享的可信档案" : "Turn the business into a shareable passport", text: zh ? "买家、资金方、审计方、合作 AI Agent 都能通过链接或二维码查看。" : "Buyers, financiers, auditors, and AI agents can review it through a link or QR code." },
+    { title: zh ? "上游：订单不是一句口头承诺" : "Upstream: an order is not just a promise", text: zh ? "供应商、小工厂、贸易商先把订单、合同、产品批次这些事实固定下来，让后续所有证据都围绕同一个批次 / 订单号展开。" : "Suppliers, factories, and traders first anchor orders, contracts, and product batches so every later record can connect to the same batch / order ID." },
+    { title: zh ? "中游：货物移动要留下事实轨迹" : "Midstream: movement needs a fact trail", text: zh ? "发货、物流、质检不再只是聊天截图或附件，而是供应链流转中的可验证节点，别人可以看到每一步有没有证据。" : "Shipment, logistics, and inspection stop being scattered screenshots or attachments. They become verifiable nodes in the supply-chain flow." },
+    { title: zh ? "下游：交付和验收形成闭环" : "Downstream: delivery and acceptance close the loop", text: zh ? "当交付和验收也被补齐，这条供应链事实链才从 Missing evidence 走向 Ready，可以分享给买家、资金方和合作伙伴。" : "When delivery and acceptance are added, the supply-chain fact chain moves from Missing evidence to Ready and can be shared with buyers, financiers, and partners." },
   ];
   const audienceCards = [
-    { label: zh ? "小出口商 / 小贸易商" : "Small exporters / traders", text: zh ? "不需要重系统，先把关键贸易事实做成可信证明页。" : "No heavyweight system required. Start by turning core trade facts into trust pages." },
-    { label: zh ? "买家 / 采购方" : "Buyers / procurement teams", text: zh ? "快速判断是不是还缺发票、质检或验收。" : "Quickly see whether invoice, inspection, or acceptance evidence is still missing." },
-    { label: zh ? "资金方 / 风控团队" : "Financiers / risk teams", text: zh ? "先看证据完整度，再决定要不要进入更深的风控流程。" : "Check evidence completeness first, then decide whether to move into deeper risk review." },
-    { label: zh ? "AI Agent" : "AI agents", text: zh ? "让 Agent 协作基于可验证事实，而不是基于口头描述和碎片消息。" : "Let agents coordinate on verifiable facts instead of fragmented chats and claims." },
+    { label: zh ? "供应商 / 小工厂" : "Suppliers / small factories", text: zh ? "证明自己确实接单、生产、发货，不再只靠聊天记录解释。" : "Show that you actually received the order, produced the goods, and shipped them without relying on chat history." },
+    { label: zh ? "贸易商 / 出口商" : "Traders / exporters", text: zh ? "把分散在上下游的文件串成一个客户和资金方都能看懂的供应链故事。" : "Connect documents from upstream and downstream into a supply-chain story customers and financiers can understand." },
+    { label: zh ? "买家 / 采购方" : "Buyers / procurement teams", text: zh ? "快速判断这批货是否有订单、发货、质检、交付和验收证据。" : "Quickly see whether this batch has order, shipment, inspection, delivery, and acceptance evidence." },
+    { label: zh ? "资金方 / AI Agent" : "Financiers / AI agents", text: zh ? "先读取供应链事实完整度，再决定是否进入风控、融资或自动协作流程。" : "Read supply-chain fact completeness first, then decide whether to enter risk, financing, or automated collaboration workflows." },
   ];
 
   function handleProofTypeChange(nextProofType: ProofType) { setProofType(nextProofType); setTitle(proofTemplates[nextProofType].title); setNote(proofTemplates[nextProofType].note); }
@@ -193,37 +193,37 @@ export default function Home() {
       <section className="hero landing-hero">
         <div className="landing-grid">
           <div className="hero-copy">
-            <div className="eyebrow">{zh ? "ChainTrace · 供应链可信证明" : "ChainTrace · Supply Chain Trust Proofs"}</div>
-            <h1>{zh ? "把贸易文件，变成人人看得懂的可信证明包。" : "Turn trade documents into proof packs people instantly understand."}</h1>
-            <p>{zh ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些贸易证据，整理成一个可分享、可校验、可审计的公开可信页面。" : "ChainTrace helps small businesses turn orders, invoices, shipment, inspection, delivery, and acceptance evidence into a shareable, verifiable, audit-friendly public trust page."}</p>
+            <div className="eyebrow">{zh ? "ChainTrace · 供应链事实轨道" : "ChainTrace · Supply Chain Fact Rail"}</div>
+            <h1>{zh ? "让一条供应链，从订单到验收都有可信记录。" : "Give every supply chain a trusted record from order to acceptance."}</h1>
+            <p>{zh ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，串成一条可分享、可校验、可审计的供应链事实链。" : "ChainTrace helps small businesses connect order, invoice, shipment, inspection, delivery, and acceptance into a shareable, verifiable, audit-friendly supply-chain fact chain."}</p>
             <div className="hero-actions">
-              <a href="#create-proof" className="primary-button">{zh ? "开始创建证明" : "Start creating a proof"}</a>
-              <a href="/passport" className="secondary-button">{zh ? "查看企业档案" : "View business passports"}</a>
+              <a href="#create-proof" className="primary-button">{zh ? "开始记录一个节点" : "Record a supply-chain node"}</a>
+              <a href="/passport" className="secondary-button">{zh ? "查看企业事实档案" : "View business fact passports"}</a>
               <a href="/receivable-pack" className="secondary-button">{zh ? "了解证明包" : "Explore proof packs"}</a>
             </div>
-            <div className="hero-badges"><span className="badge-chip">{zh ? "小企业友好" : "Small-business friendly"}</span><span className="badge-chip">Ready / Missing evidence</span><span className="badge-chip">{zh ? "链接 + 二维码分享" : "Link + QR sharing"}</span></div>
+            <div className="hero-badges"><span className="badge-chip">{zh ? "供应链事实层" : "Supply-chain fact layer"}</span><span className="badge-chip">Ready / Missing evidence</span><span className="badge-chip">{zh ? "链接 + 二维码分享" : "Link + QR sharing"}</span></div>
           </div>
           <div className="hero-visual">
             <div className="atmosphere-orb orb-one" /><div className="atmosphere-orb orb-two" />
             <div className="signal-board">
-              <div className="signal-board-header"><span>{zh ? "证明包状态" : "Proof pack status"}</span><strong>COFFEE-VN-2026-0001</strong></div>
-              <div className="signal-card-grid">{receivableProofTypes.map((item, index) => <div key={item} className={`mini-proof-card ${index < 4 ? "present" : "pending"}`}><span>{proofTypeText[item]}</span><strong>{index < 4 ? (zh ? "已就绪" : "Present") : (zh ? "待补齐" : "Pending")}</strong></div>)}</div>
-              <div className="signal-status-box"><span>{zh ? "当前结果" : "Current result"}</span><strong>Missing evidence</strong><p>{zh ? "补齐交付和验收后，这个批次就会显示 Ready。" : "Add delivery and acceptance, and this batch will switch to Ready."}</p></div>
+              <div className="signal-board-header"><span>{zh ? "供应链事实链" : "Supply-chain fact chain"}</span><strong>COFFEE-VN-2026-0001</strong></div>
+              <div className="signal-card-grid">{receivableProofTypes.map((item, index) => <div key={item} className={`mini-proof-card ${index < 4 ? "present" : "pending"}`}><span>{proofTypeText[item]}</span><strong>{index < 4 ? (zh ? "已记录" : "Recorded") : (zh ? "待补齐" : "Pending")}</strong></div>)}</div>
+              <div className="signal-status-box"><span>{zh ? "当前供应链状态" : "Current supply-chain status"}</span><strong>Missing evidence</strong><p>{zh ? "这批货已经有订单、发票、发货和质检记录；补齐交付和验收后，事实链就会显示 Ready。" : "This batch already has order, invoice, shipment, and inspection records. Add delivery and acceptance to make the fact chain Ready."}</p></div>
             </div>
           </div>
         </div>
       </section>
 
       <section className="clarity-strip">
-        <article><span>{zh ? "我们在做什么" : "What we do"}</span><strong>{zh ? "做可信证明，不做复杂 ERP。" : "Trust proofs, not a heavy ERP."}</strong></article>
-        <article><span>{zh ? "为什么有用" : "Why it matters"}</span><strong>{zh ? "让别人一眼看懂证据齐不齐。" : "Show whether evidence is complete at a glance."}</strong></article>
-        <article><span>{zh ? "最后产出" : "Output"}</span><strong>{zh ? "证明页 + 企业档案 + Ready / Missing evidence。" : "Proof pages + passports + Ready / Missing evidence."}</strong></article>
+        <article><span>{zh ? "我们在做什么" : "What we do"}</span><strong>{zh ? "给供应链关键节点建立事实记录。" : "Create fact records for key supply-chain nodes."}</strong></article>
+        <article><span>{zh ? "为什么有用" : "Why it matters"}</span><strong>{zh ? "让上下游一眼看懂这批货走到哪一步。" : "Let every party see where a batch stands at a glance."}</strong></article>
+        <article><span>{zh ? "最后产出" : "Output"}</span><strong>{zh ? "供应链事实链 + 企业档案 + Ready / Missing evidence。" : "Fact chain + business passport + Ready / Missing evidence."}</strong></article>
       </section>
 
       <section className="story-grid">{storyCards.map((card) => <article key={card.title} className="story-card"><strong>{card.title}</strong><p>{card.text}</p></article>)}</section>
 
       <section className="panel product-showcase">
-        <div className="section-heading"><span>{zh ? "产品逻辑" : "Product logic"}</span><h2>{zh ? "六类证据，形成一个人人看得懂的应收账款证明包。" : "Six evidence types become one receivable proof pack everyone can understand."}</h2><p>{zh ? "用户不需要懂区块链，也不需要懂密码学。只要围绕同一个批次 / 订单号上传证据，ChainTrace 就负责生成哈希、保存索引、形成企业可信档案。" : "Users do not need to understand blockchain or cryptography. They simply upload evidence around the same batch / order ID, and ChainTrace handles hashing, indexing, and trust-profile presentation."}</p></div>
+        <div className="section-heading"><span>{zh ? "供应链逻辑" : "Supply-chain logic"}</span><h2>{zh ? "一条供应链，每个关键节点都应该留下可验证事实。" : "Every key node in a supply chain should leave a verifiable fact."}</h2><p>{zh ? "用户不需要懂区块链，也不需要重型 ERP。只要围绕同一个批次 / 订单号记录证据，ChainTrace 就负责生成哈希、保存索引、形成企业可信档案。" : "Users do not need to understand blockchain or run a heavyweight ERP. They simply record evidence around the same batch / order ID, and ChainTrace handles hashing, indexing, and trust-profile presentation."}</p></div>
         <div className="pack-step-grid">{receivableProofTypes.map((item, index) => <button key={item} type="button" className={`pack-step-card button-reset ${proofType === item ? "active" : ""}`} onClick={() => handleProofTypeChange(item)}><span>{String(index + 1).padStart(2, "0")}</span><strong>{proofTypeText[item]}</strong><p>{proofTypeText[`${item}Description` as keyof typeof proofTypeText]}</p></button>)}</div>
       </section>
 
@@ -231,8 +231,8 @@ export default function Home() {
 
       <section className="workspace" id="create-proof">
         <div className="panel form-panel">
-          <div className="section-heading"><span>{zh ? "创建证明" : "Create a proof"}</span><h2>{zh ? "先上传一个证据，让 ChainTrace 为你生成可信记录。" : "Upload one piece of evidence and let ChainTrace turn it into a trust record."}</h2><p>{zh ? "先从一个文件开始，然后逐步补齐整个证明包。" : "Start with one file, then gradually fill the rest of the proof pack."}</p></div>
-          <div className="proof-flow-card"><strong>{zh ? "当前正在补充：" : "Current evidence slot:"} {proofTypeText[proofType]}</strong><span>{isReceivablePackSlot ? (zh ? `这是应收账款证明包第 ${currentPackPosition + 1} / ${receivableProofTypes.length} 个必需证据。` : `This is required receivable pack slot ${currentPackPosition + 1} / ${receivableProofTypes.length}.`) : (zh ? "产品证明会增强企业档案，但不是应收账款 Ready 判断的必需项。" : "Product proof enriches the business passport, but it is not required for receivable Ready status.")}</span></div>
+          <div className="section-heading"><span>{zh ? "记录供应链节点" : "Record a supply-chain node"}</span><h2>{zh ? "先上传一个节点证据，让 ChainTrace 为这条供应链生成可信记录。" : "Upload one node of evidence and let ChainTrace turn it into a trusted supply-chain record."}</h2><p>{zh ? "先从订单或发货开始，然后逐步补齐质检、交付、验收，形成完整事实链。" : "Start with an order or shipment, then add inspection, delivery, and acceptance to complete the fact chain."}</p></div>
+          <div className="proof-flow-card"><strong>{zh ? "当前正在记录：" : "Current node:"} {proofTypeText[proofType]}</strong><span>{isReceivablePackSlot ? (zh ? `这是供应链事实链第 ${currentPackPosition + 1} / ${receivableProofTypes.length} 个核心节点。` : `This is core supply-chain node ${currentPackPosition + 1} / ${receivableProofTypes.length}.`) : (zh ? "产品证明会增强企业档案，但不是 Ready 判断的必需节点。" : "Product proof enriches the business passport, but it is not required for Ready status.")}</span></div>
           <label>{t.proofType}<select value={proofType} onChange={(event) => handleProofTypeChange(event.target.value as ProofType)}>{proofTypes.map((item) => <option key={item.value} value={item.value}>{proofTypeText[item.value]}</option>)}</select></label>
           <div className="type-help">{zh ? proofTypeText[`${proofType}Description` as keyof typeof proofTypeText] : selectedProofType?.description}</div>
           <label>{t.proofTitle}<input value={title} onChange={(event) => setTitle(event.target.value)} /></label>
@@ -244,11 +244,11 @@ export default function Home() {
         </div>
 
         <div className="panel preview-panel">
-          <div className="section-heading"><span>{zh ? "你将得到什么" : "What you get"}</span><h2>{zh ? "一个可以发给别人看的公开证明页。" : "A public proof page you can actually send to other people."}</h2><p>{zh ? "这不是内部技术数据，而是面向买家、资金方、审计方的可理解页面。" : "This is not an internal technical artifact. It is a page buyers, financiers, and auditors can understand."}</p></div>
+          <div className="section-heading"><span>{zh ? "你将得到什么" : "What you get"}</span><h2>{zh ? "一个可以发给上下游看的供应链事实页。" : "A supply-chain fact page you can send to upstream and downstream partners."}</h2><p>{zh ? "这不是内部技术数据，而是面向买家、供应商、资金方、审计方的可理解页面。" : "This is not an internal technical artifact. It is a page buyers, suppliers, financiers, and auditors can understand."}</p></div>
           {!proofDraft ? <div className="empty-state"><div className="empty-icon">◇</div><h3>{t.uploadPrompt}</h3><p>{t.uploadPromptHelp}</p></div> : <article className="proof-card">
             <div className="proof-card-header"><div><span className="proof-type">{proofTypeText[proofDraft.proofType]}</span><h3>{proofDraft.title}</h3></div><div className="status-pill">{proofId ? t.proofConfirmed : txHash ? t.onchainSubmitted : t.hashGenerated}</div></div>
             <dl className="proof-details">
-              <div><dt>{zh ? "证明包槽位" : "Pack slot"}</dt><dd>{proofTypeText[proofDraft.proofType]}<br /><span>{isReceivablePackSlot ? (zh ? "计入应收账款证明包完整度。" : "Counts toward receivable proof pack completeness.") : (zh ? "企业档案增强项。" : "Business passport enrichment item.")}</span></dd></div>
+              <div><dt>{zh ? "供应链节点" : "Supply-chain node"}</dt><dd>{proofTypeText[proofDraft.proofType]}<br /><span>{isReceivablePackSlot ? (zh ? "计入供应链事实链完整度。" : "Counts toward supply-chain fact-chain completeness.") : (zh ? "企业档案增强项。" : "Business passport enrichment item.")}</span></dd></div>
               <div><dt>{t.business}</dt><dd>{proofDraft.businessName}</dd></div><div><dt>{t.batchId}</dt><dd>{proofDraft.batchId}</dd></div><div><dt>{t.file}</dt><dd>{proofDraft.fileName} · {(proofDraft.fileSize / 1024).toFixed(2)} KB</dd></div><div><dt>SHA-256</dt><dd className="hash-value" title={proofDraft.fileHash}>{shortHash(proofDraft.fileHash)}</dd></div><div><dt>{t.created}</dt><dd>{new Date(proofDraft.createdAt).toLocaleString()}</dd></div><div><dt>{t.wallet}</dt><dd>{walletAddress ? shortHash(walletAddress) : t.notConnected}</dd></div><div><dt>{t.contract}</dt><dd>{proofRegistryAddress ? shortHash(proofRegistryAddress) : "Not configured"}</dd></div>
               {proofId !== null && <div><dt>Proof ID</dt><dd><a href={shareableProofUrl} className="inline-link">#{proofId.toString()} public proof page</a></dd></div>}{txHash && <div><dt>Transaction</dt><dd><a href={getChainExplorerTxUrl(txHash)} target="_blank" rel="noreferrer" className="inline-link">{shortHash(txHash)}</a></dd></div>}
             </dl>
