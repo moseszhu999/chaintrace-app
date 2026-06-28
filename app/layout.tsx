@@ -16,11 +16,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const zh = locale === "zh-CN";
 
   const navItems = [
-    { href: "/platform", label: zh ? "平台应用" : "Platform" },
+    { href: "/product", label: zh ? "产品架构" : "Product" },
+    { href: "/platform", label: zh ? "角色痛点" : "Roles" },
     { href: "/cases", label: zh ? "场景案例" : "Cases" },
     { href: "/receivable-pack", label: zh ? "证明包" : "Proof Packs" },
     { href: "/passport", label: zh ? "企业档案" : "Passports" },
-    { href: "/#create-proof", label: zh ? "创建证明" : "Create Proof" },
+    { href: "/#create-proof", label: zh ? "创建证明" : "Create" },
   ];
 
   return (
