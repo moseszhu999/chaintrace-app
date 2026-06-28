@@ -1,4 +1,4 @@
-export type ProofType = "product" | "shipment" | "invoice" | "inspection" | "delivery" | "acceptance";
+export type ProofType = "order" | "product" | "shipment" | "invoice" | "inspection" | "delivery" | "acceptance";
 
 export type ProofDraft = {
   proofType: ProofType;
