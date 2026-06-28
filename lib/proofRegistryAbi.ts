@@ -32,6 +32,13 @@ export const proofRegistryAbi = [
     ],
   },
   {
+    type: "function",
+    name: "getProofIdsByFileHash",
+    stateMutability: "view",
+    inputs: [{ name: "fileHash", type: "bytes32" }],
+    outputs: [{ name: "proofIds", type: "uint256[]" }],
+  },
+  {
     type: "event",
     name: "ProofRegistered",
     inputs: [
