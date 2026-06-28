@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { findContextLabel, sampleApprovalRecords, sampleDrafts } from "@/lib/assistant-product-model";
+import { demoWorkspace, getContextLabel } from "@/lib/demo-workspace-data";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
 export function ApprovalsView({ zh }: { zh: boolean }) {
-  const [draftBody, setDraftBody] = useState(zh ? sampleDrafts[1].bodyZh : sampleDrafts[1].bodyEn);
-  const [approvalState, setApprovalState] = useState(sampleApprovalRecords[1].status);
+  const buyerDraft = demoWorkspace.drafts[1];
+  const buyerApproval = demoWorkspace.approvals[1];
+  const [draftBody, setDraftBody] = useState(zh ? buyerDraft.bodyZh : buyerDraft.bodyEn);
+  const [approvalState, setApprovalState] = useState(buyerApproval.status);
 
   return (
     <section className="workspace">
@@ -29,7 +31,7 @@ export function ApprovalsView({ zh }: { zh: boolean }) {
         <div className="section-heading"><span>{t(zh, "审批状态", "Approval status")}</span><h2>{approvalState}</h2></div>
         <dl className="proof-details">
           <div><dt>{t(zh, "边界", "Boundary")}</dt><dd>{t(zh, "只发送提醒，不替用户确认验收、付款或融资结果。", "Only sends a reminder; does not confirm acceptance, payment, or financing on behalf of the user.")}</dd></div>
-          <div><dt>{t(zh, "引用", "Citations")}</dt><dd>{sampleDrafts[1].contextRefs.map((ref) => findContextLabel(ref, zh)).join(" / ")}</dd></div>
+          <div><dt>{t(zh, "引用", "Citations")}</dt><dd>{buyerDraft.contextRefs.map((ref) => getContextLabel(ref, zh)).join(" / ")}</dd></div>
         </dl>
       </div>
     </section>
