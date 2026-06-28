@@ -1,11 +1,11 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { getBaseSepoliaExplorerTxUrl, isProofRegistryConfigured, proofRegistryAddress } from "@/lib/chaintraceConfig";
+import { getChainExplorerTxUrl, isProofRegistryConfigured, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { sha256File, shortHash } from "@/lib/hash";
 import { waitForProofRegistered } from "@/lib/publicChain";
 import type { ProofDraft, ProofType } from "@/lib/types";
-import { connectWallet, getConnectedAccount, hasInjectedWallet, registerProofOnChain, switchToBaseSepolia } from "@/lib/wallet";
+import { connectWallet, getConnectedAccount, hasInjectedWallet, registerProofOnChain, switchToEthereumSepolia } from "@/lib/wallet";
 
 const proofTypes: { label: string; value: ProofType; description: string }[] = [
   { label: "Product Proof", value: "product", description: "Prove product origin, batch, or authenticity." },
@@ -133,14 +133,14 @@ export default function Home() {
     }
 
     if (!proofRegistryAddress || !isProofRegistryConfigured()) {
-      setError("ProofRegistry contract address is not configured. Add NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS in Vercel after deployment.");
+      setError("ProofRegistry contract address is not configured.");
       return;
     }
 
     try {
       setIsAnchoring(true);
-      setChainStatus("Switching to Base Sepolia...");
-      await switchToBaseSepolia();
+      setChainStatus("Switching to Ethereum Sepolia...");
+      await switchToEthereumSepolia();
       setChainStatus("Waiting for wallet confirmation...");
 
       const hash = await registerProofOnChain({
@@ -172,7 +172,7 @@ export default function Home() {
         <h1>Make your product, shipment, or invoice verifiable.</h1>
         <p>
           Upload evidence, generate a browser-side SHA-256 hash, and preview a public proof page.
-          Then anchor the hash on Base Sepolia to create an on-chain proof trail.
+          Then anchor the hash on Ethereum Sepolia to create an on-chain proof trail.
         </p>
         <div className="hero-actions">
           <a href="#create-proof" className="primary-button">Create proof</a>
@@ -311,7 +311,7 @@ export default function Home() {
                   <div>
                     <dt>Transaction</dt>
                     <dd>
-                      <a href={getBaseSepoliaExplorerTxUrl(txHash)} target="_blank" rel="noreferrer" className="inline-link">
+                      <a href={getChainExplorerTxUrl(txHash)} target="_blank" rel="noreferrer" className="inline-link">
                         {shortHash(txHash)}
                       </a>
                     </dd>
@@ -325,7 +325,7 @@ export default function Home() {
                 <strong>On-chain anchoring</strong>
                 <span>
                   {chainStatus ||
-                    "Connect a wallet, switch to Base Sepolia, and submit this proof hash to ProofRegistry."}
+                    "Connect a wallet, switch to Ethereum Sepolia, and submit this proof hash to ProofRegistry."}
                 </span>
                 <div className="chain-actions">
                   <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet}>
