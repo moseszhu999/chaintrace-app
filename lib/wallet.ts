@@ -104,7 +104,7 @@ export async function connectWallet(): Promise<`0x${string}`> {
   return account;
 }
 
-export async function switchToBaseSepolia(): Promise<void> {
+export async function switchToEthereumSepolia(): Promise<void> {
   const provider = getWalletProvider();
 
   if (!provider) {
@@ -114,7 +114,7 @@ export async function switchToBaseSepolia(): Promise<void> {
   try {
     await provider.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0x14A34" }],
+      params: [{ chainId: "0xaa36a7" }],
     });
   } catch (caught) {
     const error = caught as { code?: number };
@@ -127,15 +127,15 @@ export async function switchToBaseSepolia(): Promise<void> {
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: "0x14A34",
-          chainName: "Base Sepolia",
+          chainId: "0xaa36a7",
+          chainName: "Ethereum Sepolia",
           nativeCurrency: {
             name: "Sepolia Ether",
             symbol: "ETH",
             decimals: 18,
           },
-          rpcUrls: ["https://sepolia.base.org"],
-          blockExplorerUrls: ["https://sepolia.basescan.org"],
+          rpcUrls: ["https://rpc.sepolia.org"],
+          blockExplorerUrls: ["https://sepolia.etherscan.io"],
         },
       ],
     });
