@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { neon } from "@neondatabase/serverless";
+import { SharePanel } from "@/components/SharePanel";
 import { getChainExplorerAddressUrl, getChainExplorerTxUrl, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { shortHash } from "@/lib/hash";
 
@@ -45,6 +46,20 @@ async function loadBusinessProofs(businessName: string): Promise<ProofRow[]> {
   return rows as ProofRow[];
 }
 
+function buildTrustSummary(args: {
+  businessName: string;
+  proofCount: number;
+  demoCount: number;
+  onchainCount: number;
+  proofTypes: string;
+}): string {
+  if (args.proofCount === 0) {
+    return `${args.businessName} has not indexed any public ChainTrace proof records yet.`;
+  }
+
+  return `${args.businessName} has indexed ${args.proofCount} public ChainTrace proof record${args.proofCount === 1 ? "" : "s"}, including ${args.demoCount} gas-free demo proof${args.demoCount === 1 ? "" : "s"} and ${args.onchainCount} on-chain anchored proof${args.onchainCount === 1 ? "" : "s"}. Current proof types: ${args.proofTypes}.`;
+}
+
 export default async function BusinessPassportPage({
   params,
 }: {
@@ -56,6 +71,14 @@ export default async function BusinessPassportPage({
   const demoCount = proofs.filter((item) => item.proof_mode === "demo").length;
   const onchainCount = proofs.filter((item) => item.proof_mode === "onchain").length;
   const proofTypes = Array.from(new Set(proofs.map((item) => item.proof_type))).join(", ") || "No proofs yet";
+  const passportPath = `/passport/${encodeURIComponent(businessName)}`;
+  const trustSummary = buildTrustSummary({
+    businessName,
+    proofCount: proofs.length,
+    demoCount,
+    onchainCount,
+    proofTypes,
+  });
 
   return (
     <main className="page-shell">
@@ -96,6 +119,22 @@ export default async function BusinessPassportPage({
       </section>
 
       <section className="workspace single-column">
+        <article className="panel proof-card public-proof-card">
+          <div className="proof-card-header">
+            <div>
+              <span className="proof-type">business passport</span>
+              <h3>Trust summary</h3>
+            </div>
+            <div className="status-pill">Shareable</div>
+          </div>
+
+          <p className="proof-note">{trustSummary}</p>
+
+          <div className="proof-tools">
+            <SharePanel path={passportPath} />
+          </div>
+        </article>
+
         <article className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
