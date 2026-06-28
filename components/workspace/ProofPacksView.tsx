@@ -1,11 +1,12 @@
-import { demoWorkspace, getReadyScore } from "@/lib/demo-workspace-data";
+import { getReadyScore } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function ProofPacksView({ zh }: { zh: boolean }) {
-  const { businessContext, evidenceSlots, proofPack, user } = demoWorkspace;
+export function ProofPacksView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+  const { businessContext, evidenceSlots, proofPack, user } = workspace;
   const readyScore = getReadyScore(evidenceSlots);
 
   return (
