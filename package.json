@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@neondatabase/serverless": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
