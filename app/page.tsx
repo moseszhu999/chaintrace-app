@@ -18,22 +18,22 @@ const usageSteps = [
     href: "/app-demo",
   },
   {
-    zh: "2. 选择场景并创建证明包",
-    en: "2. Choose scenario and create proof pack",
+    zh: "2. 客户助手读取授权业务背景",
+    en: "2. Assistant reads authorized business context",
+    descZh: "用户可查看、修改或关闭记忆；助手只使用授权的业务背景和当前任务。",
+    descEn: "Users can view, edit, or disable memory; the assistant only uses authorized business context and current tasks.",
+    href: "/customer-assistant",
+  },
+  {
+    zh: "3. 选择场景并创建证明包",
+    en: "3. Choose scenario and create proof pack",
     descZh: "选择跨境食品、应收账款、冷链责任等场景，系统自动生成证据槽。",
     descEn: "Choose food import, receivable financing, cold-chain responsibility, etc.; the system generates evidence slots.",
     href: "/customer-workspace",
   },
   {
-    zh: "3. 上传或补齐证据",
-    en: "3. Upload or complete evidence",
-    descZh: "订单、发票、发货、质检、交付、验收都落入对应证据槽。",
-    descEn: "Order, invoice, shipment, inspection, delivery, and acceptance fill their evidence slots.",
-    href: "/evidence-library",
-  },
-  {
-    zh: "4. 系统生成任务和风险",
-    en: "4. System generates tasks and risks",
+    zh: "4. 上传证据，系统生成任务和风险",
+    en: "4. Upload evidence; system creates tasks and risks",
     descZh: "缺什么、谁负责、影响付款/清关/融资/验收，一眼看清。",
     descEn: "See what is missing, who owns it, and whether it affects payment, customs, financing, or acceptance.",
     href: "/tasks",
@@ -73,12 +73,12 @@ const userCards = [
     valueEn: "Open one link to check fact completeness before acceptance, payment, or financing.",
   },
   {
-    zh: "AI Agent / 企业系统",
-    en: "AI Agent / enterprise system",
-    painZh: "Agent 不能靠猜 PDF 协作，需要结构化事实状态。",
-    painEn: "Agents cannot collaborate by guessing PDFs; they need structured fact status.",
-    valueZh: "读取 ProofPack、Evidence、RiskGap、Task，自动提醒和推动补证。",
-    valueEn: "Read ProofPack, Evidence, RiskGap, and Task to remind and drive evidence completion.",
+    zh: "客户助手 / AI Agent",
+    en: "Customer assistant / AI Agent",
+    painZh: "用户不想每天手工盯任务，希望系统根据授权背景提示下一步。",
+    painEn: "Users do not want to manually track tasks every day; they want suggestions based on authorized context.",
+    valueZh: "读取授权业务背景、ProofPack、Evidence、RiskGap、Task，主动给出下一步建议。",
+    valueEn: "Read authorized context, ProofPack, Evidence, RiskGap, and Task, then suggest the next action.",
   },
 ];
 
@@ -96,36 +96,36 @@ export default function Home() {
         <div className="landing-grid">
           <div className="hero-copy">
             <div className="eyebrow">{zh ? "ChainTrace · 供应链事实工作台" : "ChainTrace · Supply Chain Fact Workspace"}</div>
-            <h1>{zh ? "登录后，从一票货开始补证据、看风险、发验证链接。" : "After login, start from one shipment: complete evidence, see risks, and share a verification link."}</h1>
+            <h1>{zh ? "登录后，系统像客户助手一样理解这票货的下一步。" : "After login, the system helps like an assistant that understands the next step for this shipment."}</h1>
             <p>
               {zh
-                ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，变成可操作的证明包和可分享的事实状态。不是先讲区块链，而是先让用户少扯皮、快验证、能收款。"
-                : "ChainTrace turns order, invoice, shipment, inspection, delivery, and acceptance into operable proof packs and shareable fact status. It does not lead with blockchain; it helps users reduce disputes, verify faster, and collect better."}
+                ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，变成可操作的证明包、任务和公开验证链接。客户助手会基于用户授权的业务背景和当前待办，提示下一步。"
+                : "ChainTrace turns order, invoice, shipment, inspection, delivery, and acceptance into operable proof packs, tasks, and public verification links. The customer assistant uses authorized business context and open tasks to suggest the next step."}
             </p>
             <div className="hero-actions">
               <a href="/app-demo" className="primary-button">{zh ? "打开 App Demo" : "Open App Demo"}</a>
+              <a href="/customer-assistant" className="secondary-button">{zh ? "打开客户助手" : "Open assistant"}</a>
               <a href="/customer-workspace" className="secondary-button">{zh ? "进入客户工作台" : "Open customer workspace"}</a>
               <a href="/scenario-flow" className="secondary-button">{zh ? "看登录后流程" : "See post-login flow"}</a>
-              <a href="/verify/uy-beef-cn-2026-0001" className="secondary-button">{zh ? "查看公开验证页" : "View public verify"}</a>
             </div>
             <div className="hero-badges">
-              <span className="badge-chip">{zh ? "登录后工作流" : "Post-login workflow"}</span>
+              <span className="badge-chip">{zh ? "授权业务背景" : "Authorized context"}</span>
               <span className="badge-chip">Ready / Missing evidence</span>
-              <span className="badge-chip">{zh ? "任务 + 风险 + 分享" : "Tasks + Risks + Sharing"}</span>
+              <span className="badge-chip">{zh ? "任务 + 风险 + 主动建议" : "Tasks + Risks + Advice"}</span>
             </div>
           </div>
           <div className="hero-visual">
             <div className="atmosphere-orb orb-one" />
             <div className="atmosphere-orb orb-two" />
             <div className="signal-board">
-              <div className="signal-board-header"><span>{zh ? "客户登录后" : "After customer login"}</span><strong>UY-BEEF-CN-2026-0001</strong></div>
+              <div className="signal-board-header"><span>{zh ? "客户助手判断" : "Assistant judgement"}</span><strong>UY-BEEF-CN-2026-0001</strong></div>
               <div className="signal-card-grid">
+                <div className="mini-proof-card present"><span>{zh ? "业务背景" : "Context"}</span><strong>{zh ? "已授权" : "Allowed"}</strong></div>
                 <div className="mini-proof-card present"><span>{zh ? "订单" : "Order"}</span><strong>{zh ? "已验证" : "Verified"}</strong></div>
-                <div className="mini-proof-card present"><span>{zh ? "发货" : "Shipment"}</span><strong>{zh ? "已上传" : "Present"}</strong></div>
                 <div className="mini-proof-card pending"><span>{zh ? "入库" : "Warehouse"}</span><strong>{zh ? "待补" : "Missing"}</strong></div>
                 <div className="mini-proof-card pending"><span>{zh ? "验收" : "Acceptance"}</span><strong>{zh ? "待补" : "Missing"}</strong></div>
               </div>
-              <div className="signal-status-box"><span>{zh ? "当前状态" : "Current status"}</span><strong>Missing evidence</strong><p>{zh ? "补齐入库和验收后，这票货才能 Ready，并生成对外验证链接。" : "Add warehouse entry and acceptance before this shipment becomes Ready and shareable."}</p></div>
+              <div className="signal-status-box"><span>{zh ? "下一步建议" : "Next suggestion"}</span><strong>{zh ? "先补入库记录，再补买家验收。" : "Complete warehouse entry first, then buyer acceptance."}</strong><p>{zh ? "这两项最影响 Ready、收款和审核。" : "These two items most affect Ready status, collection, and review."}</p></div>
             </div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Home() {
       <section className="panel product-showcase">
         <div className="section-heading">
           <span>{zh ? "如何使用 ChainTrace" : "How to use ChainTrace"}</span>
-          <h2>{zh ? "从首页就能进入真实操作路径。" : "The homepage now leads directly into the real operating path."}</h2>
+          <h2>{zh ? "从首页就能进入真实操作路径和客户助手。" : "The homepage leads directly into the operating path and customer assistant."}</h2>
           <p>{zh ? "用户不需要先理解架构，先按这 5 步完成一票货的证明闭环。" : "Users do not need to understand the architecture first; they follow these five steps to close one shipment's proof loop."}</p>
         </div>
         <div className="pack-step-grid">
@@ -149,8 +149,8 @@ export default function Home() {
 
       <section className="clarity-strip">
         <article><span>{zh ? "用户痛点" : "User pain"}</span><strong>{zh ? "证据散乱，交易卡住，责任不清。" : "Scattered evidence, blocked trade, unclear responsibility."}</strong></article>
-        <article><span>{zh ? "ChainTrace 做什么" : "What ChainTrace does"}</span><strong>{zh ? "把缺证变成任务，把证据变成状态。" : "Turn gaps into tasks and evidence into status."}</strong></article>
-        <article><span>{zh ? "最后产出" : "Final output"}</span><strong>{zh ? "证明包 + 风险看板 + 公开验证链接。" : "Proof pack + risk dashboard + public verification link."}</strong></article>
+        <article><span>{zh ? "ChainTrace 做什么" : "What ChainTrace does"}</span><strong>{zh ? "结合授权背景，把缺证变成任务，把证据变成状态。" : "Use authorized context, turn gaps into tasks, and evidence into status."}</strong></article>
+        <article><span>{zh ? "最后产出" : "Final output"}</span><strong>{zh ? "证明包 + 客户助手 + 风险看板 + 公开验证链接。" : "Proof pack + customer assistant + risk dashboard + public verification link."}</strong></article>
       </section>
 
       <section className="audience-grid">
@@ -167,13 +167,13 @@ export default function Home() {
         <div className="proof-card-header">
           <div>
             <span className="proof-type">{zh ? "第一入口" : "Primary entry"}</span>
-            <h3>{zh ? "先打开 App Demo，看客户登录后怎么实际操作。" : "Open the App Demo first to see how customers actually operate after login."}</h3>
+            <h3>{zh ? "先打开 App Demo；再打开客户助手，看系统如何带着授权背景推进交易。" : "Open the App Demo first; then open the customer assistant to see how the system moves trade forward with authorized context."}</h3>
           </div>
-          <div className="status-pill">App Demo</div>
+          <div className="status-pill">Assistant</div>
         </div>
         <dl className="proof-details">
           <div><dt>{zh ? "演示入口" : "Demo entry"}</dt><dd><a href="/app-demo" className="inline-link">/app-demo</a></dd></div>
-          <div><dt>{zh ? "流程说明" : "Flow guide"}</dt><dd><a href="/scenario-flow" className="inline-link">/scenario-flow</a></dd></div>
+          <div><dt>{zh ? "客户助手" : "Assistant"}</dt><dd><a href="/customer-assistant" className="inline-link">/customer-assistant</a></dd></div>
           <div><dt>{zh ? "外部验证" : "External verification"}</dt><dd><a href="/verify/uy-beef-cn-2026-0001" className="inline-link">/verify/uy-beef-cn-2026-0001</a></dd></div>
         </dl>
       </section>
