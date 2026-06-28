@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
 import { EvidenceView } from "@/components/workspace/EvidenceView";
 import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { normalizeLocale } from "@/lib/i18n";
+import { getIsZhRequest } from "@/lib/request-locale";
 
 export default async function EvidencePage() {
-  const cookieStore = await cookies();
-  const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
-  const zh = locale === "zh-CN";
+  const zh = await getIsZhRequest();
 
   return (
     <WorkspaceShell zh={zh} active="evidence" actionSlot={<a className="secondary-button" href="/tasks">{zh ? "查看任务" : "View tasks"}</a>}>
