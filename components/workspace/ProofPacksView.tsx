@@ -1,12 +1,12 @@
-import { sampleBusinessContext, sampleEvidenceSlots, sampleProofPack } from "@/lib/assistant-product-model";
+import { demoWorkspace, getReadyScore } from "@/lib/demo-workspace-data";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
 export function ProofPacksView({ zh }: { zh: boolean }) {
-  const verified = sampleEvidenceSlots.filter((slot) => slot.status === "verified").length;
-  const readyScore = Math.round((verified / sampleEvidenceSlots.length) * 100);
+  const { businessContext, evidenceSlots, proofPack, user } = demoWorkspace;
+  const readyScore = getReadyScore(evidenceSlots);
 
   return (
     <section className="workspace">
@@ -17,8 +17,8 @@ export function ProofPacksView({ zh }: { zh: boolean }) {
           <p>{t(zh, "这是登录后的列表页：搜索、筛选、状态、负责人、公开链接。", "This is the logged-in list page: search, filters, status, owner, public link.")}</p>
         </div>
         <dl className="proof-details">
-          <div><dt>{sampleProofPack.status}</dt><dd><strong>{sampleProofPack.title}</strong><br />{sampleBusinessContext.name} · Ready {readyScore}%</dd></div>
-          <div><dt>{t(zh, "负责人", "Owner")}</dt><dd>Maya Chen · Operations lead</dd></div>
+          <div><dt>{proofPack.status}</dt><dd><strong>{proofPack.title}</strong><br />{businessContext.name} · Ready {readyScore}%</dd></div>
+          <div><dt>{t(zh, "负责人", "Owner")}</dt><dd>{user.name} · {zh ? user.titleZh : user.titleEn}</dd></div>
           <div><dt>{t(zh, "公开链接", "Public link")}</dt><dd><a className="inline-link" href="/verify/uy-beef-cn-2026-0001">/verify/uy-beef-cn-2026-0001</a></dd></div>
         </dl>
       </div>
