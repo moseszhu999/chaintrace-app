@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { demoWorkspace } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 export type WorkspaceNavKey = "dashboard" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
@@ -7,8 +7,20 @@ function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function WorkspaceShell({ zh, active, children, actionSlot }: { zh: boolean; active: WorkspaceNavKey; children: ReactNode; actionSlot?: ReactNode }) {
-  const { businessContext, organization } = demoWorkspace;
+export function WorkspaceShell({
+  zh,
+  active,
+  workspace,
+  children,
+  actionSlot,
+}: {
+  zh: boolean;
+  active: WorkspaceNavKey;
+  workspace: WorkspaceSnapshot;
+  children: ReactNode;
+  actionSlot?: ReactNode;
+}) {
+  const { businessContext, organization } = workspace;
   const navItems: { key: WorkspaceNavKey; href: string; zh: string; en: string }[] = [
     { key: "dashboard", href: "/dashboard", zh: "首页", en: "Home" },
     { key: "proofPacks", href: "/proof-packs", zh: "证明包", en: "Proof packs" },
