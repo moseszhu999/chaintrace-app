@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { sampleEvidenceSlots, sampleProofPack } from "@/lib/assistant-product-model";
+import { demoWorkspace, getMissingEvidenceSlots } from "@/lib/demo-workspace-data";
 
 type SlotStatus = "verified" | "missing" | "rejected";
 
@@ -19,13 +19,14 @@ function statusLabel(status: SlotStatus, zh: boolean) {
 }
 
 export function EvidenceView({ zh }: { zh: boolean }) {
-  const [slots, setSlots] = useState(sampleEvidenceSlots);
+  const [slots, setSlots] = useState(demoWorkspace.evidenceSlots);
+  const { proofPack } = demoWorkspace;
 
   function setSlotStatus(id: string, status: SlotStatus) {
     setSlots((items) => items.map((slot) => (slot.id === id ? { ...slot, status } : slot)));
   }
 
-  const missingSlots = slots.filter((slot) => slot.status !== "verified");
+  const missingSlots = getMissingEvidenceSlots(slots);
   const isReady = missingSlots.length === 0;
 
   return (
@@ -33,7 +34,7 @@ export function EvidenceView({ zh }: { zh: boolean }) {
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "证据槽", "Evidence slots")}</span>
-          <h2>{sampleProofPack.title}</h2>
+          <h2>{proofPack.title}</h2>
           <p>{t(zh, "每个证据槽都有责任方、业务影响和验证状态。", "Every evidence slot has an owner, business impact, and verification status.")}</p>
         </div>
         <dl className="proof-details">
