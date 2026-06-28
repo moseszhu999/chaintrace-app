@@ -20,9 +20,9 @@ const usageSteps = [
   {
     zh: "2. 客户助手读取授权业务背景",
     en: "2. Assistant reads authorized business context",
-    descZh: "用户可查看、修改或关闭记忆；助手只使用授权的业务背景和当前任务。",
-    descEn: "Users can view, edit, or disable memory; the assistant only uses authorized business context and current tasks.",
-    href: "/customer-assistant",
+    descZh: "用户可查看、修改、关闭记忆；助手只使用授权背景、证明包、证据和任务。",
+    descEn: "Users can view, edit, or disable memory; the assistant only uses authorized context, proof packs, evidence, and tasks.",
+    href: "/assistant/memory",
   },
   {
     zh: "3. 选择场景并创建证明包",
@@ -32,11 +32,11 @@ const usageSteps = [
     href: "/customer-workspace",
   },
   {
-    zh: "4. 上传证据，系统生成任务和风险",
-    en: "4. Upload evidence; system creates tasks and risks",
-    descZh: "缺什么、谁负责、影响付款/清关/融资/验收，一眼看清。",
-    descEn: "See what is missing, who owns it, and whether it affects payment, customs, financing, or acceptance.",
-    href: "/tasks",
+    zh: "4. 生成草稿、任务和审批",
+    en: "4. Create drafts, tasks, and approvals",
+    descZh: "Agent 可以建议下一步、生成草稿；发送、融资、验收等关键动作必须审批。",
+    descEn: "The Agent can suggest next steps and drafts; sending, financing, and acceptance actions require approval.",
+    href: "/assistant/actions",
   },
   {
     zh: "5. 生成公开验证链接",
@@ -99,19 +99,19 @@ export default function Home() {
             <h1>{zh ? "登录后，系统像客户助手一样理解这票货的下一步。" : "After login, the system helps like an assistant that understands the next step for this shipment."}</h1>
             <p>
               {zh
-                ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，变成可操作的证明包、任务和公开验证链接。客户助手会基于用户授权的业务背景和当前待办，提示下一步。"
-                : "ChainTrace turns order, invoice, shipment, inspection, delivery, and acceptance into operable proof packs, tasks, and public verification links. The customer assistant uses authorized business context and open tasks to suggest the next step."}
+                ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，变成可操作的证明包、任务、审批和公开验证链接。客户助手会基于用户授权的业务背景和当前待办，提示下一步。"
+                : "ChainTrace turns order, invoice, shipment, inspection, delivery, and acceptance into operable proof packs, tasks, approvals, and public verification links. The customer assistant uses authorized business context and open tasks to suggest the next step."}
             </p>
             <div className="hero-actions">
               <a href="/app-demo" className="primary-button">{zh ? "打开 App Demo" : "Open App Demo"}</a>
-              <a href="/customer-assistant" className="secondary-button">{zh ? "打开客户助手" : "Open assistant"}</a>
+              <a href="/assistant" className="secondary-button">{zh ? "打开客户助手" : "Open assistant"}</a>
               <a href="/customer-workspace" className="secondary-button">{zh ? "进入客户工作台" : "Open customer workspace"}</a>
               <a href="/scenario-flow" className="secondary-button">{zh ? "看登录后流程" : "See post-login flow"}</a>
             </div>
             <div className="hero-badges">
               <span className="badge-chip">{zh ? "授权业务背景" : "Authorized context"}</span>
               <span className="badge-chip">Ready / Missing evidence</span>
-              <span className="badge-chip">{zh ? "任务 + 风险 + 主动建议" : "Tasks + Risks + Advice"}</span>
+              <span className="badge-chip">{zh ? "记忆可控 + 人工审批" : "Controllable memory + approval"}</span>
             </div>
           </div>
           <div className="hero-visual">
@@ -123,9 +123,9 @@ export default function Home() {
                 <div className="mini-proof-card present"><span>{zh ? "业务背景" : "Context"}</span><strong>{zh ? "已授权" : "Allowed"}</strong></div>
                 <div className="mini-proof-card present"><span>{zh ? "订单" : "Order"}</span><strong>{zh ? "已验证" : "Verified"}</strong></div>
                 <div className="mini-proof-card pending"><span>{zh ? "入库" : "Warehouse"}</span><strong>{zh ? "待补" : "Missing"}</strong></div>
-                <div className="mini-proof-card pending"><span>{zh ? "验收" : "Acceptance"}</span><strong>{zh ? "待补" : "Missing"}</strong></div>
+                <div className="mini-proof-card pending"><span>{zh ? "验收" : "Acceptance"}</span><strong>{zh ? "待审批" : "Approval"}</strong></div>
               </div>
-              <div className="signal-status-box"><span>{zh ? "下一步建议" : "Next suggestion"}</span><strong>{zh ? "先补入库记录，再补买家验收。" : "Complete warehouse entry first, then buyer acceptance."}</strong><p>{zh ? "这两项最影响 Ready、收款和审核。" : "These two items most affect Ready status, collection, and review."}</p></div>
+              <div className="signal-status-box"><span>{zh ? "下一步建议" : "Next suggestion"}</span><strong>{zh ? "先补入库记录，再审批买家验收提醒。" : "Complete warehouse entry first, then approve buyer acceptance reminder."}</strong><p>{zh ? "这两项最影响 Ready、收款和审核。" : "These two items most affect Ready status, collection, and review."}</p></div>
             </div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Home() {
       <section className="panel product-showcase">
         <div className="section-heading">
           <span>{zh ? "如何使用 ChainTrace" : "How to use ChainTrace"}</span>
-          <h2>{zh ? "从首页就能进入真实操作路径和客户助手。" : "The homepage leads directly into the operating path and customer assistant."}</h2>
+          <h2>{zh ? "从首页就能进入真实操作路径、客户助手和审批。" : "The homepage leads directly into operation, customer assistant, and approval."}</h2>
           <p>{zh ? "用户不需要先理解架构，先按这 5 步完成一票货的证明闭环。" : "Users do not need to understand the architecture first; they follow these five steps to close one shipment's proof loop."}</p>
         </div>
         <div className="pack-step-grid">
@@ -149,8 +149,8 @@ export default function Home() {
 
       <section className="clarity-strip">
         <article><span>{zh ? "用户痛点" : "User pain"}</span><strong>{zh ? "证据散乱，交易卡住，责任不清。" : "Scattered evidence, blocked trade, unclear responsibility."}</strong></article>
-        <article><span>{zh ? "ChainTrace 做什么" : "What ChainTrace does"}</span><strong>{zh ? "结合授权背景，把缺证变成任务，把证据变成状态。" : "Use authorized context, turn gaps into tasks, and evidence into status."}</strong></article>
-        <article><span>{zh ? "最后产出" : "Final output"}</span><strong>{zh ? "证明包 + 客户助手 + 风险看板 + 公开验证链接。" : "Proof pack + customer assistant + risk dashboard + public verification link."}</strong></article>
+        <article><span>{zh ? "ChainTrace 做什么" : "What ChainTrace does"}</span><strong>{zh ? "结合授权背景，把缺证变成任务，把建议变成审批动作。" : "Use authorized context, turn gaps into tasks, and suggestions into approval actions."}</strong></article>
+        <article><span>{zh ? "最后产出" : "Final output"}</span><strong>{zh ? "证明包 + 客户助手 + 草稿审批 + 风险看板 + 公开验证链接。" : "Proof pack + assistant + draft approval + risk dashboard + public verification link."}</strong></article>
       </section>
 
       <section className="audience-grid">
@@ -169,11 +169,13 @@ export default function Home() {
             <span className="proof-type">{zh ? "第一入口" : "Primary entry"}</span>
             <h3>{zh ? "先打开 App Demo；再打开客户助手，看系统如何带着授权背景推进交易。" : "Open the App Demo first; then open the customer assistant to see how the system moves trade forward with authorized context."}</h3>
           </div>
-          <div className="status-pill">Assistant</div>
+          <div className="status-pill">Assistant OS</div>
         </div>
         <dl className="proof-details">
           <div><dt>{zh ? "演示入口" : "Demo entry"}</dt><dd><a href="/app-demo" className="inline-link">/app-demo</a></dd></div>
-          <div><dt>{zh ? "客户助手" : "Assistant"}</dt><dd><a href="/customer-assistant" className="inline-link">/customer-assistant</a></dd></div>
+          <div><dt>{zh ? "客户助手" : "Assistant"}</dt><dd><a href="/assistant" className="inline-link">/assistant</a></dd></div>
+          <div><dt>{zh ? "记忆管理" : "Memory"}</dt><dd><a href="/assistant/memory" className="inline-link">/assistant/memory</a></dd></div>
+          <div><dt>{zh ? "动作审批" : "Approvals"}</dt><dd><a href="/assistant/approvals" className="inline-link">/assistant/approvals</a></dd></div>
           <div><dt>{zh ? "外部验证" : "External verification"}</dt><dd><a href="/verify/uy-beef-cn-2026-0001" className="inline-link">/verify/uy-beef-cn-2026-0001</a></dd></div>
         </dl>
       </section>
