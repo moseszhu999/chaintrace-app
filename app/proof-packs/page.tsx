@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
 import { ProofPacksView } from "@/components/workspace/ProofPacksView";
 import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { normalizeLocale } from "@/lib/i18n";
+import { getIsZhRequest } from "@/lib/request-locale";
 
 export default async function ProofPacksPage() {
-  const cookieStore = await cookies();
-  const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
-  const zh = locale === "zh-CN";
+  const zh = await getIsZhRequest();
 
   return (
     <WorkspaceShell zh={zh} active="proofPacks" actionSlot={<a className="primary-button" href="/evidence">{zh ? "补证据" : "Complete evidence"}</a>}>
