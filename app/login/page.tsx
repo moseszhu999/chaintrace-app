@@ -1,11 +1,8 @@
-import { cookies } from "next/headers";
-import { normalizeLocale } from "@/lib/i18n";
 import { LoginPage } from "@/components/LoginPage";
+import { getIsZhRequest } from "@/lib/request-locale";
 
 export default async function LoginRoute() {
-  const cookieStore = await cookies();
-  const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
-  const zh = locale === "zh-CN";
+  const zh = await getIsZhRequest();
 
   return <LoginPage zh={zh} />;
 }
