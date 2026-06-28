@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { demoWorkspace, getMissingEvidenceSlots } from "@/lib/demo-workspace-data";
+import { getMissingEvidenceSlots } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 type SlotStatus = "verified" | "missing" | "rejected";
 
@@ -18,9 +19,9 @@ function statusLabel(status: SlotStatus, zh: boolean) {
   return zh ? map[status].zh : map[status].en;
 }
 
-export function EvidenceView({ zh }: { zh: boolean }) {
-  const [slots, setSlots] = useState(demoWorkspace.evidenceSlots);
-  const { proofPack } = demoWorkspace;
+export function EvidenceView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+  const [slots, setSlots] = useState(workspace.evidenceSlots);
+  const { proofPack } = workspace;
 
   function setSlotStatus(id: string, status: SlotStatus) {
     setSlots((items) => items.map((slot) => (slot.id === id ? { ...slot, status } : slot)));
