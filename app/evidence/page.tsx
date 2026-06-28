@@ -1,15 +1,13 @@
 import { EvidenceView } from "@/components/workspace/EvidenceView";
-import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { getIsZhRequest } from "@/lib/request-locale";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
+import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
 
 export default async function EvidencePage() {
-  const zh = await getIsZhRequest();
-  const workspace = await getWorkspaceSnapshot();
+  const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceShell zh={zh} active="evidence" workspace={workspace} actionSlot={<a className="secondary-button" href="/tasks">{zh ? "查看任务" : "View tasks"}</a>}>
+    <WorkspaceFrame zh={zh} active="evidence" workspace={workspace} actionSlot={<a className="secondary-button" href="/tasks">{zh ? "查看任务" : "View tasks"}</a>}>
       <EvidenceView zh={zh} workspace={workspace} />
-    </WorkspaceShell>
+    </WorkspaceFrame>
   );
 }
