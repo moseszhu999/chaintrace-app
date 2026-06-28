@@ -17,12 +17,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const navItems = [
     { href: "/app-demo", label: zh ? "App Demo" : "App Demo" },
+    { href: "/customer-assistant", label: zh ? "贴身助手" : "Assistant" },
     { href: "/customer-workspace", label: zh ? "工作台" : "Workspace" },
     { href: "/scenario-flow", label: zh ? "流程" : "Flow" },
     { href: "/user-value", label: zh ? "用户价值" : "Value" },
     { href: "/function-architecture", label: zh ? "功能架构" : "Architecture" },
     { href: "/ai-agent", label: zh ? "AI Agent" : "AI Agent" },
-    { href: "/tasks", label: zh ? "任务" : "Tasks" },
     { href: "/risk-dashboard", label: zh ? "风险" : "Risks" },
   ];
 
