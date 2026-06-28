@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { sampleBusinessContext, sampleOrganization } from "@/lib/assistant-product-model";
+import { demoWorkspace } from "@/lib/demo-workspace-data";
 
 export type WorkspaceNavKey = "dashboard" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
@@ -7,17 +7,8 @@ function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function WorkspaceShell({
-  zh,
-  active,
-  children,
-  actionSlot,
-}: {
-  zh: boolean;
-  active: WorkspaceNavKey;
-  children: ReactNode;
-  actionSlot?: ReactNode;
-}) {
+export function WorkspaceShell({ zh, active, children, actionSlot }: { zh: boolean; active: WorkspaceNavKey; children: ReactNode; actionSlot?: ReactNode }) {
+  const { businessContext, organization } = demoWorkspace;
   const navItems: { key: WorkspaceNavKey; href: string; zh: string; en: string }[] = [
     { key: "dashboard", href: "/dashboard", zh: "首页", en: "Home" },
     { key: "proofPacks", href: "/proof-packs", zh: "证明包", en: "Proof packs" },
@@ -45,7 +36,7 @@ export function WorkspaceShell({
             </nav>
             <div className="proof-flow-card" style={{ marginTop: 24 }}>
               <strong>{t(zh, "当前组织", "Current org")}</strong>
-              <span>{sampleOrganization.name}</span>
+              <span>{organization.name}</span>
             </div>
             <a className="secondary-button" href="/login" style={{ width: "100%" }}>{t(zh, "退出模拟登录", "Exit mock login")}</a>
           </aside>
@@ -55,7 +46,7 @@ export function WorkspaceShell({
               <div>
                 <div className="eyebrow">{t(zh, "登录后工作台", "Logged-in workspace")}</div>
                 <h1 style={{ margin: "14px 0 4px", fontSize: 34, letterSpacing: "-0.04em" }}>{t(zh, "今天先处理当前卡住的这票货。", "Start with the blocked shipment today.")}</h1>
-                <p style={{ color: "var(--muted)", margin: 0 }}>{sampleOrganization.name} · {sampleBusinessContext.batchNo}</p>
+                <p style={{ color: "var(--muted)", margin: 0 }}>{organization.name} · {businessContext.batchNo}</p>
               </div>
               <div className="hero-actions" style={{ marginTop: 0 }}>
                 {actionSlot ?? <a className="secondary-button" href="/assistant">{t(zh, "问助手", "Ask assistant")}</a>}
