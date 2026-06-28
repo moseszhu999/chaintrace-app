@@ -23,13 +23,37 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div className="language-switcher" aria-label="Language selector">
+    <div
+      aria-label="Language selector"
+      style={{
+        position: "fixed",
+        top: 18,
+        right: 18,
+        zIndex: 50,
+        display: "flex",
+        gap: 8,
+        padding: 6,
+        border: "1px solid rgba(0,0,0,0.08)",
+        borderRadius: 999,
+        background: "rgba(255,253,248,0.92)",
+        boxShadow: "0 12px 30px rgba(20,17,12,0.08)",
+        backdropFilter: "blur(8px)",
+      }}
+    >
       {supportedLocales.map((item) => (
         <button
           key={item}
           type="button"
-          className={`language-button ${locale === item ? "active" : ""}`}
           onClick={() => handleChange(item)}
+          style={{
+            border: 0,
+            borderRadius: 999,
+            padding: "8px 12px",
+            cursor: "pointer",
+            fontWeight: 800,
+            background: locale === item ? "#111827" : "transparent",
+            color: locale === item ? "#fff" : "#171411",
+          }}
         >
           {localeLabels[item]}
         </button>
