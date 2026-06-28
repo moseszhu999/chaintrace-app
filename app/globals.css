@@ -163,6 +163,11 @@ button:disabled {
   align-items: start;
 }
 
+.single-column {
+  grid-template-columns: 1fr;
+  margin-top: 22px;
+}
+
 .panel {
   padding: 28px;
   border: 1px solid var(--border);
@@ -273,6 +278,11 @@ textarea:focus {
   border-radius: 28px;
   background: #fffaf0;
   overflow: hidden;
+}
+
+.public-proof-card {
+  width: min(920px, 100%);
+  margin: 0 auto;
 }
 
 .proof-card-header {
