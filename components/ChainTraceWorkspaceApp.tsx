@@ -16,7 +16,6 @@ import {
 } from "@/lib/assistant-product-model";
 
 type AppView = "dashboard" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
-
 type SlotStatus = "verified" | "missing" | "rejected";
 
 function t(zh: boolean, cn: string, en: string) {
@@ -33,7 +32,7 @@ function statusLabel(status: SlotStatus, zh: boolean) {
 }
 
 export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: boolean; initialView?: AppView }) {
-  const [view, setView] = useState<AppView>(initialView);
+  const [view] = useState<AppView>(initialView);
   const [slots, setSlots] = useState(sampleEvidenceSlots);
   const [draftBody, setDraftBody] = useState(zh ? sampleDrafts[1].bodyZh : sampleDrafts[1].bodyEn);
   const [approvalState, setApprovalState] = useState(sampleApprovalRecords[1].status);
@@ -41,19 +40,19 @@ export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: 
     t(zh, "用户进入工作台，系统加载当前组织和证明包。", "User opened workspace; system loaded current organization and proof pack."),
   ]);
 
+  const navItems: { key: AppView; href: string; zh: string; en: string }[] = [
+    { key: "dashboard", href: "/dashboard", zh: "首页", en: "Home" },
+    { key: "proofPacks", href: "/proof-packs", zh: "证明包", en: "Proof packs" },
+    { key: "evidence", href: "/evidence", zh: "证据", en: "Evidence" },
+    { key: "tasks", href: "/tasks", zh: "任务", en: "Tasks" },
+    { key: "assistant", href: "/assistant", zh: "助手", en: "Assistant" },
+    { key: "approvals", href: "/assistant/approvals", zh: "审批", en: "Approvals" },
+  ];
+
   const verified = slots.filter((slot) => slot.status === "verified").length;
   const missing = slots.filter((slot) => slot.status === "missing").length;
   const readyScore = Math.round((verified / slots.length) * 100);
   const isReady = verified === slots.length;
-
-  const navItems: { key: AppView; zh: string; en: string }[] = [
-    { key: "dashboard", zh: "首页", en: "Home" },
-    { key: "proofPacks", zh: "证明包", en: "Proof packs" },
-    { key: "evidence", zh: "证据", en: "Evidence" },
-    { key: "tasks", zh: "任务", en: "Tasks" },
-    { key: "assistant", zh: "助手", en: "Assistant" },
-    { key: "approvals", zh: "审批", en: "Approvals" },
-  ];
 
   const blockerText = useMemo(() => {
     const missingSlots = slots.filter((slot) => slot.status !== "verified");
@@ -91,7 +90,7 @@ export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: 
           <p style={{ color: "var(--muted)", margin: 0 }}>{sampleOrganization.name} · {sampleBusinessContext.batchNo}</p>
         </div>
         <div className="hero-actions" style={{ marginTop: 0 }}>
-          <button type="button" className="secondary-button" onClick={() => setView("assistant")}>{t(zh, "问助手", "Ask assistant")}</button>
+          <a className="secondary-button" href="/assistant">{t(zh, "问助手", "Ask assistant")}</a>
           <button type="button" className="primary-button" onClick={verifyMissing}>{t(zh, "处理下一个缺口", "Resolve next gap")}</button>
         </div>
       </div>
@@ -102,14 +101,13 @@ export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: 
     return (
       <>
         <div className="pack-step-grid">
-          <article className="pack-step-card"><span>{t(zh, "当前证明包", "Current proof pack")}</span><strong>{sampleProofPack.title}</strong><p>{isReady ? "Ready" : "Missing evidence"}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "Ready 分数", "Ready score")}</span><strong>{readyScore}%</strong><p>{verified}/{slots.length} {t(zh, "项已验证", "verified")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "待办任务", "Open tasks")}</span><strong>{missing}</strong><p>{blockerText}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "审批", "Approvals")}</span><strong>{approvalState}</strong><p>{t(zh, "买家验收提醒待确认", "Buyer acceptance reminder needs review")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "公开链接", "Public link")}</span><strong>/verify</strong><p>{t(zh, "只公开状态和哈希", "Status and hashes only")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "助手建议", "Assistant advice")}</span><strong>{t(zh, "先补入库", "Warehouse first")}</strong><p>{t(zh, "再催买家验收", "Then chase buyer acceptance")}</p></article>
+          <a href="/proof-packs" className="pack-step-card"><span>{t(zh, "当前证明包", "Current proof pack")}</span><strong>{sampleProofPack.title}</strong><p>{isReady ? "Ready" : "Missing evidence"}</p></a>
+          <a href="/evidence" className="pack-step-card"><span>{t(zh, "Ready 分数", "Ready score")}</span><strong>{readyScore}%</strong><p>{verified}/{slots.length} {t(zh, "项已验证", "verified")}</p></a>
+          <a href="/tasks" className="pack-step-card"><span>{t(zh, "待办任务", "Open tasks")}</span><strong>{missing}</strong><p>{blockerText}</p></a>
+          <a href="/assistant/approvals" className="pack-step-card"><span>{t(zh, "审批", "Approvals")}</span><strong>{approvalState}</strong><p>{t(zh, "买家验收提醒待确认", "Buyer acceptance reminder needs review")}</p></a>
+          <a href="/verify/uy-beef-cn-2026-0001" className="pack-step-card"><span>{t(zh, "公开链接", "Public link")}</span><strong>/verify</strong><p>{t(zh, "只公开状态和哈希", "Status and hashes only")}</p></a>
+          <a href="/assistant" className="pack-step-card"><span>{t(zh, "助手建议", "Assistant advice")}</span><strong>{t(zh, "先补入库", "Warehouse first")}</strong><p>{t(zh, "再催买家验收", "Then chase buyer acceptance")}</p></a>
         </div>
-
         <section className="workspace">
           <div className="panel">
             <div className="section-heading"><span>{t(zh, "业务队列", "Business queue")}</span><h2>{t(zh, "证明包不是介绍卡片，是工作对象。", "Proof packs are work objects, not presentation cards.")}</h2></div>
@@ -132,7 +130,7 @@ export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: 
     return (
       <section className="workspace">
         <div className="panel">
-          <div className="section-heading"><span>ProofPack</span><h2>{t(zh, "一票货一个证明包。", "One shipment, one proof pack.")}</h2><p>{t(zh, "这里应该是登录后列表页：搜索、筛选、状态、负责人、公开链接。", "This should be the logged-in list page: search, filters, status, owner, public link.")}</p></div>
+          <div className="section-heading"><span>ProofPack</span><h2>{t(zh, "一票货一个证明包。", "One shipment, one proof pack.")}</h2><p>{t(zh, "这是登录后的列表页：搜索、筛选、状态、负责人、公开链接。", "This is the logged-in list page: search, filters, status, owner, public link.")}</p></div>
           <dl className="proof-details">
             <div><dt>{sampleProofPack.status}</dt><dd><strong>{sampleProofPack.title}</strong><br />{sampleBusinessContext.name} · Ready {readyScore}%</dd></div>
             <div><dt>{t(zh, "负责人", "Owner")}</dt><dd>Maya Chen · Operations lead</dd></div>
@@ -219,7 +217,7 @@ export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: 
             <div><dt>{t(zh, "业务影响", "Business impact")}</dt><dd>{t(zh, suggestion.businessImpactZh, suggestion.businessImpactEn)}</dd></div>
             <div><dt>{t(zh, "引用上下文", "Cited context")}</dt><dd>{suggestion.contextRefs.map((ref) => findContextLabel(ref, zh)).join(" / ")}</dd></div>
           </dl>
-          <button type="button" className="primary-button" onClick={() => { setView("approvals"); pushLog("助手生成了买家验收提醒草稿，等待审批。", "Assistant generated a buyer acceptance reminder draft, awaiting approval."); }}>{t(zh, "生成草稿并提交审批", "Create draft and submit approval")}</button>
+          <a className="primary-button" href="/assistant/approvals">{t(zh, "生成草稿并提交审批", "Create draft and submit approval")}</a>
         </div>
         <div className="panel">
           <div className="section-heading"><span>{t(zh, "记忆来源", "Memory source")}</span><h2>{t(zh, "必须让用户看得见、关得掉。", "Users must be able to see and disable memory.")}</h2></div>
@@ -260,12 +258,12 @@ export function ChainTraceWorkspaceApp({ zh, initialView = "dashboard" }: { zh: 
   return (
     <main className="page-shell">
       <section className="panel" style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "230px 1fr", minHeight: 760 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "230px minmax(0, 1fr)", minHeight: 760 }}>
           <aside style={{ borderRight: "1px solid var(--border)", padding: 22, background: "rgba(255,250,240,.72)" }}>
             <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 950, marginBottom: 24 }}><span style={{ display: "inline-grid", placeItems: "center", width: 34, height: 34, borderRadius: 999, background: "#111827", color: "#fff" }}>CT</span>ChainTrace</a>
             <nav style={{ display: "grid", gap: 8 }}>
               {navItems.map((item) => (
-                <button key={item.key} type="button" onClick={() => setView(item.key)} className={view === item.key ? "primary-button" : "secondary-button"} style={{ justifyContent: "flex-start", width: "100%" }}>{zh ? item.zh : item.en}</button>
+                <a key={item.key} href={item.href} className={view === item.key ? "primary-button" : "secondary-button"} style={{ justifyContent: "flex-start", width: "100%" }}>{zh ? item.zh : item.en}</a>
               ))}
             </nav>
             <div className="proof-flow-card" style={{ marginTop: 24 }}><strong>{t(zh, "当前组织", "Current org")}</strong><span>{sampleOrganization.name}</span></div>
