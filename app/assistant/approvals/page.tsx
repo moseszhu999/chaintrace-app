@@ -1,15 +1,13 @@
 import { ApprovalsView } from "@/components/workspace/ApprovalsView";
-import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { getIsZhRequest } from "@/lib/request-locale";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
+import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
 
 export default async function AssistantApprovalsPage() {
-  const zh = await getIsZhRequest();
-  const workspace = await getWorkspaceSnapshot();
+  const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceShell zh={zh} active="approvals" workspace={workspace} actionSlot={<a className="secondary-button" href="/assistant">{zh ? "返回助手" : "Back to assistant"}</a>}>
+    <WorkspaceFrame zh={zh} active="approvals" workspace={workspace} actionSlot={<a className="secondary-button" href="/assistant">{zh ? "返回助手" : "Back to assistant"}</a>}>
       <ApprovalsView zh={zh} workspace={workspace} />
-    </WorkspaceShell>
+    </WorkspaceFrame>
   );
 }
