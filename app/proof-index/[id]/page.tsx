@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { neon } from "@neondatabase/serverless";
 import { ProofVerifier } from "@/components/ProofVerifier";
 import { SharePanel } from "@/components/SharePanel";
 import { getChainExplorerTxUrl } from "@/lib/chaintraceConfig";
+import { dictionary, normalizeLocale } from "@/lib/i18n";
 import { shortHash } from "@/lib/hash";
 
 type ProofRow = {
@@ -60,6 +62,9 @@ export default async function IndexedProofPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const cookieStore = await cookies();
+  const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
+  const t = dictionary[locale];
   const { id } = await params;
   const proof = await loadIndexedProof(id);
 
@@ -67,30 +72,33 @@ export default async function IndexedProofPage({
     return (
       <main className="page-shell">
         <section className="hero">
-          <div className="eyebrow">ChainTrace Indexed Proof</div>
-          <h1>Indexed proof not found.</h1>
-          <p>This proof record was not found in the Proof Index database.</p>
+          <div className="eyebrow">{locale === "zh-CN" ? "ChainTrace 索引证明" : "ChainTrace Indexed Proof"}</div>
+          <h1>{locale === "zh-CN" ? "未找到索引证明。" : "Indexed proof not found."}</h1>
+          <p>{locale === "zh-CN" ? "Proof Index 数据库中没有找到这条证明记录。" : "This proof record was not found in the Proof Index database."}</p>
           <div className="hero-actions">
-            <Link href="/" className="primary-button">Create a proof</Link>
-            <Link href="/passport" className="secondary-button">Business passport</Link>
+            <Link href="/" className="primary-button">{t.app.createProof}</Link>
+            <Link href="/passport" className="secondary-button">{t.app.businessPassport}</Link>
           </div>
         </section>
       </main>
     );
   }
 
+  const proofTypeLabel = t.proofTypes[proof.proof_type as keyof typeof t.proofTypes] ?? proof.proof_type;
+
   return (
     <main className="page-shell">
       <section className="hero">
-        <div className="eyebrow">ChainTrace Indexed Proof</div>
+        <div className="eyebrow">{locale === "zh-CN" ? "ChainTrace 索引证明" : "ChainTrace Indexed Proof"}</div>
         <h1>{proof.title}</h1>
         <p>
-          This proof page is powered by the ChainTrace Proof Index. It provides a stable share URL
-          for proof metadata and keeps the same browser-side SHA-256 verification flow.
+          {locale === "zh-CN"
+            ? "这个证明页由 ChainTrace Proof Index 提供数据，使用稳定分享链接展示公开元数据，并保留浏览器本地 SHA-256 文件校验流程。"
+            : "This proof page is powered by the ChainTrace Proof Index. It provides a stable share URL for proof metadata and keeps the same browser-side SHA-256 verification flow."}
         </p>
         <div className="hero-actions">
-          <Link href="/" className="primary-button">Create your own proof</Link>
-          <Link href="/passport" className="secondary-button">Business passport</Link>
+          <Link href="/" className="primary-button">{t.app.createProof}</Link>
+          <Link href="/passport" className="secondary-button">{t.app.businessPassport}</Link>
         </div>
       </section>
 
@@ -98,50 +106,50 @@ export default async function IndexedProofPage({
         <article className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">{proof.proof_type}</span>
-              <h3>{proof.proof_mode === "onchain" ? "Indexed on-chain proof" : "Indexed demo proof"}</h3>
+              <span className="proof-type">{proofTypeLabel}</span>
+              <h3>{proof.proof_mode === "onchain" ? (locale === "zh-CN" ? "索引链上证明" : "Indexed on-chain proof") : (locale === "zh-CN" ? "索引 Demo 证明" : "Indexed demo proof")}</h3>
             </div>
-            <div className="status-pill">Proof Index</div>
+            <div className="status-pill">{t.app.proofIndex}</div>
           </div>
 
           <dl className="proof-details">
             <div>
-              <dt>Index ID</dt>
+              <dt>{locale === "zh-CN" ? "索引 ID" : "Index ID"}</dt>
               <dd className="hash-value">{proof.id}</dd>
             </div>
             <div>
-              <dt>Mode</dt>
+              <dt>{locale === "zh-CN" ? "模式" : "Mode"}</dt>
               <dd>{proof.proof_mode}</dd>
             </div>
             <div>
-              <dt>Business</dt>
+              <dt>{locale === "zh-CN" ? "企业" : "Business"}</dt>
               <dd>{proof.business_name}</dd>
             </div>
             <div>
-              <dt>Batch / order ID</dt>
+              <dt>{locale === "zh-CN" ? "批次 / 订单号" : "Batch / order ID"}</dt>
               <dd>{proof.batch_id}</dd>
             </div>
             <div>
-              <dt>File</dt>
+              <dt>{locale === "zh-CN" ? "文件" : "File"}</dt>
               <dd>{proof.file_name}</dd>
             </div>
             <div>
-              <dt>File hash</dt>
+              <dt>{locale === "zh-CN" ? "文件哈希" : "File hash"}</dt>
               <dd className="hash-value" title={proof.file_hash}>{proof.file_hash}</dd>
             </div>
             <div>
-              <dt>Created</dt>
+              <dt>{locale === "zh-CN" ? "创建时间" : "Created"}</dt>
               <dd>{new Date(proof.created_at).toLocaleString()}</dd>
             </div>
             {proof.wallet_address && (
               <div>
-                <dt>Wallet</dt>
+                <dt>{locale === "zh-CN" ? "钱包" : "Wallet"}</dt>
                 <dd className="hash-value">{shortHash(proof.wallet_address)}</dd>
               </div>
             )}
             {proof.transaction_hash && (
               <div>
-                <dt>Transaction</dt>
+                <dt>{locale === "zh-CN" ? "链上交易" : "Transaction"}</dt>
                 <dd>
                   <a href={getChainExplorerTxUrl(proof.transaction_hash)} target="_blank" rel="noreferrer" className="inline-link">
                     {shortHash(proof.transaction_hash)}
@@ -152,7 +160,7 @@ export default async function IndexedProofPage({
           </dl>
 
           <p className="proof-note">
-            {proof.note || "ChainTrace stores hashes and public metadata, not private business files."}
+            {proof.note || (locale === "zh-CN" ? "ChainTrace 存储哈希和公开元数据，而不是私密商业文件。" : "ChainTrace stores hashes and public metadata, not private business files.")}
           </p>
 
           <div className="proof-tools">
