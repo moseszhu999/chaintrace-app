@@ -16,6 +16,12 @@ const proofTypes: { label: string; value: ProofType; description: string }[] = [
   { label: "Acceptance Proof", value: "acceptance", description: "Prove buyer acceptance or confirmation." },
 ];
 
+type SaveProofResponse = {
+  item?: {
+    id?: string;
+  };
+};
+
 function getReadableError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -44,7 +50,7 @@ function buildDemoProofUrl(proofDraft: ProofDraft): string {
   return `/demo-proof?${params.toString()}`;
 }
 
-async function saveProofMetadata(payload: Record<string, unknown>) {
+async function saveProofMetadata(payload: Record<string, unknown>): Promise<SaveProofResponse> {
   const response = await fetch("/api/proofs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -174,7 +180,7 @@ export default function Home() {
     try {
       setIsSavingDemo(true);
       setChainStatus("Saving demo proof metadata...");
-      await saveProofMetadata({
+      const result = await saveProofMetadata({
         proofMode: "demo",
         proofType: proofDraft.proofType,
         title: proofDraft.title,
@@ -186,7 +192,7 @@ export default function Home() {
         walletAddress: walletAddress || null,
         demoUrl,
       });
-      window.location.href = demoUrl;
+      window.location.href = result.item?.id ? `/proof-index/${result.item.id}` : demoUrl;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Failed to save demo proof metadata.");
       setChainStatus("");
