@@ -20,10 +20,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     { href: "/scenario-workspace", label: zh ? "Workspace" : "Workspace" },
     { href: "/proof-pack-builder", label: zh ? "Builder" : "Builder" },
     { href: "/tasks", label: zh ? "任务" : "Tasks" },
-    { href: "/evidence-library", label: zh ? "证据库" : "Evidence" },
+    { href: "/evidence-library", label: zh ? "证据" : "Evidence" },
     { href: "/risk-dashboard", label: zh ? "风险" : "Risks" },
-    { href: "/cases", label: zh ? "案例" : "Cases" },
-    { href: "/project-plan", label: zh ? "计划" : "Plan" },
+    { href: "/business-passport", label: zh ? "档案" : "Passport" },
+    { href: "/integrations", label: zh ? "接入" : "Integrations" },
   ];
 
   return (
