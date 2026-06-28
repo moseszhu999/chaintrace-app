@@ -20,12 +20,24 @@ type ProofRow = {
   created_at: string;
 };
 
+type ReceivableProofType = (typeof receivableProofPackKeys)[number];
+
+type ReceivableProofPack = {
+  batchId: string;
+  proofs: ProofRow[];
+  proofTypeCounts: Partial<Record<ReceivableProofType, number>>;
+  missingTypes: ReceivableProofType[];
+  isReady: boolean;
+  latestCreatedAt: string;
+};
+
 async function getLocale(): Promise<Locale> {
   const cookieStore = await cookies();
   return normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
 }
 
-const proofTypeKeys = ["product", "shipment", "invoice", "inspection", "delivery", "acceptance"] as const;
+const proofTypeKeys = ["order", "product", "shipment", "invoice", "inspection", "delivery", "acceptance"] as const;
+const receivableProofPackKeys = ["order", "invoice", "shipment", "inspection", "delivery", "acceptance"] as const;
 
 async function loadBusinessProofs(businessName: string): Promise<ProofRow[]> {
   const databaseUrl = process.env.DATABASE_URL;
@@ -60,6 +72,44 @@ function countByProofType(proofs: ProofRow[]): Record<string, number> {
     accumulator[proof.proof_type] = (accumulator[proof.proof_type] ?? 0) + 1;
     return accumulator;
   }, {});
+}
+
+function isReceivableProofType(value: string): value is ReceivableProofType {
+  return receivableProofPackKeys.some((key) => key === value);
+}
+
+function buildReceivableProofPacks(proofs: ProofRow[]): ReceivableProofPack[] {
+  const groups = new Map<string, ProofRow[]>();
+
+  proofs.forEach((proof) => {
+    if (!isReceivableProofType(proof.proof_type)) return;
+
+    const existing = groups.get(proof.batch_id) ?? [];
+    existing.push(proof);
+    groups.set(proof.batch_id, existing);
+  });
+
+  return Array.from(groups.entries())
+    .map(([batchId, group]) => {
+      const proofTypeCounts = receivableProofPackKeys.reduce<Partial<Record<ReceivableProofType, number>>>((accumulator, key) => {
+        accumulator[key] = group.filter((proof) => proof.proof_type === key).length;
+        return accumulator;
+      }, {});
+      const missingTypes = receivableProofPackKeys.filter((key) => (proofTypeCounts[key] ?? 0) === 0);
+      const latestCreatedAt = group.reduce((latest, proof) => {
+        return new Date(proof.created_at).getTime() > new Date(latest).getTime() ? proof.created_at : latest;
+      }, group[0]?.created_at ?? new Date(0).toISOString());
+
+      return {
+        batchId,
+        proofs: group,
+        proofTypeCounts,
+        missingTypes,
+        isReady: missingTypes.length === 0,
+        latestCreatedAt,
+      };
+    })
+    .sort((a, b) => new Date(b.latestCreatedAt).getTime() - new Date(a.latestCreatedAt).getTime());
 }
 
 function buildTrustSummary(args: {
@@ -97,6 +147,10 @@ export default async function BusinessPassportPage({
   const demoCount = proofs.filter((item) => item.proof_mode === "demo").length;
   const onchainCount = proofs.filter((item) => item.proof_mode === "onchain").length;
   const proofTypeCounts = countByProofType(proofs);
+  const receivableProofPacks = buildReceivableProofPacks(proofs);
+  const readyPackCount = receivableProofPacks.filter((pack) => pack.isReady).length;
+  const allReceivablePacksReady = receivableProofPacks.length > 0 && readyPackCount === receivableProofPacks.length;
+  const receivableRequiredEvidence = receivableProofPackKeys.map((key) => t.proofTypes[key]).join(" · ");
   const proofTypes = Array.from(new Set(proofs.map((item) => t.proofTypes[item.proof_type as keyof typeof t.proofTypes] ?? item.proof_type))).join(", ") || (locale === "zh-CN" ? "暂无证明" : "No proofs yet");
   const passportPath = `/passport/${encodeURIComponent(businessName)}`;
   const trustSummary = buildTrustSummary({
@@ -158,6 +212,63 @@ export default async function BusinessPassportPage({
           <div className="proof-tools">
             <SharePanel path={passportPath} />
           </div>
+        </article>
+
+        <article className="panel proof-card public-proof-card">
+          <div className="proof-card-header">
+            <div>
+              <span className="proof-type">{t.passport.receivableProofPack}</span>
+              <h3>{t.passport.receivableProofPackLite}</h3>
+            </div>
+            <div className={`status-pill ${allReceivablePacksReady ? "" : "warning"}`}>
+              {allReceivablePacksReady ? t.passport.ready : t.passport.missingEvidence}
+            </div>
+          </div>
+
+          <dl className="proof-details">
+            <div>
+              <dt>{t.passport.readyPacks}</dt>
+              <dd>
+                <strong>{readyPackCount} / {receivableProofPacks.length}</strong>
+                <br />
+                {t.passport.receivableProofPackSummary}
+              </dd>
+            </div>
+            <div>
+              <dt>{t.passport.requiredEvidence}</dt>
+              <dd>{receivableRequiredEvidence}</dd>
+            </div>
+          </dl>
+
+          {receivableProofPacks.length === 0 ? (
+            <p className="proof-note">{t.passport.noReceivablePacks}</p>
+          ) : (
+            <dl className="proof-details">
+              {receivableProofPacks.map((pack) => (
+                <div key={pack.batchId}>
+                  <dt>{pack.batchId}</dt>
+                  <dd>
+                    <strong>{pack.isReady ? t.passport.ready : t.passport.missingEvidence}</strong>
+                    <br />
+                    {receivableProofPackKeys.map((key) => {
+                      const count = pack.proofTypeCounts[key] ?? 0;
+                      return `${t.proofTypes[key]} ${count > 0 ? `✓ ${count}` : "—"}`;
+                    }).join(" · ")}
+                    {!pack.isReady && (
+                      <>
+                        <br />
+                        <span>{t.passport.missing}: {pack.missingTypes.map((key) => t.proofTypes[key]).join(", ")}</span>
+                      </>
+                    )}
+                    <br />
+                    <span>{t.passport.latestEvidence}: {new Date(pack.latestCreatedAt).toLocaleString()}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          <p className="proof-note">{t.passport.completePackNote}</p>
         </article>
 
         <article className="panel proof-card public-proof-card">
