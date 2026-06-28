@@ -3,17 +3,18 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { getChainExplorerTxUrl, isProofRegistryConfigured, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { sha256File, shortHash } from "@/lib/hash";
+import { dictionary, type Locale, normalizeLocale } from "@/lib/i18n";
 import { waitForProofRegistered } from "@/lib/publicChain";
 import type { ProofDraft, ProofType } from "@/lib/types";
 import { connectWallet, getConnectedAccount, hasInjectedWallet, registerProofOnChain, switchToEthereumSepolia } from "@/lib/wallet";
 
-const proofTypes: { label: string; value: ProofType; description: string }[] = [
-  { label: "Product Proof", value: "product", description: "Prove product origin, batch, or authenticity." },
-  { label: "Shipment Proof", value: "shipment", description: "Prove shipping or logistics evidence." },
-  { label: "Invoice Proof", value: "invoice", description: "Prove an invoice existed at a specific time." },
-  { label: "Inspection Proof", value: "inspection", description: "Prove quality inspection evidence." },
-  { label: "Delivery Proof", value: "delivery", description: "Prove goods were delivered." },
-  { label: "Acceptance Proof", value: "acceptance", description: "Prove buyer acceptance or confirmation." },
+const proofTypes: { value: ProofType; description: string }[] = [
+  { value: "product", description: "Prove product origin, batch, or authenticity." },
+  { value: "shipment", description: "Prove shipping or logistics evidence." },
+  { value: "invoice", description: "Prove an invoice existed at a specific time." },
+  { value: "inspection", description: "Prove quality inspection evidence." },
+  { value: "delivery", description: "Prove goods were delivered." },
+  { value: "acceptance", description: "Prove buyer acceptance or confirmation." },
 ];
 
 type SaveProofResponse = {
@@ -22,18 +23,26 @@ type SaveProofResponse = {
   };
 };
 
-function getReadableError(error: unknown): string {
+function getCookieLocale(): Locale {
+  if (typeof document === "undefined") return "en";
+  const match = document.cookie.match(/(?:^|; )chaintrace_locale=([^;]+)/);
+  return normalizeLocale(match ? decodeURIComponent(match[1]) : undefined);
+}
+
+function getReadableError(error: unknown, locale: Locale): string {
   const message = error instanceof Error ? error.message : String(error);
 
   if (message.toLowerCase().includes("insufficient funds")) {
-    return "Insufficient SepoliaETH for gas. Add a little more Ethereum Sepolia test ETH to this wallet, then try Anchor proof again.";
+    return locale === "zh-CN"
+      ? "SepoliaETH 不足，无法支付 gas。请补充一点 Ethereum Sepolia 测试币后再点击链上锚定。"
+      : "Insufficient SepoliaETH for gas. Add a little more Ethereum Sepolia test ETH to this wallet, then try Anchor proof again.";
   }
 
   if (message.toLowerCase().includes("user rejected") || message.includes("4001")) {
-    return "Transaction rejected in wallet.";
+    return locale === "zh-CN" ? "钱包中已拒绝交易。" : "Transaction rejected in wallet.";
   }
 
-  return message || "Failed to anchor proof on-chain.";
+  return message || (locale === "zh-CN" ? "链上锚定失败。" : "Failed to anchor proof on-chain.");
 }
 
 function buildDemoProofUrl(proofDraft: ProofDraft): string {
@@ -66,6 +75,7 @@ async function saveProofMetadata(payload: Record<string, unknown>): Promise<Save
 }
 
 export default function Home() {
+  const [locale, setLocale] = useState<Locale>("en");
   const [proofType, setProofType] = useState<ProofType>("product");
   const [title, setTitle] = useState("Vietnam Coffee Batch Proof");
   const [businessName, setBusinessName] = useState("Example Small Exporter");
@@ -83,6 +93,14 @@ export default function Home() {
   const [isAnchoring, setIsAnchoring] = useState(false);
   const [isSavingDemo, setIsSavingDemo] = useState(false);
 
+  const t = dictionary[locale].home;
+  const common = dictionary[locale].app;
+  const proofTypeText = dictionary[locale].proofTypes;
+
+  useEffect(() => {
+    setLocale(getCookieLocale());
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -91,7 +109,7 @@ export default function Home() {
       const account = await getConnectedAccount();
       if (!cancelled && account) {
         setWalletAddress(account);
-        setChainStatus("Wallet already connected.");
+        setChainStatus(locale === "zh-CN" ? "钱包已连接。" : "Wallet already connected.");
       }
     }
 
@@ -100,7 +118,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [locale]);
 
   const selectedProofType = useMemo(
     () => proofTypes.find((item) => item.value === proofType),
@@ -141,7 +159,7 @@ export default function Home() {
       const hash = await sha256File(file);
       setFileHash(hash);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Failed to calculate file hash.");
+      setError(caught instanceof Error ? caught.message : locale === "zh-CN" ? "文件哈希计算失败。" : "Failed to calculate file hash.");
     } finally {
       setIsHashing(false);
     }
@@ -149,21 +167,21 @@ export default function Home() {
 
   async function handleConnectWallet() {
     setError("");
-    setChainStatus("Opening MetaMask connection request...");
+    setChainStatus(locale === "zh-CN" ? "正在打开 MetaMask 连接请求..." : "Opening MetaMask connection request...");
 
     if (!hasInjectedWallet()) {
       setChainStatus("");
-      setError("No injected wallet detected. Open this page in a browser with MetaMask installed, or use the MetaMask in-app browser on mobile.");
+      setError(locale === "zh-CN" ? "没有检测到钱包插件。请使用安装 MetaMask 的浏览器打开，或在移动端使用 MetaMask 内置浏览器。" : "No injected wallet detected. Open this page in a browser with MetaMask installed, or use the MetaMask in-app browser on mobile.");
       return;
     }
 
     try {
       const account = await connectWallet();
       setWalletAddress(account);
-      setChainStatus("Wallet connected.");
+      setChainStatus(locale === "zh-CN" ? "钱包已连接。" : "Wallet connected.");
     } catch (caught) {
       setChainStatus("");
-      setError(getReadableError(caught));
+      setError(getReadableError(caught, locale));
     }
   }
 
@@ -171,7 +189,7 @@ export default function Home() {
     setError("");
 
     if (!proofDraft) {
-      setError("Generate a file hash before creating a demo proof.");
+      setError(locale === "zh-CN" ? "请先生成文件哈希，再创建 Demo Proof。" : "Generate a file hash before creating a demo proof.");
       return;
     }
 
@@ -179,7 +197,7 @@ export default function Home() {
 
     try {
       setIsSavingDemo(true);
-      setChainStatus("Saving demo proof metadata...");
+      setChainStatus(locale === "zh-CN" ? "正在保存 Demo Proof 元数据..." : "Saving demo proof metadata...");
       const result = await saveProofMetadata({
         proofMode: "demo",
         proofType: proofDraft.proofType,
@@ -194,7 +212,7 @@ export default function Home() {
       });
       window.location.href = result.item?.id ? `/proof-index/${result.item.id}` : demoUrl;
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Failed to save demo proof metadata.");
+      setError(caught instanceof Error ? caught.message : locale === "zh-CN" ? "保存 Demo Proof 元数据失败。" : "Failed to save demo proof metadata.");
       setChainStatus("");
     } finally {
       setIsSavingDemo(false);
@@ -208,25 +226,25 @@ export default function Home() {
     setProofId(null);
 
     if (!proofDraft) {
-      setError("Generate a file hash before anchoring a proof.");
+      setError(locale === "zh-CN" ? "请先生成文件哈希，再进行链上锚定。" : "Generate a file hash before anchoring a proof.");
       return;
     }
 
     if (!walletAddress) {
-      setError("Connect your wallet first.");
+      setError(locale === "zh-CN" ? "请先连接钱包。" : "Connect your wallet first.");
       return;
     }
 
     if (!proofRegistryAddress || !isProofRegistryConfigured()) {
-      setError("ProofRegistry contract address is not configured.");
+      setError(locale === "zh-CN" ? "ProofRegistry 合约地址尚未配置。" : "ProofRegistry contract address is not configured.");
       return;
     }
 
     try {
       setIsAnchoring(true);
-      setChainStatus("Switching to Ethereum Sepolia...");
+      setChainStatus(locale === "zh-CN" ? "正在切换到 Ethereum Sepolia..." : "Switching to Ethereum Sepolia...");
       await switchToEthereumSepolia();
-      setChainStatus("Waiting for wallet confirmation...");
+      setChainStatus(locale === "zh-CN" ? "等待钱包确认..." : "Waiting for wallet confirmation...");
 
       const hash = await registerProofOnChain({
         account: walletAddress,
@@ -237,7 +255,7 @@ export default function Home() {
       });
 
       setTxHash(hash);
-      setChainStatus("Transaction submitted. Waiting for confirmation...");
+      setChainStatus(locale === "zh-CN" ? "交易已提交，等待确认..." : "Transaction submitted. Waiting for confirmation...");
 
       const event = await waitForProofRegistered(hash);
       setProofId(event.proofId);
@@ -258,9 +276,9 @@ export default function Home() {
         onchainProofId: event.proofId.toString(),
       });
 
-      setChainStatus(`Proof confirmed and indexed. Shareable proof ID: ${event.proofId.toString()}.`);
+      setChainStatus(locale === "zh-CN" ? `证明已确认并写入索引。Proof ID：${event.proofId.toString()}。` : `Proof confirmed and indexed. Shareable proof ID: ${event.proofId.toString()}.`);
     } catch (caught) {
-      setError(getReadableError(caught));
+      setError(getReadableError(caught, locale));
       setChainStatus("");
     } finally {
       setIsAnchoring(false);
@@ -270,118 +288,115 @@ export default function Home() {
   return (
     <main className="page-shell">
       <section className="hero">
-        <div className="eyebrow">ChainTrace Proof Page MVP</div>
-        <h1>Make your product, shipment, or invoice verifiable.</h1>
-        <p>
-          Upload evidence, generate a browser-side SHA-256 hash, and preview a public proof page.
-          Use Demo Proof for gas-free testing, then anchor selected proofs on Ethereum Sepolia.
-        </p>
+        <div className="eyebrow">{t.eyebrow}</div>
+        <h1>{t.title}</h1>
+        <p>{t.subtitle}</p>
         <div className="hero-actions">
-          <a href="#create-proof" className="primary-button">Create proof</a>
-          <a href="/passport" className="secondary-button">Business passport</a>
+          <a href="#create-proof" className="primary-button">{common.createProof}</a>
+          <a href="/passport" className="secondary-button">{common.businessPassport}</a>
           <a href="https://github.com/moseszhu999/chaintrace-protocol" className="secondary-button" target="_blank" rel="noreferrer">
-            Protocol repo
+            {t.protocolRepo}
           </a>
         </div>
       </section>
 
       <section className="principles-grid">
         <article>
-          <strong>Proof, not exposure</strong>
-          <span>Share verifiable facts without revealing sensitive business data.</span>
+          <strong>{t.proofNotExposure}</strong>
+          <span>{t.proofNotExposureText}</span>
         </article>
         <article>
-          <strong>Gas-free testing</strong>
-          <span>Use Demo Proof for daily product testing without faucets or wallet gas.</span>
+          <strong>{t.gasFreeTesting}</strong>
+          <span>{t.gasFreeTestingText}</span>
         </article>
         <article>
-          <strong>AI-agent ready</strong>
-          <span>Give agents a verifiable memory layer for supply chain facts.</span>
+          <strong>{t.aiAgentReady}</strong>
+          <span>{t.aiAgentReadyText}</span>
         </article>
       </section>
 
       <section id="create-proof" className="workspace">
         <div className="panel form-panel">
           <div className="section-heading">
-            <span>Step 1</span>
-            <h2>Create a proof draft</h2>
-            <p>For the first MVP, the browser calculates the file hash locally. The file itself is not uploaded to a server.</p>
+            <span>{t.step1}</span>
+            <h2>{t.createDraft}</h2>
+            <p>{t.createDraftHelp}</p>
           </div>
 
           <label>
-            Proof type
+            {t.proofType}
             <select value={proofType} onChange={(event) => setProofType(event.target.value as ProofType)}>
               {proofTypes.map((item) => (
-                <option key={item.value} value={item.value}>{item.label}</option>
+                <option key={item.value} value={item.value}>{proofTypeText[item.value]}</option>
               ))}
             </select>
           </label>
 
-          <div className="type-help">{selectedProofType?.description}</div>
+          <div className="type-help">{locale === "zh-CN" ? proofTypeText[`${proofType}Description` as keyof typeof proofTypeText] : selectedProofType?.description}</div>
 
           <label>
-            Proof title
+            {t.proofTitle}
             <input value={title} onChange={(event) => setTitle(event.target.value)} />
           </label>
 
           <label>
-            Business name
+            {t.businessName}
             <input value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
           </label>
 
           <label>
-            Batch / order / shipment ID
+            {t.batchId}
             <input value={batchId} onChange={(event) => setBatchId(event.target.value)} />
           </label>
 
           <label>
-            Evidence file
+            {t.evidenceFile}
             <input type="file" onChange={handleFileChange} />
           </label>
 
-          {isHashing && <div className="notice">Calculating SHA-256 hash in your browser...</div>}
+          {isHashing && <div className="notice">{t.calculatingHash}</div>}
           {error && <div className="error">{error}</div>}
 
           <label>
-            Public note
+            {t.publicNote}
             <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} />
           </label>
         </div>
 
         <div className="panel preview-panel">
           <div className="section-heading">
-            <span>Step 2</span>
-            <h2>Proof page preview</h2>
-            <p>This is the trust page a small business can share with a buyer, logistics partner, or financier.</p>
+            <span>{t.step2}</span>
+            <h2>{t.proofPreview}</h2>
+            <p>{t.proofPreviewHelp}</p>
           </div>
 
           {!proofDraft ? (
             <div className="empty-state">
               <div className="empty-icon">◇</div>
-              <h3>Upload an evidence file to generate a proof preview.</h3>
-              <p>The first generated value will be a SHA-256 hash. Blockchain anchoring comes next.</p>
+              <h3>{t.uploadPrompt}</h3>
+              <p>{t.uploadPromptHelp}</p>
             </div>
           ) : (
             <article className="proof-card">
               <div className="proof-card-header">
                 <div>
-                  <span className="proof-type">{proofDraft.proofType}</span>
+                  <span className="proof-type">{proofTypeText[proofDraft.proofType]}</span>
                   <h3>{proofDraft.title}</h3>
                 </div>
-                <div className="status-pill">{proofId ? "Proof confirmed" : txHash ? "On-chain submitted" : "Hash generated"}</div>
+                <div className="status-pill">{proofId ? t.proofConfirmed : txHash ? t.onchainSubmitted : t.hashGenerated}</div>
               </div>
 
               <dl className="proof-details">
                 <div>
-                  <dt>Business</dt>
+                  <dt>{t.business}</dt>
                   <dd>{proofDraft.businessName}</dd>
                 </div>
                 <div>
-                  <dt>Batch / order ID</dt>
+                  <dt>{t.batchId}</dt>
                   <dd>{proofDraft.batchId}</dd>
                 </div>
                 <div>
-                  <dt>File</dt>
+                  <dt>{t.file}</dt>
                   <dd>{proofDraft.fileName} · {(proofDraft.fileSize / 1024).toFixed(2)} KB</dd>
                 </div>
                 <div>
@@ -389,15 +404,15 @@ export default function Home() {
                   <dd className="hash-value" title={proofDraft.fileHash}>{shortHash(proofDraft.fileHash)}</dd>
                 </div>
                 <div>
-                  <dt>Created</dt>
+                  <dt>{t.created}</dt>
                   <dd>{new Date(proofDraft.createdAt).toLocaleString()}</dd>
                 </div>
                 <div>
-                  <dt>Wallet</dt>
-                  <dd>{walletAddress ? shortHash(walletAddress) : "Not connected"}</dd>
+                  <dt>{t.wallet}</dt>
+                  <dd>{walletAddress ? shortHash(walletAddress) : t.notConnected}</dd>
                 </div>
                 <div>
-                  <dt>Contract</dt>
+                  <dt>{t.contract}</dt>
                   <dd>{proofRegistryAddress ? shortHash(proofRegistryAddress) : "Not configured"}</dd>
                 </div>
                 {proofId !== null && (
@@ -425,20 +440,17 @@ export default function Home() {
               <p className="proof-note">{proofDraft.note}</p>
 
               <div className="future-chain-box">
-                <strong>Testing and anchoring</strong>
-                <span>
-                  {chainStatus ||
-                    "Use Demo Proof for gas-free testing. Use Anchor proof only when you need a real Ethereum Sepolia transaction."}
-                </span>
+                <strong>{t.testingAndAnchoring}</strong>
+                <span>{chainStatus || t.defaultChainStatus}</span>
                 <div className="chain-actions">
                   <button type="button" className="secondary-button button-reset" onClick={handleCreateDemoProof} disabled={!demoProofUrl || isSavingDemo}>
-                    {isSavingDemo ? "Saving..." : "Demo proof no gas"}
+                    {isSavingDemo ? t.saving : t.demoProofNoGas}
                   </button>
                   <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet}>
-                    {walletAddress ? "Wallet connected" : "Connect wallet"}
+                    {walletAddress ? t.walletConnected : t.connectWallet}
                   </button>
                   <button type="button" className="primary-button button-reset" onClick={handleAnchorProof} disabled={isAnchoring || !walletAddress || !fileHash}>
-                    {isAnchoring ? "Submitting..." : "Anchor proof"}
+                    {isAnchoring ? t.submitting : t.anchorProof}
                   </button>
                 </div>
                 {!isProofRegistryConfigured() && (
