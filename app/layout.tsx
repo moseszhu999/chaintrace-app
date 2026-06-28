@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ChainTrace | Supply Chain Fact Platform",
-  description: "A supply-chain fact platform for proof packs, business passports, scenario cases, and verifiable trade evidence.",
+  description: "A supply-chain fact platform for proof packs, customer-context memory, assistant actions, approvals, and verifiable trade evidence.",
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -17,12 +17,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const navItems = [
     { href: "/app-demo", label: zh ? "App Demo" : "App Demo" },
-    { href: "/customer-assistant", label: zh ? "贴身助手" : "Assistant" },
+    { href: "/assistant", label: zh ? "助手中心" : "Assistant OS" },
+    { href: "/assistant/memory", label: zh ? "记忆" : "Memory" },
+    { href: "/assistant/approvals", label: zh ? "审批" : "Approvals" },
     { href: "/customer-workspace", label: zh ? "工作台" : "Workspace" },
     { href: "/scenario-flow", label: zh ? "流程" : "Flow" },
     { href: "/user-value", label: zh ? "用户价值" : "Value" },
-    { href: "/function-architecture", label: zh ? "功能架构" : "Architecture" },
-    { href: "/ai-agent", label: zh ? "AI Agent" : "AI Agent" },
+    { href: "/function-architecture", label: zh ? "架构" : "Architecture" },
     { href: "/risk-dashboard", label: zh ? "风险" : "Risks" },
   ];
 
