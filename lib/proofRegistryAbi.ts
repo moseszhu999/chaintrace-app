@@ -12,6 +12,26 @@ export const proofRegistryAbi = [
     outputs: [{ name: "proofId", type: "uint256" }],
   },
   {
+    type: "function",
+    name: "getProof",
+    stateMutability: "view",
+    inputs: [{ name: "proofId", type: "uint256" }],
+    outputs: [
+      {
+        name: "proof",
+        type: "tuple",
+        components: [
+          { name: "submitter", type: "address" },
+          { name: "fileHash", type: "bytes32" },
+          { name: "proofType", type: "string" },
+          { name: "uri", type: "string" },
+          { name: "metadataHash", type: "bytes32" },
+          { name: "timestamp", type: "uint256" },
+        ],
+      },
+    ],
+  },
+  {
     type: "event",
     name: "ProofRegistered",
     inputs: [
