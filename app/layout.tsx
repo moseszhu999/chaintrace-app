@@ -17,6 +17,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const navItems = [
     { href: "/product", label: zh ? "产品架构" : "Product" },
+    { href: "/project-plan", label: zh ? "项目计划" : "Plan" },
     { href: "/platform", label: zh ? "角色痛点" : "Roles" },
     { href: "/cases", label: zh ? "场景案例" : "Cases" },
     { href: "/receivable-pack", label: zh ? "证明包" : "Proof Packs" },
