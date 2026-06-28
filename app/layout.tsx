@@ -16,8 +16,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const zh = locale === "zh-CN";
 
   const navItems = [
-    { href: "/product", label: zh ? "产品" : "Product" },
-    { href: "/scenario-workspace", label: zh ? "Workspace" : "Workspace" },
+    { href: "/user-value", label: zh ? "用户价值" : "Value" },
+    { href: "/scenario-workspace", label: zh ? "场景" : "Scenario" },
     { href: "/proof-pack-builder", label: zh ? "Builder" : "Builder" },
     { href: "/tasks", label: zh ? "任务" : "Tasks" },
     { href: "/evidence-library", label: zh ? "证据" : "Evidence" },
