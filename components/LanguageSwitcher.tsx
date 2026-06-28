@@ -26,18 +26,12 @@ export function LanguageSwitcher() {
     <div
       aria-label="Language selector"
       style={{
-        position: "fixed",
-        top: 18,
-        right: 18,
-        zIndex: 50,
         display: "flex",
-        gap: 8,
-        padding: 6,
+        gap: 6,
+        padding: 4,
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 999,
-        background: "rgba(255,253,248,0.92)",
-        boxShadow: "0 12px 30px rgba(20,17,12,0.08)",
-        backdropFilter: "blur(8px)",
+        background: "rgba(255,250,240,0.94)",
       }}
     >
       {supportedLocales.map((item) => (
@@ -48,9 +42,9 @@ export function LanguageSwitcher() {
           style={{
             border: 0,
             borderRadius: 999,
-            padding: "8px 12px",
+            padding: "7px 10px",
             cursor: "pointer",
-            fontWeight: 800,
+            fontWeight: 850,
             background: locale === item ? "#111827" : "transparent",
             color: locale === item ? "#fff" : "#171411",
           }}
