@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 
-export function SharePanel({ proofId }: { proofId: string }) {
+export function SharePanel({ proofId, path }: { proofId?: string; path?: string }) {
   const [copyStatus, setCopyStatus] = useState("");
 
+  const proofPath = path ?? `/proof/${proofId ?? ""}`;
+
   const proofUrl = useMemo(() => {
-    if (typeof window === "undefined") return `/proof/${proofId}`;
-    return `${window.location.origin}/proof/${proofId}`;
-  }, [proofId]);
+    if (typeof window === "undefined") return proofPath;
+    return `${window.location.origin}${proofPath}`;
+  }, [proofPath]);
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(proofUrl)}`;
 
@@ -24,7 +26,7 @@ export function SharePanel({ proofId }: { proofId: string }) {
   return (
     <section className="share-box">
       <div className="qr-card">
-        <img src={qrUrl} alt={`QR code for ChainTrace proof ${proofId}`} />
+        <img src={qrUrl} alt="QR code for ChainTrace proof" />
       </div>
       <div className="share-content">
         <strong>Share this proof</strong>
