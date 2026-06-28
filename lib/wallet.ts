@@ -3,6 +3,7 @@ import { chaintraceChain } from "@/lib/chaintraceConfig";
 import { proofRegistryAbi } from "@/lib/proofRegistryAbi";
 
 export type EthereumProvider = {
+  selectedAddress?: `0x${string}` | null;
   request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
 };
 
@@ -32,17 +33,44 @@ export function hasInjectedWallet(): boolean {
   return typeof window !== "undefined" && Boolean(window.ethereum);
 }
 
+export async function getConnectedAccount(): Promise<`0x${string}` | null> {
+  if (!window.ethereum) return null;
+
+  const accounts = (await window.ethereum.request({
+    method: "eth_accounts",
+  })) as `0x${string}`[];
+
+  return accounts[0] ?? window.ethereum.selectedAddress ?? null;
+}
+
 export async function connectWallet(): Promise<`0x${string}`> {
   if (!window.ethereum) {
     throw new Error("No injected wallet found. Install MetaMask or another EVM wallet.");
   }
 
-  const existingAccounts = (await window.ethereum.request({
-    method: "eth_accounts",
-  })) as `0x${string}`[];
+  const existingAccount = await getConnectedAccount();
+  if (existingAccount) return existingAccount;
 
-  if (existingAccounts[0]) {
-    return existingAccounts[0];
+  try {
+    await withTimeout(
+      window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      }) as Promise<unknown>,
+      20000,
+      "MetaMask permission request timed out. Open the MetaMask popup and approve the site connection, then try again."
+    );
+  } catch (caught) {
+    const error = caught as { code?: number; message?: string };
+
+    if (error.code === 4001) {
+      throw new Error("Wallet connection rejected in MetaMask.");
+    }
+
+    const message = error.message ?? "MetaMask permission request failed.";
+    if (!message.toLowerCase().includes("already pending")) {
+      // Continue to eth_requestAccounts as a fallback for wallets that do not support wallet_requestPermissions.
+    }
   }
 
   const accounts = (await withTimeout(
@@ -53,11 +81,13 @@ export async function connectWallet(): Promise<`0x${string}`> {
     "MetaMask did not return an account. Open the MetaMask popup and approve the site connection, then try again."
   )) as `0x${string}`[];
 
-  if (!accounts[0]) {
+  const account = accounts[0] ?? window.ethereum.selectedAddress ?? null;
+
+  if (!account) {
     throw new Error("No wallet account returned.");
   }
 
-  return accounts[0];
+  return account;
 }
 
 export async function switchToBaseSepolia(): Promise<void> {
