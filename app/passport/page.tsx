@@ -49,6 +49,7 @@ export default async function PassportPage() {
   const businessName = proofs[0]?.business_name ?? "Example Small Exporter";
   const demoCount = proofs.filter((item) => item.proof_mode === "demo").length;
   const onchainCount = proofs.filter((item) => item.proof_mode === "onchain").length;
+  const businessPassportPath = `/passport/${encodeURIComponent(businessName)}`;
 
   return (
     <main className="page-shell">
@@ -61,6 +62,7 @@ export default async function PassportPage() {
         </p>
         <div className="hero-actions">
           <Link href="/" className="primary-button">Create a proof</Link>
+          <Link href={businessPassportPath} className="secondary-button">Open business passport</Link>
           <a
             href={getChainExplorerAddressUrl(proofRegistryAddress)}
             className="secondary-button"
@@ -109,7 +111,10 @@ export default async function PassportPage() {
                   <dd>
                     <strong>{proof.title}</strong>
                     <br />
-                    {proof.business_name} · {proof.batch_id} · {new Date(proof.created_at).toLocaleString()}
+                    <Link href={`/passport/${encodeURIComponent(proof.business_name)}`} className="inline-link">
+                      {proof.business_name}
+                    </Link>
+                    {" · "}{proof.batch_id} · {new Date(proof.created_at).toLocaleString()}
                     <br />
                     <span className="hash-value">{shortHash(proof.file_hash)}</span>
                     <br />
