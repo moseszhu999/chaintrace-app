@@ -16,7 +16,8 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "viem": "latest"
   },
   "devDependencies": {}
 }
