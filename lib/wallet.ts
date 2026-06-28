@@ -12,6 +12,22 @@ declare global {
   }
 }
 
+function withTimeout<T>(promise: Promise<T>, milliseconds: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(message)), milliseconds);
+
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
 export function hasInjectedWallet(): boolean {
   return typeof window !== "undefined" && Boolean(window.ethereum);
 }
@@ -21,9 +37,21 @@ export async function connectWallet(): Promise<`0x${string}`> {
     throw new Error("No injected wallet found. Install MetaMask or another EVM wallet.");
   }
 
-  const accounts = (await window.ethereum.request({
-    method: "eth_requestAccounts",
+  const existingAccounts = (await window.ethereum.request({
+    method: "eth_accounts",
   })) as `0x${string}`[];
+
+  if (existingAccounts[0]) {
+    return existingAccounts[0];
+  }
+
+  const accounts = (await withTimeout(
+    window.ethereum.request({
+      method: "eth_requestAccounts",
+    }) as Promise<`0x${string}`[]>,
+    20000,
+    "MetaMask did not return an account. Open the MetaMask popup and approve the site connection, then try again."
+  )) as `0x${string}`[];
 
   if (!accounts[0]) {
     throw new Error("No wallet account returned.");
