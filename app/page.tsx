@@ -3,6 +3,7 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { getBaseSepoliaExplorerTxUrl, isProofRegistryConfigured, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { sha256File, shortHash } from "@/lib/hash";
+import { waitForProofRegistered } from "@/lib/publicChain";
 import type { ProofDraft, ProofType } from "@/lib/types";
 import { connectWallet, getConnectedAccount, hasInjectedWallet, registerProofOnChain, switchToBaseSepolia } from "@/lib/wallet";
 
@@ -29,6 +30,7 @@ export default function Home() {
   const [walletAddress, setWalletAddress] = useState<`0x${string}` | "">("");
   const [chainStatus, setChainStatus] = useState("");
   const [txHash, setTxHash] = useState<`0x${string}` | "">("");
+  const [proofId, setProofId] = useState<bigint | null>(null);
   const [isAnchoring, setIsAnchoring] = useState(false);
 
   useEffect(() => {
@@ -71,10 +73,13 @@ export default function Home() {
     };
   }, [batchId, businessName, fileHash, fileName, fileSize, note, proofType, title]);
 
+  const shareableProofUrl = proofId === null ? "" : `/proof/${proofId.toString()}`;
+
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     setError("");
     setTxHash("");
+    setProofId(null);
 
     if (!file) return;
 
@@ -115,6 +120,7 @@ export default function Home() {
     setError("");
     setChainStatus("");
     setTxHash("");
+    setProofId(null);
 
     if (!proofDraft) {
       setError("Generate a file hash before anchoring a proof.");
@@ -146,7 +152,11 @@ export default function Home() {
       });
 
       setTxHash(hash);
-      setChainStatus("Proof transaction submitted.");
+      setChainStatus("Transaction submitted. Waiting for confirmation...");
+
+      const event = await waitForProofRegistered(hash);
+      setProofId(event.proofId);
+      setChainStatus(`Proof confirmed. Shareable proof ID: ${event.proofId.toString()}.`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Failed to anchor proof on-chain.");
       setChainStatus("");
@@ -255,7 +265,7 @@ export default function Home() {
                   <span className="proof-type">{proofDraft.proofType}</span>
                   <h3>{proofDraft.title}</h3>
                 </div>
-                <div className="status-pill">{txHash ? "On-chain submitted" : "Hash generated"}</div>
+                <div className="status-pill">{proofId ? "Proof confirmed" : txHash ? "On-chain submitted" : "Hash generated"}</div>
               </div>
 
               <dl className="proof-details">
@@ -287,6 +297,16 @@ export default function Home() {
                   <dt>Contract</dt>
                   <dd>{proofRegistryAddress ? shortHash(proofRegistryAddress) : "Not configured"}</dd>
                 </div>
+                {proofId !== null && (
+                  <div>
+                    <dt>Proof ID</dt>
+                    <dd>
+                      <a href={shareableProofUrl} className="inline-link">
+                        #{proofId.toString()} public proof page
+                      </a>
+                    </dd>
+                  </div>
+                )}
                 {txHash && (
                   <div>
                     <dt>Transaction</dt>
