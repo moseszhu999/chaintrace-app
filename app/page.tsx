@@ -9,6 +9,7 @@ import type { ProofDraft, ProofType } from "@/lib/types";
 import { connectWallet, getConnectedAccount, hasInjectedWallet, registerProofOnChain, switchToEthereumSepolia } from "@/lib/wallet";
 
 const proofTypes: { value: ProofType; description: string }[] = [
+  { value: "order", description: "Prove a purchase order, sales contract, or receivable basis document." },
   { value: "product", description: "Prove product origin, batch, or authenticity." },
   { value: "shipment", description: "Prove shipping or logistics evidence." },
   { value: "invoice", description: "Prove an invoice existed at a specific time." },
@@ -76,11 +77,11 @@ async function saveProofMetadata(payload: Record<string, unknown>): Promise<Save
 
 export default function Home() {
   const [locale, setLocale] = useState<Locale>("en");
-  const [proofType, setProofType] = useState<ProofType>("product");
-  const [title, setTitle] = useState("Vietnam Coffee Batch Proof");
+  const [proofType, setProofType] = useState<ProofType>("order");
+  const [title, setTitle] = useState("Coffee Export Order Proof");
   const [businessName, setBusinessName] = useState("Example Small Exporter");
   const [batchId, setBatchId] = useState("COFFEE-VN-2026-0001");
-  const [note, setNote] = useState("This proof anchors an evidence file hash for a product batch. The original file can be verified later by recalculating its SHA-256 hash.");
+  const [note, setNote] = useState("This proof anchors an evidence file hash for a trade order or receivable evidence item. The original file can be verified later by recalculating its SHA-256 hash.");
   const [fileName, setFileName] = useState("");
   const [fileSize, setFileSize] = useState(0);
   const [fileHash, setFileHash] = useState("");
