@@ -1,8 +1,10 @@
 "use client";
 
 import { ChangeEvent, useMemo, useState } from "react";
+import { getBaseSepoliaExplorerTxUrl, isProofRegistryConfigured, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { sha256File, shortHash } from "@/lib/hash";
 import type { ProofDraft, ProofType } from "@/lib/types";
+import { connectWallet, hasInjectedWallet, registerProofOnChain, switchToBaseSepolia } from "@/lib/wallet";
 
 const proofTypes: { label: string; value: ProofType; description: string }[] = [
   { label: "Product Proof", value: "product", description: "Prove product origin, batch, or authenticity." },
@@ -24,6 +26,10 @@ export default function Home() {
   const [fileHash, setFileHash] = useState("");
   const [isHashing, setIsHashing] = useState(false);
   const [error, setError] = useState("");
+  const [walletAddress, setWalletAddress] = useState<`0x${string}` | "">("");
+  const [chainStatus, setChainStatus] = useState("");
+  const [txHash, setTxHash] = useState<`0x${string}` | "">("");
+  const [isAnchoring, setIsAnchoring] = useState(false);
 
   const selectedProofType = useMemo(
     () => proofTypes.find((item) => item.value === proofType),
@@ -49,6 +55,7 @@ export default function Home() {
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     setError("");
+    setTxHash("");
 
     if (!file) return;
 
@@ -65,6 +72,63 @@ export default function Home() {
     }
   }
 
+  async function handleConnectWallet() {
+    setError("");
+    setChainStatus("");
+
+    try {
+      const account = await connectWallet();
+      setWalletAddress(account);
+      setChainStatus("Wallet connected.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Failed to connect wallet.");
+    }
+  }
+
+  async function handleAnchorProof() {
+    setError("");
+    setChainStatus("");
+    setTxHash("");
+
+    if (!proofDraft) {
+      setError("Generate a file hash before anchoring a proof.");
+      return;
+    }
+
+    if (!walletAddress) {
+      setError("Connect your wallet first.");
+      return;
+    }
+
+    if (!proofRegistryAddress || !isProofRegistryConfigured()) {
+      setError("ProofRegistry contract address is not configured. Add NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS in Vercel after deployment.");
+      return;
+    }
+
+    try {
+      setIsAnchoring(true);
+      setChainStatus("Switching to Base Sepolia...");
+      await switchToBaseSepolia();
+      setChainStatus("Waiting for wallet confirmation...");
+
+      const hash = await registerProofOnChain({
+        account: walletAddress,
+        contractAddress: proofRegistryAddress,
+        fileHash: proofDraft.fileHash as `0x${string}`,
+        proofType: proofDraft.proofType,
+        uri: "",
+      });
+
+      setTxHash(hash);
+      setChainStatus("Proof transaction submitted.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Failed to anchor proof on-chain.");
+      setChainStatus("");
+    } finally {
+      setIsAnchoring(false);
+    }
+  }
+
   return (
     <main className="page-shell">
       <section className="hero">
@@ -72,7 +136,7 @@ export default function Home() {
         <h1>Make your product, shipment, or invoice verifiable.</h1>
         <p>
           Upload evidence, generate a browser-side SHA-256 hash, and preview a public proof page.
-          Later this hash will be anchored on-chain and shared as a QR-verifiable trust page.
+          Then anchor the hash on Base Sepolia to create an on-chain proof trail.
         </p>
         <div className="hero-actions">
           <a href="#create-proof" className="primary-button">Create proof</a>
@@ -165,7 +229,7 @@ export default function Home() {
                   <span className="proof-type">{proofDraft.proofType}</span>
                   <h3>{proofDraft.title}</h3>
                 </div>
-                <div className="status-pill">Hash generated</div>
+                <div className="status-pill">{txHash ? "On-chain submitted" : "Hash generated"}</div>
               </div>
 
               <dl className="proof-details">
@@ -189,13 +253,46 @@ export default function Home() {
                   <dt>Created</dt>
                   <dd>{new Date(proofDraft.createdAt).toLocaleString()}</dd>
                 </div>
+                <div>
+                  <dt>Wallet</dt>
+                  <dd>{walletAddress ? shortHash(walletAddress) : "Not connected"}</dd>
+                </div>
+                <div>
+                  <dt>Contract</dt>
+                  <dd>{proofRegistryAddress ? shortHash(proofRegistryAddress) : "Not configured"}</dd>
+                </div>
+                {txHash && (
+                  <div>
+                    <dt>Transaction</dt>
+                    <dd>
+                      <a href={getBaseSepoliaExplorerTxUrl(txHash)} target="_blank" rel="noreferrer" className="inline-link">
+                        {shortHash(txHash)}
+                      </a>
+                    </dd>
+                  </div>
+                )}
               </dl>
 
               <p className="proof-note">{proofDraft.note}</p>
 
               <div className="future-chain-box">
-                <strong>Next milestone</strong>
-                <span>Anchor this proof hash to a testnet smart contract and generate a shareable URL + QR code.</span>
+                <strong>On-chain anchoring</strong>
+                <span>
+                  {chainStatus ||
+                    "Connect a wallet, switch to Base Sepolia, and submit this proof hash to ProofRegistry."}
+                </span>
+                <div className="chain-actions">
+                  <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet} disabled={!hasInjectedWallet()}>
+                    {walletAddress ? "Wallet connected" : "Connect wallet"}
+                  </button>
+                  <button type="button" className="primary-button button-reset" onClick={handleAnchorProof} disabled={isAnchoring || !walletAddress || !fileHash}>
+                    {isAnchoring ? "Submitting..." : "Anchor proof"}
+                  </button>
+                </div>
+                {!hasInjectedWallet() && <span>No injected wallet detected. Install MetaMask to test on-chain anchoring.</span>}
+                {!isProofRegistryConfigured() && (
+                  <span>Contract address missing. Set NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS after deploying ProofRegistry.</span>
+                )}
               </div>
             </article>
           )}
