@@ -3,7 +3,9 @@ import { chaintraceChain } from "@/lib/chaintraceConfig";
 import { proofRegistryAbi } from "@/lib/proofRegistryAbi";
 
 export type EthereumProvider = {
+  isMetaMask?: boolean;
   selectedAddress?: `0x${string}` | null;
+  providers?: EthereumProvider[];
   request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
 };
 
@@ -29,22 +31,39 @@ function withTimeout<T>(promise: Promise<T>, milliseconds: number, message: stri
   });
 }
 
+export function getWalletProvider(): EthereumProvider | undefined {
+  if (typeof window === "undefined") return undefined;
+
+  const injected = window.ethereum;
+  if (!injected) return undefined;
+
+  if (Array.isArray(injected.providers)) {
+    const metamask = injected.providers.find((provider) => provider.isMetaMask);
+    return metamask ?? injected.providers[0];
+  }
+
+  return injected;
+}
+
 export function hasInjectedWallet(): boolean {
-  return typeof window !== "undefined" && Boolean(window.ethereum);
+  return Boolean(getWalletProvider());
 }
 
 export async function getConnectedAccount(): Promise<`0x${string}` | null> {
-  if (!window.ethereum) return null;
+  const provider = getWalletProvider();
+  if (!provider) return null;
 
-  const accounts = (await window.ethereum.request({
+  const accounts = (await provider.request({
     method: "eth_accounts",
   })) as `0x${string}`[];
 
-  return accounts[0] ?? window.ethereum.selectedAddress ?? null;
+  return accounts[0] ?? provider.selectedAddress ?? null;
 }
 
 export async function connectWallet(): Promise<`0x${string}`> {
-  if (!window.ethereum) {
+  const provider = getWalletProvider();
+
+  if (!provider) {
     throw new Error("No injected wallet found. Install MetaMask or another EVM wallet.");
   }
 
@@ -53,7 +72,7 @@ export async function connectWallet(): Promise<`0x${string}`> {
 
   try {
     await withTimeout(
-      window.ethereum.request({
+      provider.request({
         method: "wallet_requestPermissions",
         params: [{ eth_accounts: {} }],
       }) as Promise<unknown>,
@@ -66,22 +85,17 @@ export async function connectWallet(): Promise<`0x${string}`> {
     if (error.code === 4001) {
       throw new Error("Wallet connection rejected in MetaMask.");
     }
-
-    const message = error.message ?? "MetaMask permission request failed.";
-    if (!message.toLowerCase().includes("already pending")) {
-      // Continue to eth_requestAccounts as a fallback for wallets that do not support wallet_requestPermissions.
-    }
   }
 
   const accounts = (await withTimeout(
-    window.ethereum.request({
+    provider.request({
       method: "eth_requestAccounts",
     }) as Promise<`0x${string}`[]>,
     20000,
     "MetaMask did not return an account. Open the MetaMask popup and approve the site connection, then try again."
   )) as `0x${string}`[];
 
-  const account = accounts[0] ?? window.ethereum.selectedAddress ?? null;
+  const account = accounts[0] ?? provider.selectedAddress ?? null;
 
   if (!account) {
     throw new Error("No wallet account returned.");
@@ -91,12 +105,14 @@ export async function connectWallet(): Promise<`0x${string}`> {
 }
 
 export async function switchToBaseSepolia(): Promise<void> {
-  if (!window.ethereum) {
+  const provider = getWalletProvider();
+
+  if (!provider) {
     throw new Error("No injected wallet found.");
   }
 
   try {
-    await window.ethereum.request({
+    await provider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0x14A34" }],
     });
@@ -107,7 +123,7 @@ export async function switchToBaseSepolia(): Promise<void> {
       throw caught;
     }
 
-    await window.ethereum.request({
+    await provider.request({
       method: "wallet_addEthereumChain",
       params: [
         {
@@ -133,14 +149,16 @@ export async function registerProofOnChain(args: {
   proofType: string;
   uri?: string;
 }): Promise<`0x${string}`> {
-  if (!window.ethereum) {
+  const provider = getWalletProvider();
+
+  if (!provider) {
     throw new Error("No injected wallet found.");
   }
 
   const walletClient = createWalletClient({
     account: args.account,
     chain: chaintraceChain,
-    transport: custom(window.ethereum),
+    transport: custom(provider),
   });
 
   return walletClient.writeContract({
