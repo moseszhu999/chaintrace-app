@@ -1,12 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { ProofVerifier } from "@/components/ProofVerifier";
 import { SharePanel } from "@/components/SharePanel";
 import { getBaseSepoliaExplorerAddressUrl, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { shortHash } from "@/lib/hash";
-import { getProofById } from "@/lib/publicChain";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+import { ChainTraceProof, getProofById } from "@/lib/publicChain";
 
 function formatTimestamp(timestamp: bigint): string {
   return new Date(Number(timestamp) * 1000).toLocaleString("en-US", {
@@ -24,19 +24,74 @@ function getErrorMessage(error: unknown): string {
   return "Unable to read this proof from the ChainTrace ProofRegistry contract.";
 }
 
-export default async function PublicProofPage({
+export default function PublicProofPage({
   params,
 }: {
-  params: Promise<{ proofId: string }>;
+  params: { proofId: string };
 }) {
-  const { proofId } = await params;
-  const proofIdBigInt = BigInt(proofId);
+  const { proofId } = params;
+  const [proof, setProof] = useState<ChainTraceProof | null>(null);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  let proof;
+  const proofIdBigInt = useMemo(() => {
+    try {
+      return BigInt(proofId);
+    } catch {
+      return null;
+    }
+  }, [proofId]);
 
-  try {
-    proof = await getProofById(proofIdBigInt);
-  } catch (error) {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProof() {
+      setIsLoading(true);
+      setError("");
+      setProof(null);
+
+      if (proofIdBigInt === null) {
+        setError("Invalid proof ID.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const loadedProof = await getProofById(proofIdBigInt);
+        if (!cancelled) {
+          setProof(loadedProof);
+        }
+      } catch (caught) {
+        if (!cancelled) {
+          setError(getErrorMessage(caught));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadProof();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [proofIdBigInt]);
+
+  if (isLoading) {
+    return (
+      <main className="page-shell">
+        <section className="hero">
+          <div className="eyebrow">ChainTrace Public Proof</div>
+          <h1>Loading Proof #{proofId}</h1>
+          <p>Reading this proof directly from the ChainTrace ProofRegistry contract on Base Sepolia.</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (error || !proof) {
     return (
       <main className="page-shell">
         <section className="hero">
@@ -90,7 +145,7 @@ export default async function PublicProofPage({
               </div>
               <div>
                 <dt>Error</dt>
-                <dd>{getErrorMessage(error)}</dd>
+                <dd>{error || "Unknown read error."}</dd>
               </div>
             </dl>
 
