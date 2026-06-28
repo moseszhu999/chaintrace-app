@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { demoWorkspace, getContextLabel } from "@/lib/demo-workspace-data";
+import { getContextLabel } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function ApprovalsView({ zh }: { zh: boolean }) {
-  const buyerDraft = demoWorkspace.drafts[1];
-  const buyerApproval = demoWorkspace.approvals[1];
+export function ApprovalsView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+  const buyerDraft = workspace.drafts[1];
+  const buyerApproval = workspace.approvals[1];
   const [draftBody, setDraftBody] = useState(zh ? buyerDraft.bodyZh : buyerDraft.bodyEn);
   const [approvalState, setApprovalState] = useState(buyerApproval.status);
 
