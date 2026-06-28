@@ -1,11 +1,12 @@
-import { demoWorkspace, getBlockerText, getMissingEvidenceSlots, getReadyScore, getVerifiedEvidenceCount } from "@/lib/demo-workspace-data";
+import { getBlockerText, getMissingEvidenceSlots, getReadyScore, getVerifiedEvidenceCount } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function DashboardView({ zh }: { zh: boolean }) {
-  const { businessContext, evidenceSlots, proofPack } = demoWorkspace;
+export function DashboardView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+  const { businessContext, evidenceSlots, proofPack } = workspace;
   const verified = getVerifiedEvidenceCount(evidenceSlots);
   const missing = getMissingEvidenceSlots(evidenceSlots).length;
   const readyScore = getReadyScore(evidenceSlots);
