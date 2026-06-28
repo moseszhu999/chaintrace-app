@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { neon } from "@neondatabase/serverless";
 import { SharePanel } from "@/components/SharePanel";
 import { getChainExplorerAddressUrl, getChainExplorerTxUrl, proofRegistryAddress } from "@/lib/chaintraceConfig";
+import { dictionary, normalizeLocale, type Locale } from "@/lib/i18n";
 import { shortHash } from "@/lib/hash";
 
 type ProofRow = {
@@ -18,14 +20,12 @@ type ProofRow = {
   created_at: string;
 };
 
-const supplyChainProofTypes = [
-  { key: "product", label: "Product", description: "Origin, batch, or authenticity proof" },
-  { key: "shipment", label: "Shipment", description: "Shipping and logistics evidence" },
-  { key: "invoice", label: "Invoice", description: "Invoice existence and payment evidence" },
-  { key: "inspection", label: "Inspection", description: "Quality control and inspection evidence" },
-  { key: "delivery", label: "Delivery", description: "Delivery or warehouse receipt proof" },
-  { key: "acceptance", label: "Acceptance", description: "Buyer acceptance or confirmation proof" },
-];
+async function getLocale(): Promise<Locale> {
+  const cookieStore = await cookies();
+  return normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
+}
+
+const proofTypeKeys = ["product", "shipment", "invoice", "inspection", "delivery", "acceptance"] as const;
 
 async function loadBusinessProofs(businessName: string): Promise<ProofRow[]> {
   const databaseUrl = process.env.DATABASE_URL;
@@ -55,20 +55,6 @@ async function loadBusinessProofs(businessName: string): Promise<ProofRow[]> {
   return rows as ProofRow[];
 }
 
-function buildTrustSummary(args: {
-  businessName: string;
-  proofCount: number;
-  demoCount: number;
-  onchainCount: number;
-  proofTypes: string;
-}): string {
-  if (args.proofCount === 0) {
-    return `${args.businessName} has not indexed any public ChainTrace proof records yet.`;
-  }
-
-  return `${args.businessName} has indexed ${args.proofCount} public ChainTrace proof record${args.proofCount === 1 ? "" : "s"}, including ${args.demoCount} gas-free demo proof${args.demoCount === 1 ? "" : "s"} and ${args.onchainCount} on-chain anchored proof${args.onchainCount === 1 ? "" : "s"}. Current proof types: ${args.proofTypes}.`;
-}
-
 function countByProofType(proofs: ProofRow[]): Record<string, number> {
   return proofs.reduce<Record<string, number>>((accumulator, proof) => {
     accumulator[proof.proof_type] = (accumulator[proof.proof_type] ?? 0) + 1;
@@ -76,46 +62,68 @@ function countByProofType(proofs: ProofRow[]): Record<string, number> {
   }, {});
 }
 
+function buildTrustSummary(args: {
+  locale: Locale;
+  businessName: string;
+  proofCount: number;
+  demoCount: number;
+  onchainCount: number;
+  proofTypes: string;
+}): string {
+  if (args.locale === "zh-CN") {
+    if (args.proofCount === 0) {
+      return `${args.businessName} 尚未索引任何公开 ChainTrace 证明记录。`;
+    }
+    return `${args.businessName} 已索引 ${args.proofCount} 条公开 ChainTrace 证明记录，其中包括 ${args.demoCount} 条无 Gas Demo 证明和 ${args.onchainCount} 条链上锚定证明。当前证明类型：${args.proofTypes}。`;
+  }
+
+  if (args.proofCount === 0) {
+    return `${args.businessName} has not indexed any public ChainTrace proof records yet.`;
+  }
+
+  return `${args.businessName} has indexed ${args.proofCount} public ChainTrace proof record${args.proofCount === 1 ? "" : "s"}, including ${args.demoCount} gas-free demo proof${args.demoCount === 1 ? "" : "s"} and ${args.onchainCount} on-chain anchored proof${args.onchainCount === 1 ? "" : "s"}. Current proof types: ${args.proofTypes}.`;
+}
+
 export default async function BusinessPassportPage({
   params,
 }: {
   params: Promise<{ businessName: string }>;
 }) {
+  const locale = await getLocale();
+  const t = dictionary[locale];
   const { businessName: encodedBusinessName } = await params;
   const businessName = decodeURIComponent(encodedBusinessName);
   const proofs = await loadBusinessProofs(businessName);
   const demoCount = proofs.filter((item) => item.proof_mode === "demo").length;
   const onchainCount = proofs.filter((item) => item.proof_mode === "onchain").length;
-  const proofTypes = Array.from(new Set(proofs.map((item) => item.proof_type))).join(", ") || "No proofs yet";
+  const proofTypeCounts = countByProofType(proofs);
+  const proofTypes = Array.from(new Set(proofs.map((item) => t.proofTypes[item.proof_type as keyof typeof t.proofTypes] ?? item.proof_type))).join(", ") || (locale === "zh-CN" ? "暂无证明" : "No proofs yet");
   const passportPath = `/passport/${encodeURIComponent(businessName)}`;
   const trustSummary = buildTrustSummary({
+    locale,
     businessName,
     proofCount: proofs.length,
     demoCount,
     onchainCount,
     proofTypes,
   });
-  const proofTypeCounts = countByProofType(proofs);
 
   return (
     <main className="page-shell">
       <section className="hero">
-        <div className="eyebrow">ChainTrace Business Passport</div>
+        <div className="eyebrow">{t.passport.eyebrow}</div>
         <h1>{businessName}</h1>
-        <p>
-          A public proof history for this business. Buyers, logistics partners, auditors, and financiers
-          can review indexed evidence records without receiving private business files.
-        </p>
+        <p>{t.passport.subtitle}</p>
         <div className="hero-actions">
-          <Link href="/" className="primary-button">Create a proof</Link>
-          <Link href="/passport" className="secondary-button">All passports</Link>
+          <Link href="/" className="primary-button">{t.app.createProof}</Link>
+          <Link href="/passport" className="secondary-button">{t.app.allPassports}</Link>
           <a
             href={getChainExplorerAddressUrl(proofRegistryAddress)}
             className="secondary-button"
             target="_blank"
             rel="noreferrer"
           >
-            View registry
+            {t.app.viewRegistry}
           </a>
         </div>
       </section>
@@ -123,15 +131,15 @@ export default async function BusinessPassportPage({
       <section className="principles-grid">
         <article>
           <strong>{proofs.length}</strong>
-          <span>Total indexed proofs</span>
+          <span>{t.passport.totalIndexedProofs}</span>
         </article>
         <article>
           <strong>{demoCount} / {onchainCount}</strong>
-          <span>Demo proofs / on-chain proofs</span>
+          <span>{t.passport.demoOnchain}</span>
         </article>
         <article>
           <strong>{proofTypes}</strong>
-          <span>Proof types</span>
+          <span>{t.passport.proofTypes}</span>
         </article>
       </section>
 
@@ -139,10 +147,10 @@ export default async function BusinessPassportPage({
         <article className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">business passport</span>
-              <h3>Trust summary</h3>
+              <span className="proof-type">{locale === "zh-CN" ? "企业档案" : "business passport"}</span>
+              <h3>{t.passport.trustSummary}</h3>
             </div>
-            <div className="status-pill">Shareable</div>
+            <div className="status-pill">{t.app.shareable}</div>
           </div>
 
           <p className="proof-note">{trustSummary}</p>
@@ -155,54 +163,51 @@ export default async function BusinessPassportPage({
         <article className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">supply chain dashboard</span>
-              <h3>Proof type dashboard</h3>
+              <span className="proof-type">{t.passport.supplyChainDashboard}</span>
+              <h3>{t.passport.proofTypeDashboard}</h3>
             </div>
-            <div className="status-pill">Composition</div>
+            <div className="status-pill">{t.app.composition}</div>
           </div>
 
           <dl className="proof-details">
-            {supplyChainProofTypes.map((item) => {
-              const count = proofTypeCounts[item.key] ?? 0;
+            {proofTypeKeys.map((key) => {
+              const count = proofTypeCounts[key] ?? 0;
+              const label = t.proofTypes[key];
+              const description = t.proofTypes[`${key}Description` as keyof typeof t.proofTypes];
               return (
-                <div key={item.key}>
-                  <dt>{item.label}</dt>
+                <div key={key}>
+                  <dt>{label}</dt>
                   <dd>
-                    <strong>{count} proof{count === 1 ? "" : "s"}</strong>
+                    <strong>{count} {count === 1 ? t.passport.proof : t.passport.proofs}</strong>
                     <br />
-                    {item.description}
+                    {description}
                     <br />
-                    <span>{count > 0 ? "Evidence present in this passport." : "No indexed evidence yet."}</span>
+                    <span>{count > 0 ? t.passport.evidencePresent : t.passport.noEvidenceYet}</span>
                   </dd>
                 </div>
               );
             })}
           </dl>
 
-          <p className="proof-note">
-            This dashboard helps buyers and financiers see whether a business has evidence across the whole trade flow:
-            product, shipment, invoice, inspection, delivery, and acceptance.
-          </p>
+          <p className="proof-note">{t.passport.dashboardNote}</p>
         </article>
 
         <article className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">business passport</span>
-              <h3>Proof history for {businessName}</h3>
+              <span className="proof-type">{locale === "zh-CN" ? "企业档案" : "business passport"}</span>
+              <h3>{t.passport.proofHistoryFor} {businessName}</h3>
             </div>
-            <div className="status-pill">Proof Index</div>
+            <div className="status-pill">{t.app.proofIndex}</div>
           </div>
 
           {proofs.length === 0 ? (
-            <p className="proof-note">
-              No indexed proofs found for this business name yet. Create a proof using exactly this business name to populate this passport.
-            </p>
+            <p className="proof-note">{t.passport.noProofs}</p>
           ) : (
             <dl className="proof-details">
               {proofs.map((proof) => (
                 <div key={proof.id}>
-                  <dt>{proof.proof_type}</dt>
+                  <dt>{t.proofTypes[proof.proof_type as keyof typeof t.proofTypes] ?? proof.proof_type}</dt>
                   <dd>
                     <strong>{proof.title}</strong>
                     <br />
@@ -210,7 +215,7 @@ export default async function BusinessPassportPage({
                     <br />
                     <span className="hash-value">{shortHash(proof.file_hash)}</span>
                     <br />
-                    <Link href={`/proof-index/${proof.id}`} className="inline-link">Open indexed proof</Link>
+                    <Link href={`/proof-index/${proof.id}`} className="inline-link">{t.passport.openIndexedProof}</Link>
                     {proof.transaction_hash && (
                       <>
                         <br />
@@ -220,7 +225,7 @@ export default async function BusinessPassportPage({
                           rel="noreferrer"
                           className="inline-link"
                         >
-                          View transaction
+                          {t.passport.viewTransaction}
                         </a>
                       </>
                     )}
@@ -230,10 +235,7 @@ export default async function BusinessPassportPage({
             </dl>
           )}
 
-          <p className="proof-note">
-            Business Passport is the trust profile layer on top of proof pages. It does not expose private files;
-            it indexes public metadata, hashes, and optional on-chain anchors.
-          </p>
+          <p className="proof-note">{t.passport.passportNote}</p>
         </article>
       </section>
     </main>
