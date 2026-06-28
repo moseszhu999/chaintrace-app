@@ -1,11 +1,16 @@
 import { cookies } from "next/headers";
+import { DashboardView } from "@/components/workspace/DashboardView";
+import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
 import { normalizeLocale } from "@/lib/i18n";
-import { ChainTraceWorkspaceApp } from "@/components/ChainTraceWorkspaceApp";
 
 export default async function DashboardRoute() {
   const cookieStore = await cookies();
   const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
   const zh = locale === "zh-CN";
 
-  return <ChainTraceWorkspaceApp zh={zh} initialView="dashboard" />;
+  return (
+    <WorkspaceShell zh={zh} active="dashboard" actionSlot={<a className="primary-button" href="/evidence">{zh ? "处理下一个缺口" : "Resolve next gap"}</a>}>
+      <DashboardView zh={zh} />
+    </WorkspaceShell>
+  );
 }
