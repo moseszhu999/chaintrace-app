@@ -30,6 +30,20 @@ function getReadableError(error: unknown): string {
   return message || "Failed to anchor proof on-chain.";
 }
 
+function buildDemoProofUrl(proofDraft: ProofDraft): string {
+  const params = new URLSearchParams({
+    hash: proofDraft.fileHash,
+    type: proofDraft.proofType,
+    title: proofDraft.title,
+    business: proofDraft.businessName,
+    batch: proofDraft.batchId,
+    file: proofDraft.fileName,
+    created: proofDraft.createdAt,
+  });
+
+  return `/demo-proof?${params.toString()}`;
+}
+
 export default function Home() {
   const [proofType, setProofType] = useState<ProofType>("product");
   const [title, setTitle] = useState("Vietnam Coffee Batch Proof");
@@ -88,6 +102,7 @@ export default function Home() {
   }, [batchId, businessName, fileHash, fileName, fileSize, note, proofType, title]);
 
   const shareableProofUrl = proofId === null ? "" : `/proof/${proofId.toString()}`;
+  const demoProofUrl = proofDraft ? buildDemoProofUrl(proofDraft) : "";
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -128,6 +143,17 @@ export default function Home() {
       setChainStatus("");
       setError(getReadableError(caught));
     }
+  }
+
+  function handleCreateDemoProof() {
+    setError("");
+
+    if (!proofDraft) {
+      setError("Generate a file hash before creating a demo proof.");
+      return;
+    }
+
+    window.location.href = buildDemoProofUrl(proofDraft);
   }
 
   async function handleAnchorProof() {
@@ -186,7 +212,7 @@ export default function Home() {
         <h1>Make your product, shipment, or invoice verifiable.</h1>
         <p>
           Upload evidence, generate a browser-side SHA-256 hash, and preview a public proof page.
-          Then anchor the hash on Ethereum Sepolia to create an on-chain proof trail.
+          Use Demo Proof for gas-free testing, then anchor selected proofs on Ethereum Sepolia.
         </p>
         <div className="hero-actions">
           <a href="#create-proof" className="primary-button">Create proof</a>
@@ -202,8 +228,8 @@ export default function Home() {
           <span>Share verifiable facts without revealing sensitive business data.</span>
         </article>
         <article>
-          <strong>Small businesses first</strong>
-          <span>Start from a simple proof page, then grow into a business passport.</span>
+          <strong>Gas-free testing</strong>
+          <span>Use Demo Proof for daily product testing without faucets or wallet gas.</span>
         </article>
         <article>
           <strong>AI-agent ready</strong>
@@ -336,12 +362,15 @@ export default function Home() {
               <p className="proof-note">{proofDraft.note}</p>
 
               <div className="future-chain-box">
-                <strong>On-chain anchoring</strong>
+                <strong>Testing and anchoring</strong>
                 <span>
                   {chainStatus ||
-                    "Connect a wallet, switch to Ethereum Sepolia, and submit this proof hash to ProofRegistry."}
+                    "Use Demo Proof for gas-free testing. Use Anchor proof only when you need a real Ethereum Sepolia transaction."}
                 </span>
                 <div className="chain-actions">
+                  <button type="button" className="secondary-button button-reset" onClick={handleCreateDemoProof} disabled={!demoProofUrl}>
+                    Demo proof no gas
+                  </button>
                   <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet}>
                     {walletAddress ? "Wallet connected" : "Connect wallet"}
                   </button>
