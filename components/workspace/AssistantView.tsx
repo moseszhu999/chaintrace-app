@@ -1,11 +1,12 @@
-import { demoWorkspace, getContextLabel } from "@/lib/demo-workspace-data";
+import { getContextLabel } from "@/lib/demo-workspace-data";
+import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function AssistantView({ zh }: { zh: boolean }) {
-  const { memories, suggestions } = demoWorkspace;
+export function AssistantView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+  const { memories, suggestions } = workspace;
   const suggestion = suggestions[1];
 
   return (
