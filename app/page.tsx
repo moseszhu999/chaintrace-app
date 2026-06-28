@@ -74,13 +74,20 @@ export default function Home() {
 
   async function handleConnectWallet() {
     setError("");
-    setChainStatus("");
+    setChainStatus("Checking wallet...");
+
+    if (!hasInjectedWallet()) {
+      setChainStatus("");
+      setError("No injected wallet detected. Open this page in a browser with MetaMask installed, or use the MetaMask in-app browser on mobile.");
+      return;
+    }
 
     try {
       const account = await connectWallet();
       setWalletAddress(account);
       setChainStatus("Wallet connected.");
     } catch (caught) {
+      setChainStatus("");
       setError(caught instanceof Error ? caught.message : "Failed to connect wallet.");
     }
   }
@@ -282,14 +289,13 @@ export default function Home() {
                     "Connect a wallet, switch to Base Sepolia, and submit this proof hash to ProofRegistry."}
                 </span>
                 <div className="chain-actions">
-                  <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet} disabled={!hasInjectedWallet()}>
+                  <button type="button" className="secondary-button button-reset" onClick={handleConnectWallet}>
                     {walletAddress ? "Wallet connected" : "Connect wallet"}
                   </button>
                   <button type="button" className="primary-button button-reset" onClick={handleAnchorProof} disabled={isAnchoring || !walletAddress || !fileHash}>
                     {isAnchoring ? "Submitting..." : "Anchor proof"}
                   </button>
                 </div>
-                {!hasInjectedWallet() && <span>No injected wallet detected. Install MetaMask to test on-chain anchoring.</span>}
                 {!isProofRegistryConfigured() && (
                   <span>Contract address missing. Set NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS after deploying ProofRegistry.</span>
                 )}
