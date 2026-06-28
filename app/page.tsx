@@ -198,6 +198,7 @@ export default function Home() {
             <p>{zh ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，串成一条可分享、可校验、可审计的供应链事实链。" : "ChainTrace helps small businesses connect order, invoice, shipment, inspection, delivery, and acceptance into a shareable, verifiable, audit-friendly supply-chain fact chain."}</p>
             <div className="hero-actions">
               <a href="#create-proof" className="primary-button">{zh ? "开始记录一个节点" : "Record a supply-chain node"}</a>
+              <a href="/cases" className="secondary-button">{zh ? "复杂案例" : "Case studies"}</a>
               <a href="/passport" className="secondary-button">{zh ? "查看企业事实档案" : "View business fact passports"}</a>
               <a href="/receivable-pack" className="secondary-button">{zh ? "了解证明包" : "Explore proof packs"}</a>
             </div>
