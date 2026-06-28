@@ -1,10 +1,10 @@
 "use client";
 
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { getBaseSepoliaExplorerTxUrl, isProofRegistryConfigured, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { sha256File, shortHash } from "@/lib/hash";
 import type { ProofDraft, ProofType } from "@/lib/types";
-import { connectWallet, hasInjectedWallet, registerProofOnChain, switchToBaseSepolia } from "@/lib/wallet";
+import { connectWallet, getConnectedAccount, hasInjectedWallet, registerProofOnChain, switchToBaseSepolia } from "@/lib/wallet";
 
 const proofTypes: { label: string; value: ProofType; description: string }[] = [
   { label: "Product Proof", value: "product", description: "Prove product origin, batch, or authenticity." },
@@ -30,6 +30,25 @@ export default function Home() {
   const [chainStatus, setChainStatus] = useState("");
   const [txHash, setTxHash] = useState<`0x${string}` | "">("");
   const [isAnchoring, setIsAnchoring] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function detectWallet() {
+      if (!hasInjectedWallet()) return;
+      const account = await getConnectedAccount();
+      if (!cancelled && account) {
+        setWalletAddress(account);
+        setChainStatus("Wallet already connected.");
+      }
+    }
+
+    detectWallet().catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const selectedProofType = useMemo(
     () => proofTypes.find((item) => item.value === proofType),
@@ -74,7 +93,7 @@ export default function Home() {
 
   async function handleConnectWallet() {
     setError("");
-    setChainStatus("Checking wallet...");
+    setChainStatus("Opening MetaMask connection request...");
 
     if (!hasInjectedWallet()) {
       setChainStatus("");
