@@ -18,6 +18,8 @@ const proofTypes: { value: ProofType; description: string }[] = [
   { value: "acceptance", description: "Prove buyer acceptance or confirmation." },
 ];
 
+const receivableProofTypes: ProofType[] = ["order", "invoice", "shipment", "inspection", "delivery", "acceptance"];
+
 type SaveProofResponse = {
   item?: {
     id?: string;
@@ -97,10 +99,66 @@ export default function Home() {
   const t = dictionary[locale].home;
   const common = dictionary[locale].app;
   const proofTypeText = dictionary[locale].proofTypes;
+  const zh = locale === "zh-CN";
+
+  const proofTemplates = useMemo<Record<ProofType, { title: string; note: string }>>(
+    () => ({
+      order: {
+        title: zh ? "咖啡出口订单证明" : "Coffee Export Order Proof",
+        note: zh
+          ? "该证明用于锚定订单、销售合同或应收账款基础文件的哈希。后续可用同一个批次 / 订单号补齐发票、发货、质检、交付和验收证据。"
+          : "This proof anchors the hash of a purchase order, sales contract, or receivable basis document. Use the same batch / order ID to add invoice, shipment, inspection, delivery, and acceptance evidence next.",
+      },
+      product: {
+        title: zh ? "产品批次真实性证明" : "Product Batch Authenticity Proof",
+        note: zh
+          ? "该证明用于锚定产品批次、产地或真实性证据。产品证明可增强企业档案，但不计入应收账款证明包的六个必需槽位。"
+          : "This proof anchors product batch, origin, or authenticity evidence. Product proof enriches the business passport, but it is not one of the six required receivable pack slots.",
+      },
+      shipment: {
+        title: zh ? "发货与物流证明" : "Shipment and Logistics Proof",
+        note: zh
+          ? "该证明用于锚定发货单、运单、承运交接或物流记录。它是应收账款证明包的必需证据之一。"
+          : "This proof anchors a shipping note, waybill, carrier handoff, or logistics record. It is one required slot in the receivable proof pack.",
+      },
+      invoice: {
+        title: zh ? "发票存在性证明" : "Invoice Existence Proof",
+        note: zh
+          ? "该证明用于锚定发票文件哈希和公开元数据，证明发票在某个时间点已经存在。"
+          : "This proof anchors the invoice file hash and public metadata, proving that the invoice existed at a specific time.",
+      },
+      inspection: {
+        title: zh ? "质检报告证明" : "Quality Inspection Proof",
+        note: zh
+          ? "该证明用于锚定质检报告、验货记录或测试结果，降低买家和资金方对货物质量的不确定性。"
+          : "This proof anchors an inspection report, QC record, or test result, reducing uncertainty for buyers and financiers.",
+      },
+      delivery: {
+        title: zh ? "交付或入库回执证明" : "Delivery Receipt Proof",
+        note: zh
+          ? "该证明用于锚定交付回执、入库回执或 POD 交付证明，说明货物已经完成交付环节。"
+          : "This proof anchors a delivery receipt, warehouse receipt, or proof of delivery, showing that the delivery step is complete.",
+      },
+      acceptance: {
+        title: zh ? "买家验收证明" : "Buyer Acceptance Proof",
+        note: zh
+          ? "该证明用于锚定买家验收、确认记录或签收审批。缺少验收时，应收账款证明包通常不应显示 Ready。"
+          : "This proof anchors buyer acceptance, confirmation, or signed approval. Without acceptance evidence, the receivable pack should usually remain Missing evidence.",
+      },
+    }),
+    [zh]
+  );
 
   useEffect(() => {
     setLocale(getCookieLocale());
   }, []);
+
+  useEffect(() => {
+    if (fileHash) return;
+    const template = proofTemplates[proofType];
+    setTitle(template.title);
+    setNote(template.note);
+  }, [fileHash, proofTemplates, proofType]);
 
   useEffect(() => {
     let cancelled = false;
@@ -144,6 +202,16 @@ export default function Home() {
 
   const shareableProofUrl = proofId === null ? "" : `/proof/${proofId.toString()}`;
   const demoProofUrl = proofDraft ? buildDemoProofUrl(proofDraft) : "";
+  const passportUrl = `/passport/${encodeURIComponent(businessName)}`;
+  const currentPackPosition = receivableProofTypes.indexOf(proofType);
+  const isReceivablePackSlot = currentPackPosition >= 0;
+
+  function handleProofTypeChange(nextProofType: ProofType) {
+    setProofType(nextProofType);
+    const template = proofTemplates[nextProofType];
+    setTitle(template.title);
+    setNote(template.note);
+  }
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -294,10 +362,55 @@ export default function Home() {
         <p>{t.subtitle}</p>
         <div className="hero-actions">
           <a href="#create-proof" className="primary-button">{common.createProof}</a>
+          <a href="/receivable-pack" className="secondary-button">{zh ? "应收账款证明包" : "Receivable proof pack"}</a>
           <a href="/passport" className="secondary-button">{common.businessPassport}</a>
           <a href="https://github.com/moseszhu999/chaintrace-protocol" className="secondary-button" target="_blank" rel="noreferrer">
             {t.protocolRepo}
           </a>
+        </div>
+      </section>
+
+      <section className="product-strip">
+        <article>
+          <span>{zh ? "产品定位" : "Positioning"}</span>
+          <strong>{zh ? "小企业可信证明包" : "Trust proof packs for small businesses"}</strong>
+          <p>{zh ? "先解决贸易证据缺失和信任成本，不急着做复杂金融系统。" : "Start by reducing evidence gaps and trust costs, not by building a heavy finance system."}</p>
+        </article>
+        <article>
+          <span>{zh ? "核心状态" : "Core status"}</span>
+          <strong>Ready / Missing evidence</strong>
+          <p>{zh ? "买家和资金方第一眼就知道这个订单是否证据齐全。" : "Buyers and financiers can immediately see whether an order is evidence-ready."}</p>
+        </article>
+        <article>
+          <span>{zh ? "增长路径" : "Growth loop"}</span>
+          <strong>{zh ? "分享链接 + 二维码" : "Share link + QR code"}</strong>
+          <p>{zh ? "每个证明页和企业档案都可以被转发，天然适合小 B viral。" : "Every proof page and passport is shareable, which makes the product naturally viral for small businesses."}</p>
+        </article>
+      </section>
+
+      <section className="panel product-showcase">
+        <div className="section-heading">
+          <span>{zh ? "应收账款证明包 Lite" : "Receivable Proof Pack Lite"}</span>
+          <h2>{zh ? "按六个证据槽创建，自动形成 Ready / Missing evidence" : "Create by six evidence slots, then get Ready / Missing evidence automatically"}</h2>
+          <p>
+            {zh
+              ? "当前产品不要求用户理解区块链，只要求他们围绕同一个批次 / 订单号补齐证据。ChainTrace 负责生成哈希、索引证明、企业档案和可分享页面。"
+              : "Users do not need to understand blockchain. They only need to add evidence around the same batch / order ID. ChainTrace handles hashes, indexed proofs, business passports, and shareable pages."}
+          </p>
+        </div>
+        <div className="pack-step-grid">
+          {receivableProofTypes.map((item, index) => (
+            <button
+              key={item}
+              type="button"
+              className={`pack-step-card button-reset ${proofType === item ? "active" : ""}`}
+              onClick={() => handleProofTypeChange(item)}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{proofTypeText[item]}</strong>
+              <p>{proofTypeText[`${item}Description` as keyof typeof proofTypeText]}</p>
+            </button>
+          ))}
         </div>
       </section>
 
@@ -324,9 +437,18 @@ export default function Home() {
             <p>{t.createDraftHelp}</p>
           </div>
 
+          <div className="proof-flow-card">
+            <strong>{zh ? "当前正在补充：" : "Current evidence slot:"} {proofTypeText[proofType]}</strong>
+            <span>
+              {isReceivablePackSlot
+                ? (zh ? `应收账款证明包第 ${currentPackPosition + 1} / ${receivableProofTypes.length} 个必需证据。` : `Required receivable pack slot ${currentPackPosition + 1} / ${receivableProofTypes.length}.`)
+                : (zh ? "产品证明会增强企业档案，但不是应收账款 Ready 判断的必需项。" : "Product proof enriches the business passport, but it is not required for receivable Ready status.")}
+            </span>
+          </div>
+
           <label>
             {t.proofType}
-            <select value={proofType} onChange={(event) => setProofType(event.target.value as ProofType)}>
+            <select value={proofType} onChange={(event) => handleProofTypeChange(event.target.value as ProofType)}>
               {proofTypes.map((item) => (
                 <option key={item.value} value={item.value}>{proofTypeText[item.value]}</option>
               ))}
@@ -389,6 +511,14 @@ export default function Home() {
 
               <dl className="proof-details">
                 <div>
+                  <dt>{zh ? "证明包槽位" : "Pack slot"}</dt>
+                  <dd>
+                    {proofTypeText[proofDraft.proofType]}
+                    <br />
+                    <span>{isReceivablePackSlot ? (zh ? "计入应收账款证明包完整度。" : "Counts toward receivable proof pack completeness.") : (zh ? "企业档案增强项。" : "Business passport enrichment item.")}</span>
+                  </dd>
+                </div>
+                <div>
                   <dt>{t.business}</dt>
                   <dd>{proofDraft.businessName}</dd>
                 </div>
@@ -439,6 +569,15 @@ export default function Home() {
               </dl>
 
               <p className="proof-note">{proofDraft.note}</p>
+
+              <div className="proof-tools preview-actions">
+                <a href={passportUrl} className="secondary-button">
+                  {zh ? "打开该企业档案" : "Open this business passport"}
+                </a>
+                <a href="/receivable-pack" className="secondary-button">
+                  {zh ? "查看证明包说明" : "View proof pack guide"}
+                </a>
+              </div>
 
               <div className="future-chain-box">
                 <strong>{t.testingAndAnchoring}</strong>
