@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ProofVerifier } from "@/components/ProofVerifier";
 import { SharePanel } from "@/components/SharePanel";
-import { getBaseSepoliaExplorerAddressUrl, proofRegistryAddress } from "@/lib/chaintraceConfig";
+import { getChainExplorerAddressUrl, proofRegistryAddress } from "@/lib/chaintraceConfig";
 import { shortHash } from "@/lib/hash";
 import { ChainTraceProof, getProofById } from "@/lib/publicChain";
 
@@ -85,7 +85,7 @@ export default function PublicProofPage({
         <section className="hero">
           <div className="eyebrow">ChainTrace Public Proof</div>
           <h1>Loading Proof #{proofId}</h1>
-          <p>Reading this proof directly from the ChainTrace ProofRegistry contract on Base Sepolia.</p>
+          <p>Reading this proof directly from the ChainTrace ProofRegistry contract on Ethereum Sepolia.</p>
         </section>
       </main>
     );
@@ -98,13 +98,13 @@ export default function PublicProofPage({
           <div className="eyebrow">ChainTrace Public Proof</div>
           <h1>Proof #{proofId} could not be loaded.</h1>
           <p>
-            The app could not read this proof from Base Sepolia. The proof ID may not exist yet,
+            The app could not read this proof from Ethereum Sepolia. The proof ID may not exist yet,
             or the public RPC endpoint may be temporarily unavailable.
           </p>
           <div className="hero-actions">
             <Link href="/" className="primary-button">Create your own proof</Link>
             <a
-              href={getBaseSepoliaExplorerAddressUrl(proofRegistryAddress)}
+              href={getChainExplorerAddressUrl(proofRegistryAddress)}
               className="secondary-button"
               target="_blank"
               rel="noreferrer"
@@ -133,7 +133,7 @@ export default function PublicProofPage({
                 <dt>Registry</dt>
                 <dd>
                   <a
-                    href={getBaseSepoliaExplorerAddressUrl(proofRegistryAddress)}
+                    href={getChainExplorerAddressUrl(proofRegistryAddress)}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-link"
@@ -165,13 +165,13 @@ export default function PublicProofPage({
         <div className="eyebrow">ChainTrace Public Proof</div>
         <h1>Proof #{proofId}</h1>
         <p>
-          This page reads directly from the ChainTrace ProofRegistry contract on Base Sepolia.
+          This page reads directly from the ChainTrace ProofRegistry contract on Ethereum Sepolia.
           It verifies that an evidence hash was anchored on-chain by a wallet address.
         </p>
         <div className="hero-actions">
           <Link href="/" className="primary-button">Create your own proof</Link>
           <a
-            href={getBaseSepoliaExplorerAddressUrl(proofRegistryAddress)}
+            href={getChainExplorerAddressUrl(proofRegistryAddress)}
             className="secondary-button"
             target="_blank"
             rel="noreferrer"
@@ -204,7 +204,7 @@ export default function PublicProofPage({
               <dt>Submitter</dt>
               <dd>
                 <a
-                  href={getBaseSepoliaExplorerAddressUrl(proof.submitter)}
+                  href={getChainExplorerAddressUrl(proof.submitter)}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-link"
@@ -234,7 +234,7 @@ export default function PublicProofPage({
               <dt>Registry</dt>
               <dd>
                 <a
-                  href={getBaseSepoliaExplorerAddressUrl(proofRegistryAddress)}
+                  href={getChainExplorerAddressUrl(proofRegistryAddress)}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-link"
