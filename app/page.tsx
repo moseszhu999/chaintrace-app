@@ -87,7 +87,6 @@ export default function Home() {
   const [isSavingDemo, setIsSavingDemo] = useState(false);
 
   const t = dictionary[locale].home;
-  const common = dictionary[locale].app;
   const proofTypeText = dictionary[locale].proofTypes;
   const zh = locale === "zh-CN";
 
@@ -197,10 +196,11 @@ export default function Home() {
             <h1>{zh ? "让一条供应链，从订单到验收都有可信记录。" : "Give every supply chain a trusted record from order to acceptance."}</h1>
             <p>{zh ? "ChainTrace 帮小企业把订单、发票、发货、质检、交付、验收这些关键节点，串成一条可分享、可校验、可审计的供应链事实链。" : "ChainTrace helps small businesses connect order, invoice, shipment, inspection, delivery, and acceptance into a shareable, verifiable, audit-friendly supply-chain fact chain."}</p>
             <div className="hero-actions">
-              <a href="#create-proof" className="primary-button">{zh ? "开始记录一个节点" : "Record a supply-chain node"}</a>
+              <a href="/platform" className="primary-button">{zh ? "平台应用" : "Platform app"}</a>
+              <a href="#create-proof" className="secondary-button">{zh ? "开始记录一个节点" : "Record a supply-chain node"}</a>
               <a href="/cases" className="secondary-button">{zh ? "复杂案例" : "Case studies"}</a>
-              <a href="/passport" className="secondary-button">{zh ? "查看企业事实档案" : "View business fact passports"}</a>
-              <a href="/receivable-pack" className="secondary-button">{zh ? "了解证明包" : "Explore proof packs"}</a>
+              <a href="/passport" className="secondary-button">{zh ? "企业事实档案" : "Business fact passports"}</a>
+              <a href="/receivable-pack" className="secondary-button">{zh ? "证明包" : "Proof packs"}</a>
             </div>
             <div className="hero-badges"><span className="badge-chip">{zh ? "供应链事实层" : "Supply-chain fact layer"}</span><span className="badge-chip">Ready / Missing evidence</span><span className="badge-chip">{zh ? "链接 + 二维码分享" : "Link + QR sharing"}</span></div>
           </div>
