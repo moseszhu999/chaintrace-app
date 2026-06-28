@@ -2,7 +2,7 @@ import { baseSepolia } from "viem/chains";
 
 export const chaintraceChain = baseSepolia;
 
-export const defaultProofRegistryAddress = "0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3" as const;
+export const defaultProofRegistryAddress = "0xB35feebF4238D807ad4c4755113BEE1dA46DA597" as const;
 
 export const proofRegistryAddress =
   (process.env.NEXT_PUBLIC_PROOF_REGISTRY_ADDRESS as `0x${string}` | undefined) ??
