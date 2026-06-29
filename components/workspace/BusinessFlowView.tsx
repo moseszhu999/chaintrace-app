@@ -34,7 +34,7 @@ export function BusinessFlowView({ zh, workspace }: { zh: boolean; workspace: Wo
     <>
       <section className="panel">
         <div className="section-heading">
-          <span>{t(zh, "业务操作系统", "Business operating system")}</span>
+          <span>{t(zh, "交易 Agent", "Trade agent")}</span>
           <h2>{t(zh, operatingSummary.headlineZh, operatingSummary.headlineEn)}</h2>
           <p>{t(zh, operatingSummary.promiseZh, operatingSummary.promiseEn)}</p>
         </div>
@@ -52,8 +52,8 @@ export function BusinessFlowView({ zh, workspace }: { zh: boolean; workspace: Wo
       <section className="workspace">
         <div className="panel">
           <div className="section-heading">
-            <span>{t(zh, "完整流程", "End-to-end flow")}</span>
-            <h2>{t(zh, "小微企业不是来做溯源演示，是来把生意做完。", "SMEs are not here for traceability demos; they need to finish the business.")}</h2>
+            <span>{t(zh, "完整交易流程", "End-to-end trade flow")}</span>
+            <h2>{t(zh, "小微企业不是来做溯源演示，是让 Agent 把生意推进到验收和收款。", "SMEs are not here for traceability demos; they need agents to move trades to acceptance and collection.")}</h2>
             <p>{t(zh, operatingSummary.activeDealZh, operatingSummary.activeDealEn)}</p>
           </div>
           <div className={styles.list}>
@@ -71,7 +71,7 @@ export function BusinessFlowView({ zh, workspace }: { zh: boolean; workspace: Wo
                 <div className={styles.rowActions}>
                   <Link className="secondary-button" href="/evidence">{t(zh, "查看文件", "View documents")}</Link>
                   <Link className="secondary-button" href="/tasks">{t(zh, "查看任务", "View tasks")}</Link>
-                  {stage.status === "blocked" && <Link className="primary-button" href="/assistant">{t(zh, "让助手处理缺口", "Ask assistant to handle gap")}</Link>}
+                  {stage.status === "blocked" && <Link className="primary-button" href="/assistant">{t(zh, "让 Agent 处理缺口", "Ask agent to handle gap")}</Link>}
                 </div>
               </article>
             ))}
@@ -81,7 +81,7 @@ export function BusinessFlowView({ zh, workspace }: { zh: boolean; workspace: Wo
         <div className="panel">
           <div className="section-heading">
             <span>{t(zh, "产品边界", "Product boundary")}</span>
-            <h2>{t(zh, "ChainTrace 应该是业务流程小助手，不只是证明包工具。", "ChainTrace should be a business workflow sidecar, not only a proof-pack tool.")}</h2>
+            <h2>{t(zh, "ChainTrace 应该是交易 Agent，不是飞书式协作套件。", "ChainTrace should be a trade agent, not a Feishu-like collaboration suite.")}</h2>
           </div>
           <div className={styles.list}>
             <article className={styles.listRow}>
