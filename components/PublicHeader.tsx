@@ -9,7 +9,7 @@ export function PublicHeader({ zh }: { zh: boolean }) {
     { href: "/#workflow", label: zh ? "交易流程" : "Trade flow" },
     { href: "/evidence", label: zh ? "文件" : "Documents" },
     { href: "/tasks", label: zh ? "履约 / 验收" : "Fulfillment" },
-    { href: "/assistant/approvals", label: zh ? "收款 / 融资" : "Collection" },
+    { href: "/business-financing", label: zh ? "融资 / RWA" : "Financing / RWA" },
     { href: "/proof-packs", label: zh ? "证明 / 风控" : "Proof & risk" },
     { href: "/login", label: zh ? "登录" : "Login" },
   ];
