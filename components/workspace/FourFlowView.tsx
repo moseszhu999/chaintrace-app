@@ -42,7 +42,7 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
       value: activeTrade.containerNo,
       subtitle: t(zh, `${activeTrade.origin} → ${activeTrade.destination}，提单 ${activeTrade.shipmentNo}`, `${activeTrade.origin} → ${activeTrade.destination}, shipment ${activeTrade.shipmentNo}`),
       status: t(zh, `${blockedMilestones} 个物流 / 验收卡点`, `${blockedMilestones} logistics / acceptance blockers`),
-      href: "/tasks",
+      href: "/business-logistics",
     },
     {
       title: t(zh, "资金流", "Funds flow"),
@@ -92,7 +92,7 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
             <div className={styles.rowHeader}>
               <div className={styles.rowMain}>
                 <h3 className={styles.rowTitle}>{t(zh, "物流 ↔ 资金流", "Logistics flow ↔ funds flow")}</h3>
-                <p className={styles.rowMeta}>{t(zh, "入库确认和买家验收缺失且未签章，导致 70% 尾款和融资放款都不能正式推进。", "Warehouse entry and buyer acceptance are missing and not signed, so the 70% balance and financing disbursement cannot formally proceed.")}</p>
+                <p className={styles.rowMeta}>{t(zh, "提单最终签章、仓库回执和到港质检/买方验收仍未闭合，导致 70% 尾款和融资放款都不能正式推进。", "Final B/L seal, warehouse receipt, and arrival QC / buyer acceptance are not closed, so the 70% balance and financing disbursement cannot formally proceed.")}</p>
               </div>
               <span className={`${styles.statusChip} ${styles.statusRejected}`}>blocked</span>
             </div>
@@ -110,15 +110,15 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
             <div className={styles.rowHeader}>
               <div className={styles.rowMain}>
                 <h3 className={styles.rowTitle}>{t(zh, "Agent 当前判断", "Current agent judgement")}</h3>
-                <p className={styles.rowMeta}>{t(zh, "四流没有完全闭合：商流签章完成，信息流部分完成，物流缺提单核验、入库和验收签章，资金流因此被卡。先补签章，再发行 RWA token。", "The four flows are not fully closed: commercial signing is complete, information flow is partial, logistics lacks bill-of-lading verification, warehouse entry, and acceptance signatures, so funds are blocked. Complete signing first, then issue the RWA token.")}</p>
+                <p className={styles.rowMeta}>{t(zh, "四流没有完全闭合：商流签章完成，信息流部分完成，物流缺提单最终签章、仓库回执和质检/验收结论，资金流因此被卡。先补物流证据，再推进贷款和 RWA token。", "The four flows are not fully closed: commercial signing is complete, information flow is partial, logistics lacks final B/L seal, warehouse receipt, and QC / acceptance conclusion, so funds are blocked. Complete logistics evidence before loan and RWA tokenization.")}</p>
               </div>
               <span className={`${styles.statusChip} ${styles.statusHigh}`}>priority</span>
             </div>
           </article>
           <div className={styles.rowActions}>
-            <Link className="primary-button" href="/business-signing">{t(zh, "查看签章合约", "View signing contract")}</Link>
+            <Link className="primary-button" href="/business-logistics">{t(zh, "查看物流证据", "View logistics evidence")}</Link>
+            <Link className="secondary-button" href="/business-signing">{t(zh, "查看签章合约", "View signing contract")}</Link>
             <Link className="secondary-button" href="/evidence">{t(zh, "补齐信息流", "Complete information flow")}</Link>
-            <Link className="secondary-button" href="/tasks">{t(zh, "处理物流 / 验收", "Handle logistics / acceptance")}</Link>
             <Link className="secondary-button" href="/business-financing">{t(zh, "RWA tokenization", "RWA tokenization")}</Link>
           </div>
         </div>
