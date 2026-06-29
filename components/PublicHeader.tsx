@@ -5,8 +5,8 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
+    { href: "/business-flows", label: zh ? "四流合一" : "Four flows" },
     { href: "/business-ops", label: zh ? "交易 Agent" : "Trade agent" },
-    { href: "/#workflow", label: zh ? "交易流程" : "Trade flow" },
     { href: "/evidence", label: zh ? "文件" : "Documents" },
     { href: "/tasks", label: zh ? "履约 / 验收" : "Fulfillment" },
     { href: "/business-funds", label: zh ? "资金" : "Funds" },
@@ -77,7 +77,7 @@ export function PublicHeader({ zh }: { zh: boolean }) {
         }}
       >
         {navItems.map((item) => {
-          const isPrimary = item.href === "/business-ops";
+          const isPrimary = item.href === "/business-flows";
           return (
             <Link
               key={item.href}
