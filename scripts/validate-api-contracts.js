@@ -35,19 +35,28 @@ function validateAgentPipeline() {
     "machineDecision",
   ].forEach((key) => assertIncludes(runRoute, key, "agent pipeline response"));
 
-  assertIncludes(runRoute, 'blockerCode: "GATES_NOT_PASSED"', "agent pipeline gates");
-  assertIncludes(runRoute, "disbursementAllowed: false", "agent pipeline decision");
+  assertIncludes(runRoute, "blockerCode: gateSummary.blockerCode", "agent pipeline gates");
+  assertIncludes(runRoute, "disbursementAllowed: gateSummary.disbursementAllowed", "agent pipeline decision");
 }
 
 function validateGateDecision() {
+  const sharedFixture = read("lib/loan-gate-fixture.ts");
+  const runRoute = read("app/api/agents/run/route.ts");
   const gatesRoute = read("app/api/agents/gates/route.ts");
 
-  assert(countMatches(gatesRoute, /status: "passed"/g) === 6, "agent gates must keep exactly 6 passed gates");
-  assert(countMatches(gatesRoute, /status: "pending"/g) === 2, "agent gates must keep exactly 2 pending gates");
-  assert(countMatches(gatesRoute, /status: "blocked"/g) === 4, "agent gates must keep exactly 4 blocked gates");
-  assertIncludes(gatesRoute, 'blockerCode: "GATES_NOT_PASSED"', "agent gate decision");
-  assertIncludes(gatesRoute, "disbursementAllowed: false", "agent gate decision");
-  assertIncludes(gatesRoute, "preReviewAllowed: true", "agent gate decision");
+  assert(!runRoute.includes("const gateChecklist = ["), "agent pipeline route must use shared gate fixture");
+  assert(!gatesRoute.includes("const gateChecklist = ["), "agent gates route must use shared gate fixture");
+  assertIncludes(runRoute, "getLoanGateChecklist", "agent pipeline route");
+  assertIncludes(runRoute, "getLoanGateSummary", "agent pipeline route");
+  assertIncludes(gatesRoute, "getLoanGateChecklist", "agent gates route");
+  assertIncludes(gatesRoute, "getLoanGateSummary", "agent gates route");
+
+  assert(countMatches(sharedFixture, /status: "passed"/g) === 6, "shared gate fixture must keep exactly 6 passed gates");
+  assert(countMatches(sharedFixture, /status: "pending"/g) === 2, "shared gate fixture must keep exactly 2 pending gates");
+  assert(countMatches(sharedFixture, /status: "blocked"/g) === 4, "shared gate fixture must keep exactly 4 blocked gates");
+  assertIncludes(sharedFixture, 'blockerCode: "GATES_NOT_PASSED"', "shared gate summary");
+  assertIncludes(sharedFixture, "disbursementAllowed: false", "shared gate summary");
+  assertIncludes(sharedFixture, "preReviewAllowed: true", "shared gate summary");
 }
 
 function validatePreReviewDraft() {
