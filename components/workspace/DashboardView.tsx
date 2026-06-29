@@ -20,7 +20,7 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
     <>
       <section className="panel">
         <div className="section-heading">
-          <span>{t(zh, "业务 Sidecar", "Business sidecar")}</span>
+          <span>{t(zh, "交易 Agent", "Trade agent")}</span>
           <h2>{t(zh, operatingSummary.headlineZh, operatingSummary.headlineEn)}</h2>
           <p>{t(zh, operatingSummary.promiseZh, operatingSummary.promiseEn)}</p>
         </div>
@@ -51,10 +51,10 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
             <article className={styles.listRow}>
               <div className={styles.rowHeader}>
                 <div className={styles.rowMain}>
-                  <h3 className={styles.rowTitle}>{t(zh, "业务 Sidecar 总览", "Business sidecar overview")}</h3>
+                  <h3 className={styles.rowTitle}>{t(zh, "交易 Agent 总览", "Trade agent overview")}</h3>
                   <p className={styles.rowMeta}>{workingStages}/{businessStages.length} {t(zh, "个环节正在推进；当前卡点：", "stages need attention; blockers: ")}{blockerText}</p>
                 </div>
-                <Link className="primary-button" href="/business-ops">{t(zh, "打开 Sidecar", "Open sidecar")}</Link>
+                <Link className="primary-button" href="/business-ops">{t(zh, "打开 Agent", "Open agent")}</Link>
               </div>
             </article>
           </div>
@@ -73,7 +73,7 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
               <div className={styles.rowActions}>
                 <Link className="secondary-button" href="/evidence">{t(zh, "补文件", "Complete docs")}</Link>
                 <Link className="secondary-button" href="/tasks">{t(zh, "看任务", "View tasks")}</Link>
-                <Link className="secondary-button" href="/assistant">{t(zh, "问助手", "Ask assistant")}</Link>
+                <Link className="secondary-button" href="/assistant">{t(zh, "问 Agent", "Ask agent")}</Link>
               </div>
             </article>
           </div>
