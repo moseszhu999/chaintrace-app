@@ -16,55 +16,55 @@ function t(zh: boolean, cn: string, en: string) {
 
 const tradeFlow = [
   {
-    zh: "交易建档",
-    en: "Deal setup",
-    descZh: "记录买家、供应商、订单、金额、交付条件和付款节点。",
-    descEn: "Capture buyer, supplier, order, amount, delivery terms, and payment milestones.",
+    zh: "证据上传",
+    en: "Evidence upload",
+    descZh: "上传 PO、发票、装箱、VGM、报关、仓库、质检和买家验收材料。",
+    descEn: "Upload PO, invoice, packing, VGM, customs, warehouse, QC, and buyer-acceptance materials.",
   },
   {
-    zh: "文件补齐",
-    en: "Document completion",
-    descZh: "把合同、订单、发票、提单、质检、冷链、入库、验收放到交易对象下。",
-    descEn: "Attach contract, order, invoice, bill of lading, inspection, cold-chain, warehouse, and acceptance records to the deal.",
+    zh: "Agent 初筛",
+    en: "Agent pre-check",
+    descZh: "AI Agent 自动分类单证、抽取关键字段、匹配签章和物流 gate。",
+    descEn: "AI agents classify documents, extract key fields, and match signing/logistics gates.",
   },
   {
-    zh: "履约闭环",
-    en: "Fulfillment closure",
-    descZh: "跟踪发货、清关、入库、交付和验收，不让关键环节卡在聊天记录里。",
-    descEn: "Track shipment, customs, warehouse entry, delivery, and acceptance without burying blockers in chat.",
+    zh: "缺口催办",
+    en: "Gap chasing",
+    descZh: "系统生成缺口清单、责任方、催办话术和下一步动作。",
+    descEn: "The system generates gap lists, responsible parties, follow-up language, and next actions.",
   },
   {
-    zh: "收款 / 融资准备",
-    en: "Collection / financing readiness",
-    descZh: "根据事实链判断能不能催款、能不能给资金方看、还缺什么。",
-    descEn: "Use the fact trail to judge whether to collect, share with financiers, and identify remaining gaps.",
+    zh: "融资预审",
+    en: "Financing pre-review",
+    descZh: "输出 Readiness Score、Financing Pack、风险 flags 和资金方 memo。",
+    descEn: "Output Readiness Score, Financing Pack, risk flags, and financier memo.",
   },
   {
-    zh: "选择性证明",
-    en: "Selective proof",
-    descZh: "对外只暴露状态、哈希和必要元数据，不把商业机密全公开。",
-    descEn: "Expose only status, hashes, and necessary metadata externally, not all business secrets.",
+    zh: "合约执行",
+    en: "Contract execution",
+    descZh: "智能合约检查 gate，条件未齐时阻断放款，减少人工复核摩擦。",
+    descEn: "Smart contracts check gates and block disbursement when conditions are incomplete.",
   },
 ];
 
 const differentiationBlocks = [
   {
-    titleZh: "不是飞书",
-    titleEn: "Not Feishu",
-    textZh: "不做通用聊天、会议、文档协作。ChainTrace 的 Agent 只围绕跨公司交易闭环。",
-    textEn: "Not generic chat, meetings, or document collaboration. ChainTrace agents focus on cross-company trade closure.",
+    titleZh: "AI Agent 减少证据摩擦",
+    titleEn: "Agents reduce evidence friction",
+    textZh: "Agent 替代人工翻 PDF、抽字段、对 checklist、写 memo 初稿和催办缺口。",
+    textEn: "Agents replace manual PDF reading, field extraction, checklist matching, memo drafting, and gap chasing.",
   },
   {
-    titleZh: "不是 ERP",
-    titleEn: "Not ERP",
-    textZh: "不替代库存、财务总账和内部流程；Agent 只抓交易对外可信所需的关键事实。",
-    textEn: "Not inventory, general ledger, or internal process replacement; the agent captures facts needed for external trust.",
+    titleZh: "智能合约减少执行摩擦",
+    titleEn: "Contracts reduce execution friction",
+    textZh: "签章、物流、贷款 gate 成为共享状态机；条件未齐时，合约自动阻断放款。",
+    textEn: "Signing, logistics, and loan gates become a shared state machine; contracts block disbursement if conditions are incomplete.",
   },
   {
-    titleZh: "不是单纯溯源",
-    titleEn: "Not only traceability",
-    textZh: "溯源只是证据能力之一，Agent 的目标是推进验收、收款、融资、理赔和减少纠纷。",
-    textEn: "Traceability is one evidence capability; the agent's goal is acceptance, collection, financing, claims, and fewer disputes.",
+    titleZh: "中介退到高价值节点",
+    titleEn: "Intermediaries move up-value",
+    textZh: "银行和律所不再从零翻材料，而是审查授信、合规、法律结构、争议和重大例外。",
+    textEn: "Banks and law firms stop starting from raw materials and focus on underwriting, compliance, legal structure, disputes, and material exceptions.",
   },
 ];
 
@@ -83,41 +83,41 @@ export default function Home() {
         <section className="hero landing-hero">
           <div className="landing-grid">
             <div className="hero-copy">
-              <div className="eyebrow">{t(zh, "ChainTrace · 小微企业交易 Agent", "ChainTrace · SME trade agent")}</div>
-              <h1>{t(zh, "从订单到收款，让 Agent 推进每一笔生意。", "From order to collection, let agents move every trade forward.")}</h1>
+              <div className="eyebrow">{t(zh, "ChainTrace · AI Agent 驱动的贸易融资证据操作系统", "ChainTrace · AI-agent-driven trade-finance evidence OS")}</div>
+              <h1>{t(zh, "把跨境贸易 PDF 变成可融资应收账款。", "Turn cross-border trade PDFs into finance-ready receivables.")}</h1>
               <p>
                 {t(
                   zh,
-                  "ChainTrace 不是飞书式协作工具，而是小微企业跨公司交易 Agent。它围绕订单、发票、物流、验收、收款和融资，主动发现缺口、催办责任方、准备选择性证明，让买家、资金方和合作伙伴更容易相信你。",
-                  "ChainTrace is not another collaboration suite. It is a cross-company trade agent for SMEs. Around orders, invoices, logistics, acceptance, collection, and financing, it actively finds gaps, nudges owners, prepares selective proof, and helps buyers, financiers, and partners trust you.",
+                  "ChainTrace 用 AI Agent 整理贸易证据，用智能合约锁定 gate 状态，让资金方、银行和律所只审查关键例外，而不是从零翻一堆 PDF。当前案例是越南罗布斯塔咖啡出口新加坡：USD 36,960 尾款被质检和验收卡住，系统判断仅可预审，不能正式放款。",
+                  "ChainTrace uses AI agents to organize trade evidence and smart contracts to lock gate states, so financiers, banks, and law firms review key exceptions instead of reading raw PDFs from scratch. The current case is Vietnam Robusta coffee exported to Singapore: a USD 36,960 balance is blocked by QC and acceptance, so the system allows pre-review only, not formal disbursement.",
                 )}
               </p>
               <div className="hero-actions">
-                <a href="/business-ops" className="primary-button">{t(zh, "打开交易 Agent", "Open trade agent")}</a>
-                <a href="/login" className="secondary-button">{t(zh, "登录", "Login")}</a>
-                <a href="/verify/uy-beef-cn-2026-0001" className="secondary-button">{t(zh, "查看选择性证明", "View selective proof")}</a>
+                <a href="/business-ops" className="primary-button">{t(zh, "查看 Agent 工作台", "View Agent workbench")}</a>
+                <a href="/business-readiness" className="secondary-button">{t(zh, "查看融资评分", "View readiness score")}</a>
+                <a href="/api/financing-pack" className="secondary-button">{t(zh, "打开融资包 API", "Open financing-pack API")}</a>
               </div>
               <div className="hero-badges">
-                <span className="badge-chip">Deal</span>
-                <span className="badge-chip">Invoice</span>
-                <span className="badge-chip">Fulfillment</span>
-                <span className="badge-chip">Acceptance</span>
-                <span className="badge-chip">Receivable</span>
+                <span className="badge-chip">Evidence Agent</span>
+                <span className="badge-chip">Gate Agent</span>
+                <span className="badge-chip">Readiness 62/100</span>
+                <span className="badge-chip">6/12 Gates</span>
+                <span className="badge-chip">GATES_NOT_PASSED</span>
               </div>
             </div>
             <div className="hero-visual">
               <div className="signal-board">
-                <div className="signal-board-header"><span>{t(zh, "当前交易", "Active deal")}</span><strong>UY-BEEF-CN-2026-0001</strong></div>
+                <div className="signal-board-header"><span>{t(zh, "当前交易", "Active trade")}</span><strong>VN-COFFEE-SG-2026-0007</strong></div>
                 <div className="signal-card-grid">
-                  <div className="mini-proof-card present"><span>{t(zh, "订单", "Order")}</span><strong>{t(zh, "已确认", "Confirmed")}</strong></div>
-                  <div className="mini-proof-card present"><span>{t(zh, "发票", "Invoice")}</span><strong>{t(zh, "已齐", "Ready")}</strong></div>
-                  <div className="mini-proof-card pending"><span>{t(zh, "入库", "Warehouse")}</span><strong>{t(zh, "缺失", "Missing")}</strong></div>
-                  <div className="mini-proof-card pending"><span>{t(zh, "验收", "Acceptance")}</span><strong>{t(zh, "待确认", "Open")}</strong></div>
+                  <div className="mini-proof-card present"><span>{t(zh, "贸易金额", "Trade value")}</span><strong>USD 52,800</strong></div>
+                  <div className="mini-proof-card present"><span>{t(zh, "申请垫款", "Advance")}</span><strong>USDC 29,500</strong></div>
+                  <div className="mini-proof-card pending"><span>{t(zh, "贷款 Gate", "Loan gates")}</span><strong>6/12</strong></div>
+                  <div className="mini-proof-card pending"><span>{t(zh, "融资状态", "Finance status")}</span><strong>{t(zh, "仅可预审", "Pre-review only")}</strong></div>
                 </div>
                 <div className="signal-status-box">
-                  <span>{t(zh, "Agent 建议", "Agent advice")}</span>
-                  <strong>{t(zh, "先补入库和买家验收，再进入催款 / 融资。", "Complete warehouse entry and buyer acceptance before collection / financing.")}</strong>
-                  <p>{t(zh, "这不是内部协作提醒，而是影响收款和融资的交易事实缺口。", "This is not an internal collaboration reminder; it is a trade-fact gap that affects collection and financing.")}</p>
+                  <span>{t(zh, "系统判断", "System decision")}</span>
+                  <strong>{t(zh, "到港 QC、仓库回执、买家验收未闭合；禁止正式放款。", "Arrival QC, warehouse receipt, and buyer acceptance remain open; formal disbursement is blocked.")}</strong>
+                  <p>{t(zh, "AI Agent 负责整理和催办，智能合约负责 gate 检查和放款阻断。", "AI agents organize and chase evidence; smart contracts enforce gate checks and disbursement blocking.")}</p>
                 </div>
               </div>
             </div>
@@ -127,8 +127,8 @@ export default function Home() {
         <section id="product" className="panel product-showcase">
           <div className="section-heading">
             <span>{t(zh, "差异化", "Differentiation")}</span>
-            <h2>{t(zh, "ChainTrace 不做办公协作，做跨公司交易 Agent。", "ChainTrace does not do office collaboration; it provides cross-company trade agents.")}</h2>
-            <p>{t(zh, "飞书解决公司内部怎么协作；ChainTrace Agent 解决小微企业对外怎么被相信、怎么验收、怎么收款、怎么融资。", "Feishu solves internal collaboration; ChainTrace agents help SMEs be trusted externally, get acceptance, collect, and prepare financing.")}</p>
+            <h2>{t(zh, "不是协作工具，不是简单溯源，而是融资证据操作系统。", "Not collaboration software, not simple traceability, but a trade-finance evidence OS.")}</h2>
+            <p>{t(zh, "核心价值是同时压缩三类摩擦：证据整理摩擦、合约执行摩擦、中介重复核验摩擦。", "The core value is compressing three frictions at once: evidence operations, contract execution, and repetitive intermediary review.")}</p>
           </div>
           <div className="principles-grid">
             {differentiationBlocks.map((item) => (
@@ -142,9 +142,9 @@ export default function Home() {
 
         <section id="workflow" className="panel product-showcase">
           <div className="section-heading">
-            <span>{t(zh, "交易流程", "Trade flow")}</span>
-            <h2>{t(zh, "核心不是任务管理，而是 Agent 把交易推进到验收和收款。", "The core is not task management; agents move the trade to acceptance and collection.")}</h2>
-            <p>{t(zh, "任务、审批、证明都是 Agent 的工具，主对象永远是交易事实。", "Tasks, approvals, and proof are tools for the agent; the main object is always trade facts.")}</p>
+            <span>{t(zh, "产品旅程", "Product journey")}</span>
+            <h2>{t(zh, "从贸易证据到融资判断，再到合约执行。", "From trade evidence to financing decision to contract execution.")}</h2>
+            <p>{t(zh, "每一步都对应一个可演示视图：Agent 工作台、融资评分、专业审查、合约控制台。", "Each step maps to a demo view: Agent workbench, readiness score, professional review, and contract console.")}</p>
           </div>
           <div className="pack-step-grid">
             {tradeFlow.map((step, index) => (
@@ -158,23 +158,23 @@ export default function Home() {
         </section>
 
         <section id="security" className="clarity-strip">
-          <article><span>{t(zh, "对外结果", "External outcome")}</span><strong>{t(zh, "买家验收更快，资金方更容易初审，合作伙伴更容易相信交易事实。", "Buyers accept faster, financiers can pre-review more easily, and partners can trust trade facts.")}</strong></article>
-          <article><span>{t(zh, "最小披露", "Minimal disclosure")}</span><strong>{t(zh, "只分享状态、哈希和必要元数据，不公开原始合同和商业机密。", "Share only status, hashes, and necessary metadata, not raw contracts or trade secrets.")}</strong></article>
-          <article><span>{t(zh, "人工确认", "Human approval")}</span><strong>{t(zh, "催款、融资、验收、理赔和法律责任不能由 AI 自动决定。", "AI cannot automatically decide collection, financing, acceptance, claims, or legal responsibility.")}</strong></article>
+          <article><span>{t(zh, "资金方", "Financier")}</span><strong>{t(zh, "看融资包、risk flags、approval conditions，而不是从零翻单证。", "Reviews financing pack, risk flags, and approval conditions instead of raw documents.")}</strong></article>
+          <article><span>{t(zh, "银行 / 律所", "Bank / law firm")}</span><strong>{t(zh, "处理授信、合规、法律结构、争议和重大例外。", "Handles underwriting, compliance, legal structure, disputes, and material exceptions.")}</strong></article>
+          <article><span>{t(zh, "合约执行", "Contract execution")}</span><strong>{t(zh, "gate 不通过，贷款合约不放款。", "If gates do not pass, the loan contract does not disburse.")}</strong></article>
         </section>
 
         <section className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">Trade Agent</span>
-              <h3>{t(zh, "下一步从交易 Agent 开始，而不是从通用工作台开始。", "Start from the trade agent, not a generic workspace.")}</h3>
+              <span className="proof-type">Agent-first MVP</span>
+              <h3>{t(zh, "从 Agent 工作台开始，看一笔贸易如何变成融资预审包。", "Start from the Agent workbench and see how one trade becomes a financing pre-review pack.")}</h3>
             </div>
-            <div className="status-pill">SME</div>
+            <div className="status-pill">Pre-review</div>
           </div>
           <dl className="proof-details">
-            <div><dt>{t(zh, "交易 Agent", "Trade agent")}</dt><dd><a href="/business-ops" className="inline-link">/business-ops</a></dd></div>
-            <div><dt>{t(zh, "登录", "Login")}</dt><dd><a href="/login" className="inline-link">/login</a></dd></div>
-            <div><dt>{t(zh, "选择性证明", "Selective proof")}</dt><dd><a href="/verify/uy-beef-cn-2026-0001" className="inline-link">/verify/uy-beef-cn-2026-0001</a></dd></div>
+            <div><dt>{t(zh, "Agent 工作台", "Agent workbench")}</dt><dd><a href="/business-ops" className="inline-link">/business-ops</a></dd></div>
+            <div><dt>{t(zh, "融资评分", "Readiness score")}</dt><dd><a href="/business-readiness" className="inline-link">/business-readiness</a></dd></div>
+            <div><dt>{t(zh, "专业审查", "Professional review")}</dt><dd><a href="/business-professional-review" className="inline-link">/business-professional-review</a></dd></div>
           </dl>
         </section>
       </main>
