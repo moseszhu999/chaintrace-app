@@ -1,0 +1,103 @@
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.listRow {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 250, 240, 0.74);
+}
+
+.rowHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.rowMain {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rowTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.rowMeta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 253, 248, 0.92);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusVerified,
+.statusLow {
+  border-color: rgba(29, 107, 59, 0.24);
+  background: rgba(29, 107, 59, 0.08);
+  color: var(--success);
+}
+
+.statusMissing,
+.statusOpen,
+.statusMedium {
+  border-color: rgba(176, 122, 42, 0.24);
+  background: rgba(255, 239, 214, 0.72);
+  color: #8a5a12;
+}
+
+.statusRejected,
+.statusHigh {
+  border-color: rgba(161, 29, 29, 0.24);
+  background: #fff0ef;
+  color: var(--error);
+}
+
+.emptyRow {
+  padding: 18px;
+  border: 1px dashed var(--border);
+  border-radius: 20px;
+  background: rgba(255, 250, 240, 0.58);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .rowHeader {
+    display: grid;
+  }
+
+  .statusChip {
+    width: max-content;
+  }
+}
