@@ -1,10 +1,14 @@
 import Link from "next/link";
-import type { TradeMilestoneStatus } from "@/lib/concrete-trade-fixture";
+import type { TradeDocument, TradeMilestoneStatus } from "@/lib/concrete-trade-fixture";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 import styles from "./WorkspaceViews.module.css";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
+}
+
+function isTradeDocument(doc: TradeDocument | undefined): doc is TradeDocument {
+  return Boolean(doc);
 }
 
 function statusLabel(status: TradeMilestoneStatus, zh: boolean) {
@@ -32,7 +36,6 @@ export function BusinessFlowView({ zh, workspace }: { zh: boolean; workspace: Wo
   const blockedMilestones = activeTrade.milestones.filter((item) => item.status === "blocked");
   const verifiedDocs = activeTrade.documents.filter((item) => item.status === "verified").length;
   const missingDocs = activeTrade.documents.filter((item) => item.status === "missing").length;
-  const paidAmount = activeTrade.payments.filter((item) => item.status === "paid").map((item) => item.amount).join(" / ");
   const blockedPayment = activeTrade.payments.find((item) => item.status === "blocked");
 
   function partyName(id: string) {
@@ -42,8 +45,8 @@ export function BusinessFlowView({ zh, workspace }: { zh: boolean; workspace: Wo
   function evidenceNames(ids: string[]) {
     return ids
       .map((id) => activeTrade.documents.find((doc) => doc.id === id))
-      .filter(Boolean)
-      .map((doc) => `${zh ? doc!.typeZh : doc!.typeEn}: ${doc!.documentNo}`)
+      .filter(isTradeDocument)
+      .map((doc) => `${zh ? doc.typeZh : doc.typeEn}: ${doc.documentNo}`)
       .join(" / ");
   }
 
