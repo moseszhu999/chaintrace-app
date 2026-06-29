@@ -39,13 +39,23 @@ export type BusinessOperatingSummary = {
 export const sampleOperatingSummary: BusinessOperatingSummary = {
   headlineZh: "小微企业交易 Agent",
   headlineEn: "SME trade agent",
-  promiseZh: "从客户、订单、文件、物流、收款、融资、钱包到纠纷处理，都由交易 Agent 主动协助推进。",
-  promiseEn: "A trade agent actively helps move customers, orders, documents, logistics, collection, financing, wallets, and disputes forward.",
-  activeDealZh: "当前主线：越南咖啡豆出口新加坡，从发货后文件补齐进入收款、资金管理、钱包和融资准备。",
-  activeDealEn: "Active lane: Vietnam coffee beans to Singapore is moving from post-shipment document completion into collection, funds management, wallet, and financing readiness.",
+  promiseZh: "把供应链商流、物流、资金流、信息流统一到同一笔业务，由交易 Agent 主动协助推进。",
+  promiseEn: "Unify commercial, logistics, funds, and information flows around the same trade, with a trade agent actively moving it forward.",
+  activeDealZh: "当前主线：越南咖啡豆出口新加坡，四流未完全闭合；物流缺入库和验收，资金流因此被卡。",
+  activeDealEn: "Active lane: Vietnam coffee beans to Singapore has not closed all four flows; logistics lacks warehouse entry and acceptance, so funds are blocked.",
 };
 
 export const sampleBusinessModules: BusinessModule[] = [
+  {
+    id: "module_four_flows",
+    titleZh: "四流合一",
+    titleEn: "Four-flow integration",
+    descriptionZh: "把商流、物流、资金流、信息流对齐到同一笔交易，判断哪里没有闭环。",
+    descriptionEn: "Align commercial, logistics, funds, and information flows to the same trade and identify what is not closed.",
+    entryHref: "/business-flows",
+    statusZh: "物流和验收未闭合",
+    statusEn: "Logistics and acceptance not closed",
+  },
   {
     id: "module_customers",
     titleZh: "客户与交易",
