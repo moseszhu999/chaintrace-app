@@ -14,6 +14,19 @@ export type AgentApiEndpoint = {
 
 export const agentApiEndpoints: AgentApiEndpoint[] = [
   {
+    id: "evidence_upload",
+    nameZh: "Evidence Upload API",
+    nameEn: "Evidence Upload API",
+    path: "/api/evidence/upload",
+    method: "POST",
+    stageZh: "上传入口",
+    stageEn: "Upload intake",
+    outputZh: "接收上传证据 metadata，推断下一组 Agent 调用和可能影响的融资 gate。",
+    outputEn: "Accepts uploaded evidence metadata and infers the next agent calls and affected financing gates.",
+    replacesZh: "人工收材料后再手动分发给运营、风控、律所。",
+    replacesEn: "Manual intake and routing of documents to ops, risk, and legal teams.",
+  },
+  {
     id: "agent_run",
     nameZh: "Agent Pipeline Run",
     nameEn: "Agent Pipeline Run",
