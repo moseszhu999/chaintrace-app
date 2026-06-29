@@ -20,7 +20,7 @@ export function LoginPage({ zh }: { zh: boolean }) {
           <div className="panel form-panel">
             <div className="section-heading">
               <span>{t(zh, "登录 ChainTrace", "Login to ChainTrace")}</span>
-              <h2>{t(zh, "进入你的供应链事实工作台。", "Enter your supply-chain fact workspace.")}</h2>
+              <h2>{t(zh, "进入小微企业业务 Sidecar。", "Enter the SME business sidecar.")}</h2>
               <p>{t(zh, "这里先用前端模拟登录。真实版本会接认证、组织、角色、权限和审计日志。", "This is a frontend login simulation. The real version will connect auth, organization, roles, permissions, and audit logs.")}</p>
             </div>
 
@@ -44,21 +44,21 @@ export function LoginPage({ zh }: { zh: boolean }) {
             </label>
 
             <div className="hero-actions">
-              <a className="primary-button" href="/dashboard">{t(zh, "登录并进入工作台", "Login and open workspace")}</a>
-              <a className="secondary-button" href="/verify/uy-beef-cn-2026-0001">{t(zh, "不用登录：查看公开验证页", "No login: view public verification")}</a>
+              <a className="primary-button" href="/business-ops">{t(zh, "登录并打开业务 Sidecar", "Login and open business sidecar")}</a>
+              <a className="secondary-button" href="/dashboard">{t(zh, "查看工作台首页", "View workspace home")}</a>
             </div>
           </div>
 
           <div className="panel preview-panel">
             <div className="section-heading">
               <span>{t(zh, "登录后看到什么", "What appears after login")}</span>
-              <h2>{t(zh, "不是说明页，而是业务首页。", "Not an explanation page, but an operating homepage.")}</h2>
-              <p>{t(zh, "客户登录后直接看到证明包、缺证任务、风险、助手建议、草稿审批和公开链接。", "After login, the customer sees proof packs, missing-evidence tasks, risks, assistant suggestions, draft approvals, and public links.")}</p>
+              <h2>{t(zh, "不是说明页，而是业务副驾驶。", "Not an explanation page, but a business sidecar.")}</h2>
+              <p>{t(zh, "客户登录后直接处理客户、订单、文件、物流、收款、融资、风险、草稿审批和选择性证明。", "After login, the customer works on customers, orders, documents, logistics, collection, financing, risks, draft approvals, and selective proof.")}</p>
             </div>
             <dl className="proof-details">
               <div><dt>{t(zh, "当前用户", "Current user")}</dt><dd>{email}</dd></div>
               <div><dt>{t(zh, "组织", "Organization")}</dt><dd>{org}</dd></div>
-              <div><dt>{t(zh, "默认首页", "Default home")}</dt><dd>{t(zh, "工作台仪表盘 /dashboard", "Workspace dashboard /dashboard")}</dd></div>
+              <div><dt>{t(zh, "默认入口", "Default entry")}</dt><dd>{t(zh, "业务 Sidecar /business-ops", "Business sidecar /business-ops")}</dd></div>
               <div><dt>{t(zh, "权限边界", "Permission boundary")}</dt><dd>{t(zh, "助手只能读取授权上下文，关键商业动作仍需确认。", "Assistant only reads authorized context; key commercial actions still require confirmation.")}</dd></div>
             </dl>
           </div>
