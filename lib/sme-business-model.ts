@@ -37,10 +37,10 @@ export type BusinessOperatingSummary = {
 };
 
 export const sampleOperatingSummary: BusinessOperatingSummary = {
-  headlineZh: "小微企业业务 Sidecar",
-  headlineEn: "SME business sidecar",
-  promiseZh: "从客户、订单、文件、物流、收款、融资到纠纷处理，都由一个业务副驾驶协助推进。",
-  promiseEn: "A business sidecar helps move customers, orders, documents, logistics, collection, financing, and disputes forward.",
+  headlineZh: "小微企业交易 Agent",
+  headlineEn: "SME trade agent",
+  promiseZh: "从客户、订单、文件、物流、收款、融资到纠纷处理，都由交易 Agent 主动协助推进。",
+  promiseEn: "A trade agent actively helps move customers, orders, documents, logistics, collection, financing, and disputes forward.",
   activeDealZh: "当前主线：UY-BEEF-CN-2026-0001 从发货后文件补齐进入收款和融资准备。",
   activeDealEn: "Active lane: UY-BEEF-CN-2026-0001 is moving from post-shipment document completion into collection and financing readiness.",
 };
@@ -98,10 +98,10 @@ export const sampleBusinessModules: BusinessModule[] = [
   },
   {
     id: "module_agent",
-    titleZh: "业务 Sidecar",
-    titleEn: "Business sidecar",
-    descriptionZh: "把缺口变成任务、草稿、审批和对外沟通，但不越权自动发送。",
-    descriptionEn: "Turns gaps into tasks, drafts, approvals, and external communication without sending automatically.",
+    titleZh: "交易 Agent",
+    titleEn: "Trade agent",
+    descriptionZh: "把交易缺口变成任务、草稿、审批和对外沟通，但不越权自动发送。",
+    descriptionEn: "Turns trade gaps into tasks, drafts, approvals, and external communication without sending automatically.",
     entryHref: "/assistant",
     statusZh: "3 个建议动作",
     statusEn: "3 suggested actions",
