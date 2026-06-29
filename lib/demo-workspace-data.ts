@@ -15,10 +15,14 @@ import {
   sampleUser,
   type EvidenceSlot,
 } from "@/lib/assistant-product-model";
+import { sampleBusinessModules, sampleBusinessStages, sampleOperatingSummary } from "@/lib/sme-business-model";
 
 export const demoWorkspace = {
   organization: sampleOrganization,
   user: sampleUser,
+  operatingSummary: sampleOperatingSummary,
+  businessModules: sampleBusinessModules,
+  businessStages: sampleBusinessStages,
   businessContext: sampleBusinessContext,
   proofPack: sampleProofPack,
   evidenceSlots: sampleEvidenceSlots,
