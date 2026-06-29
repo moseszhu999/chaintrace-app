@@ -1,6 +1,7 @@
-export type WorkspaceNavKey = "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
+export type WorkspaceNavKey = "flows" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
 export const workspaceNavItems: { key: WorkspaceNavKey; href: string; zh: string; en: string }[] = [
+  { key: "flows", href: "/business-flows", zh: "四流合一", en: "Four-flow view" },
   { key: "business", href: "/business-ops", zh: "业务 Agent", en: "Business agent" },
   { key: "dashboard", href: "/dashboard", zh: "业务总览", en: "Business overview" },
   { key: "evidence", href: "/evidence", zh: "业务文件", en: "Business documents" },
