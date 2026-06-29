@@ -1,11 +1,11 @@
 export type WorkspaceNavKey = "dashboard" | "business" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
 export const workspaceNavItems: { key: WorkspaceNavKey; href: string; zh: string; en: string }[] = [
-  { key: "dashboard", href: "/dashboard", zh: "首页", en: "Home" },
-  { key: "business", href: "/business-ops", zh: "业务 Sidecar", en: "Business sidecar" },
-  { key: "proofPacks", href: "/proof-packs", zh: "证明 / 风控", en: "Proof & risk" },
+  { key: "business", href: "/business-ops", zh: "交易 Sidecar", en: "Trade sidecar" },
+  { key: "dashboard", href: "/dashboard", zh: "交易总览", en: "Trade overview" },
   { key: "evidence", href: "/evidence", zh: "文件", en: "Documents" },
-  { key: "tasks", href: "/tasks", zh: "任务", en: "Tasks" },
-  { key: "assistant", href: "/assistant", zh: "助手", en: "Assistant" },
-  { key: "approvals", href: "/assistant/approvals", zh: "审批", en: "Approvals" },
+  { key: "tasks", href: "/tasks", zh: "履约 / 验收", en: "Fulfillment" },
+  { key: "approvals", href: "/assistant/approvals", zh: "收款 / 融资", en: "Collection" },
+  { key: "proofPacks", href: "/proof-packs", zh: "证明 / 风控", en: "Proof & risk" },
+  { key: "assistant", href: "/assistant", zh: "Sidecar 建议", en: "Sidecar advice" },
 ];
