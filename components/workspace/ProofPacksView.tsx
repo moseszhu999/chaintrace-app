@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getReadyScore } from "@/lib/demo-workspace-data";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
@@ -20,7 +21,7 @@ export function ProofPacksView({ zh, workspace }: { zh: boolean; workspace: Work
         <dl className="proof-details">
           <div><dt>{proofPack.status}</dt><dd><strong>{proofPack.title}</strong><br />{businessContext.name} · Ready {readyScore}%</dd></div>
           <div><dt>{t(zh, "负责人", "Owner")}</dt><dd>{user.name} · {zh ? user.titleZh : user.titleEn}</dd></div>
-          <div><dt>{t(zh, "公开链接", "Public link")}</dt><dd><a className="inline-link" href="/verify/uy-beef-cn-2026-0001">/verify/uy-beef-cn-2026-0001</a></dd></div>
+          <div><dt>{t(zh, "公开链接", "Public link")}</dt><dd><Link className="inline-link" href="/verify/uy-beef-cn-2026-0001">/verify/uy-beef-cn-2026-0001</Link></dd></div>
         </dl>
       </div>
       <div className="panel form-panel">
