@@ -104,6 +104,41 @@ It is not a public token offering. It includes:
 
 This token should only be issued after the signing and loan gates satisfy the relevant legal and business conditions.
 
+## CI deployment modes
+
+### Hardhat dev chain
+
+Command:
+
+```bash
+npm run contracts:deploy:dev
+```
+
+This deploys to an ephemeral in-memory Hardhat chain. It needs no RPC URL, no private key, and no testnet ETH. GitHub Actions runs this automatically after compilation and uploads:
+
+```text
+deployments/hardhat-dev.json
+```
+
+The addresses in this file are CI validation addresses only. They are not persistent.
+
+### Base Sepolia
+
+Command:
+
+```bash
+npm run contracts:deploy:base-sepolia
+```
+
+This deploys to Base Sepolia and needs:
+
+```text
+BASE_SEPOLIA_RPC_URL
+DEPLOYER_PRIVATE_KEY
+```
+
+The deployer wallet also needs Base Sepolia ETH for gas. If the wallet has 0 ETH, deployment will fail with `insufficient funds for gas * price + value`.
+
 ## Suggested call sequence for the Vietnam coffee trade
 
 1. Deploy `TradeSigningRegistry`.
