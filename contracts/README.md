@@ -9,11 +9,11 @@ This directory contains a prototype contract suite for ChainTrace's four-flow su
 ChainTrace aligns four flows for a concrete trade:
 
 1. Commercial flow: PO, invoice, contract terms, acceptance conditions.
-2. Logistics flow: shipment, bill of lading, container, warehouse entry, delivery, buyer acceptance.
+2. Logistics flow: container, seal, packing list, VGM, export clearance, B/L, import permit, warehouse receipt, QC, buyer acceptance.
 3. Funds flow: deposit, receivable, payable, loan disbursement, repayment, default.
-4. Information flow: document hashes, signing/seal status, audit trail, proof pack, agent actions.
+4. Information flow: document hashes, signing/seal status, logistics evidence status, audit trail, proof pack, agent actions.
 
-The contracts do not put raw trade documents on-chain. They store hashes, signing states, role constraints, credit rules, and financing events.
+The contracts do not put raw trade documents on-chain. They store hashes, signing states, logistics evidence gates, role constraints, credit rules, and financing events.
 
 ## Contracts
 
@@ -37,6 +37,37 @@ Raw documents stay off-chain. The registry stores:
 - `slotId`
 - flow type
 - required signer
+- role hash
+- document hash
+- status
+- timestamp
+- version
+- optional URI
+
+### `LogisticsEvidenceRegistry.sol`
+
+Stores logistics evidence gates that should be readable by financing contracts.
+
+Examples:
+
+- Container / empty-release evidence.
+- Packing completion.
+- Seal and photo hash.
+- VGM submission.
+- Vietnam export customs release.
+- Singapore import permit / TradeNet URN reference.
+- Warehouse receipt.
+- Arrival QC report.
+- Buyer acceptance / rejection decision.
+
+The registry does not verify real-world facts by itself. It records which party is allowed to verify a specific evidence gate and stores the resulting hash/status.
+
+Raw logistics documents, photos, reports, and permit screenshots stay off-chain. The registry stores:
+
+- `tradeId`
+- `evidenceId`
+- evidence type
+- required verifier
 - role hash
 - document hash
 - status
@@ -75,18 +106,22 @@ It binds:
 - principal,
 - fee,
 - maturity,
-- required signing slots.
+- required signing slots,
+- required logistics evidence gates.
 
 Flow:
 
-1. Read gates from `TradeSigningRegistry`.
-2. If all required slots are signed, status can move from `Gated` to `Ready`.
-3. Financier/owner calls `disburse()`.
-4. Loan contract calls `BankVault.disburseLoan()`.
-5. Borrower receives USDC.
-6. Buyer repayment can be routed to the vault.
-7. The contract records repayment and closes when principal + fee are paid.
-8. If overdue, financier/owner can mark default.
+1. Read commercial/signature gates from `TradeSigningRegistry`.
+2. Read logistics/QC gates from `LogisticsEvidenceRegistry`.
+3. If all required signing and logistics gates pass, status can move from `Gated` to `Ready`.
+4. Financier/owner calls `disburse()`.
+5. Loan contract calls `BankVault.disburseLoan()`.
+6. Borrower receives USDC.
+7. Buyer repayment can be routed to the vault.
+8. The contract records repayment and closes when principal + fee are paid.
+9. If overdue, financier/owner can mark default.
+
+This is what makes the loan state machine more realistic: PO and invoice alone are not enough. The contract can also require packing/VGM/export clearance, final B/L, import permit, warehouse receipt, arrival QC, and buyer acceptance gates.
 
 ### `RestrictedReceivableToken.sol`
 
@@ -102,7 +137,7 @@ It is not a public token offering. It includes:
 - trade ID binding,
 - receivable hash binding.
 
-This token should only be issued after the signing and loan gates satisfy the relevant legal and business conditions.
+This token should only be issued after the signing, logistics, loan, legal-assignment, and KYC gates satisfy the relevant legal and business conditions.
 
 ## CI deployment modes
 
@@ -142,21 +177,26 @@ The deployer wallet also needs Base Sepolia ETH for gas. If the wallet has 0 ETH
 ## Suggested call sequence for the Vietnam coffee trade
 
 1. Deploy `TradeSigningRegistry`.
-2. Create signing slots for PO, invoice, quality certificate, bill of lading, warehouse entry, buyer acceptance, and financing multisig.
-3. Sign/seal PO, invoice, and quality certificate.
-4. Keep bill of lading pending until logistics provider confirms.
-5. Keep warehouse entry and buyer acceptance blocked until documents arrive.
-6. Deploy `BankVault`.
-7. Mark USDC as a supported asset.
-8. Deposit USDC liquidity.
-9. Grant borrower credit line.
-10. Deploy `ReceivableLoan` with required signing slots.
-11. Approve the loan contract in `BankVault`.
-12. Loan contract checks signing gates.
-13. When all gates pass, loan contract disburses USDC from `BankVault` to the exporter.
-14. Buyer balance payment enters repayment flow.
-15. Loan closes when principal + fee are repaid.
-16. Optional: issue restricted `RestrictedReceivableToken` if the permitted jurisdiction and KYC/whitelist transfer requirements are satisfied.
+2. Deploy `LogisticsEvidenceRegistry`.
+3. Deploy `BankVault`.
+4. Create signing slots for PO, invoice, quality certificate, bill of lading, warehouse entry, buyer acceptance, and financing multisig.
+5. Create logistics evidence gates for packing, VGM, export customs release, Singapore import permit, warehouse receipt, and arrival QC.
+6. Sign/seal PO, invoice, and pre-shipment quality certificate.
+7. Verify packing list, seal/VGM, and export customs release.
+8. Keep B/L final seal and Singapore permit status pending until the logistics provider / buyer updates them.
+9. Keep warehouse receipt and arrival QC blocked until the warehouse and lab evidence arrive.
+10. Keep buyer acceptance blocked until the buyer signs accept, discount, or reject.
+11. Mark USDC as a supported asset in `BankVault`.
+12. Deposit USDC liquidity.
+13. Grant borrower credit line.
+14. Deploy `ReceivableLoan` with required signing slot IDs and required logistics evidence IDs.
+15. Approve the loan contract in `BankVault`.
+16. Loan contract checks both signing and logistics gates.
+17. If only early gates pass, financier can do pre-review but cannot execute disbursement.
+18. When all gates pass, loan contract disburses USDC from `BankVault` to the exporter.
+19. Buyer balance payment enters repayment flow.
+20. Loan closes when principal + fee are repaid.
+21. Optional: issue restricted `RestrictedReceivableToken` if the permitted jurisdiction and KYC/whitelist transfer requirements are satisfied.
 
 ## Risk boundaries
 
@@ -167,6 +207,7 @@ The contracts intentionally do not:
 - custody user private keys,
 - bypass KYC/AML,
 - offer tokens to the public,
+- replace official customs or food-safety systems,
 - replace off-chain legal assignment or recourse documents.
 
 Those controls must be handled by legal wrappers, regulated partners, KYC providers, attestation/oracle systems, and audited operational workflows.
