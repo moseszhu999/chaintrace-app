@@ -73,10 +73,42 @@ function validatePreReviewDraft() {
   assertIncludes(preReviewRoute, "LoanRequestRegistry.submitPreReviewRequest", "loan pre-review draft");
 }
 
+function validateRepositoryLayer() {
+  const repository = read("lib/repositories/chaintrace-repository.ts");
+
+  [
+    "export type TradeCaseRecord",
+    "export type EvidenceRecord",
+    "export type EvidenceStatus",
+    "export type EvidenceDocumentType",
+    "export type GateImpact",
+    "export async function getCurrentTradeCase",
+    "export async function listEvidenceRecords",
+    "export async function addEvidenceRecord",
+    "export async function findEvidenceById",
+  ].forEach((expected) => assertIncludes(repository, expected, "chaintrace repository"));
+
+  assertIncludes(repository, "doc_po", "default evidence records");
+  assertIncludes(repository, "doc_invoice", "default evidence records");
+  assertIncludes(repository, "doc_packing", "default evidence records");
+  assertIncludes(repository, "doc_quality", "default evidence records");
+  assertIncludes(repository, "doc_vgm", "default evidence records");
+  assertIncludes(repository, "doc_export_customs", "default evidence records");
+  assertIncludes(repository, "doc_bl", "default evidence records");
+  assertIncludes(repository, "doc_sg_permit", "default evidence records");
+  assertIncludes(repository, "doc_warehouse", "default evidence records");
+  assertIncludes(repository, "doc_arrival_qc", "default evidence records");
+  assertIncludes(repository, "doc_acceptance", "default evidence records");
+  assertIncludes(repository, 'verified: "verified"', "default verified evidence");
+  assertIncludes(repository, 'uploaded: "uploaded_pending_verification"', "default pending evidence");
+  assertIncludes(repository, 'missing: "missing"', "default missing evidence");
+}
+
 function main() {
   validateAgentPipeline();
   validateGateDecision();
   validatePreReviewDraft();
+  validateRepositoryLayer();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
 
