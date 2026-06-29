@@ -11,6 +11,29 @@ function isTradeDocument(doc: TradeDocument | undefined): doc is TradeDocument {
   return Boolean(doc);
 }
 
+function MetricCard({ label, value, note }: { label: string; value: string; note: string }) {
+  return (
+    <article
+      style={{
+        border: "1px solid var(--border)",
+        borderRadius: 28,
+        padding: 22,
+        minWidth: 0,
+        minHeight: 150,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        gap: 14,
+        overflow: "hidden",
+      }}
+    >
+      <span style={{ color: "#18794e", fontWeight: 900, fontSize: 14, lineHeight: 1.3 }}>{label}</span>
+      <strong style={{ fontSize: "clamp(26px, 3vw, 38px)", lineHeight: 1.05, letterSpacing: "-0.04em", wordBreak: "break-word" }}>{value}</strong>
+      <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.45, wordBreak: "break-word" }}>{note}</p>
+    </article>
+  );
+}
+
 export function FinancingView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
   const { activeTrade } = workspace;
   const balance = activeTrade.payments.find((payment) => payment.id === "pay_balance");
@@ -36,13 +59,13 @@ export function FinancingView({ zh, workspace }: { zh: boolean; workspace: Works
           <h2>{t(zh, "先做应收账款融资资格判断，不急着 tokenization。", "Judge receivable-financing eligibility before tokenization.")}</h2>
           <p>{t(zh, activeTrade.titleZh, activeTrade.titleEn)} · {activeTrade.poNo} · {activeTrade.invoiceNo}</p>
         </div>
-        <div className="pack-step-grid">
-          <article className="pack-step-card"><span>{t(zh, "应收账款", "Receivable")}</span><strong>{balance?.amount ?? "-"}</strong><p>{t(zh, balance?.conditionZh ?? "等待付款条件", balance?.conditionEn ?? "Waiting for payment condition")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "已收款", "Collected")}</span><strong>{deposit?.amount ?? "-"}</strong><p>{deposit?.status ?? "-"}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "融资状态", "Financing status")}</span><strong>{t(zh, "仅可预审", "Pre-review only")}</strong><p>{t(zh, "不能正式提交", "Not ready for formal submission")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "RWA 资格", "RWA eligibility")}</span><strong>{isRwaEligible ? t(zh, "可进入准备", "Preparation ready") : t(zh, "暂不合格", "Not eligible yet")}</strong><p>{missingDocs.length + uploadedButNotVerified.length} {t(zh, "个阻塞条件", "blocking conditions")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "建议融资额", "Suggested advance")}</span><strong>{estimatedAdvance}</strong><p>{t(zh, "缺口未补齐前为 0", "Zero until gaps close")}</p></article>
-          <article className="pack-step-card"><span>{t(zh, "资金方", "Financier")}</span><strong>{financier?.name ?? "-"}</strong><p>{financier?.email ?? "-"}</p></article>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, alignItems: "stretch" }}>
+          <MetricCard label={t(zh, "应收账款", "Receivable")} value={balance?.amount ?? "-"} note={t(zh, balance?.conditionZh ?? "等待付款条件", balance?.conditionEn ?? "Waiting for payment condition")} />
+          <MetricCard label={t(zh, "已收款", "Collected")} value={deposit?.amount ?? "-"} note={deposit?.status ?? "-"} />
+          <MetricCard label={t(zh, "融资状态", "Financing status")} value={t(zh, "仅可预审", "Pre-review only")} note={t(zh, "不能正式提交", "Not ready for formal submission")} />
+          <MetricCard label={t(zh, "RWA 资格", "RWA eligibility")} value={isRwaEligible ? t(zh, "可进入准备", "Preparation ready") : t(zh, "暂不合格", "Not eligible yet")} note={`${missingDocs.length + uploadedButNotVerified.length} ${t(zh, "个阻塞条件", "blocking conditions")}`} />
+          <MetricCard label={t(zh, "建议融资额", "Suggested advance")} value={estimatedAdvance} note={t(zh, "缺口未补齐前为 0", "Zero until gaps close")} />
+          <MetricCard label={t(zh, "资金方", "Financier")} value={financier?.name ?? "-"} note={financier?.email ?? "-"} />
         </div>
       </div>
 
