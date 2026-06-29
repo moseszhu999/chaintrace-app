@@ -48,12 +48,12 @@ export function WorkspaceShell({
           <section className="workspace-main">
             <div className="workspace-topbar">
               <div>
-                <div className="eyebrow">{t(zh, "业务 Sidecar", "Business sidecar")}</div>
+                <div className="eyebrow">{t(zh, "交易 Agent", "Trade agent")}</div>
                 <h1 className="workspace-title">{t(zh, operatingSummary.headlineZh, operatingSummary.headlineEn)}</h1>
                 <p className="workspace-subtitle">{organization.name} · {businessContext.batchNo}</p>
               </div>
               <div className="hero-actions workspace-action">
-                {actionSlot ?? <Link className="secondary-button" href="/assistant">{t(zh, "问助手", "Ask assistant")}</Link>}
+                {actionSlot ?? <Link className="secondary-button" href="/assistant">{t(zh, "问 Agent", "Ask agent")}</Link>}
               </div>
             </div>
             {children}
