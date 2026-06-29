@@ -76,7 +76,7 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "四流对齐检查", "Four-flow alignment check")}</span>
-          <h2>{t(zh, "只有四流互相印证，应收账款和 RWA 才有基础。", "Receivables and RWA only have a basis when all four flows corroborate each other.")}</h2>
+          <h2>{t(zh, "只有四流互相印证，应收账款 RWA token 才有基础。", "A receivable RWA token only has a basis when all four flows corroborate each other.")}</h2>
         </div>
         <div className={styles.list}>
           <article className={styles.listRow}>
@@ -101,7 +101,7 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
             <div className={styles.rowHeader}>
               <div className={styles.rowMain}>
                 <h3 className={styles.rowTitle}>{t(zh, "资金流 ↔ 钱包", "Funds flow ↔ wallet")}</h3>
-                <p className={styles.rowMeta}>{t(zh, "业务钱包可以承载 stablecoin 收款和 RWA 托管草稿，但不能在文件缺失时自动放款。", "The business wallet can support stablecoin collection and RWA escrow drafts, but cannot auto-disburse while documents are missing.")}</p>
+                <p className={styles.rowMeta}>{t(zh, "业务钱包可以承载 stablecoin 收款、RWA 托管和受限 tokenization，但不能在文件缺失时自动放款或发行。", "The business wallet can support stablecoin collection, RWA escrow, and restricted tokenization, but cannot auto-disburse or issue while documents are missing.")}</p>
               </div>
               <span className={`${styles.statusChip} ${styles.statusMissing}`}>guarded</span>
             </div>
@@ -110,7 +110,7 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
             <div className={styles.rowHeader}>
               <div className={styles.rowMain}>
                 <h3 className={styles.rowTitle}>{t(zh, "Agent 当前判断", "Current agent judgement")}</h3>
-                <p className={styles.rowMeta}>{t(zh, "四流没有完全闭合：商流成立，信息流部分成立，物流缺入库和验收，资金流因此被卡。下一步不是 tokenization，而是补物流与验收事实。", "The four flows are not fully closed: commercial flow is formed, information flow is partial, logistics lacks warehouse and acceptance, so funds are blocked. The next step is not tokenization; it is closing logistics and acceptance facts.")}</p>
+                <p className={styles.rowMeta}>{t(zh, "四流没有完全闭合：商流成立，信息流部分成立，物流缺入库和验收，资金流因此被卡。可以设计 RWA tokenization，但当前不应正式发行；先补物流与验收事实。", "The four flows are not fully closed: commercial flow is formed, information flow is partial, logistics lacks warehouse and acceptance, so funds are blocked. RWA tokenization can be designed, but issuance should not start yet; close logistics and acceptance facts first.")}</p>
               </div>
               <span className={`${styles.statusChip} ${styles.statusHigh}`}>priority</span>
             </div>
@@ -119,7 +119,7 @@ export function FourFlowView({ zh, workspace }: { zh: boolean; workspace: Worksp
             <Link className="primary-button" href="/evidence">{t(zh, "补齐信息流", "Complete information flow")}</Link>
             <Link className="secondary-button" href="/tasks">{t(zh, "处理物流 / 验收", "Handle logistics / acceptance")}</Link>
             <Link className="secondary-button" href="/business-funds">{t(zh, "查看资金流", "View funds flow")}</Link>
-            <Link className="secondary-button" href="/business-wallet">{t(zh, "查看钱包", "View wallet")}</Link>
+            <Link className="secondary-button" href="/business-financing">{t(zh, "RWA tokenization", "RWA tokenization")}</Link>
           </div>
         </div>
       </div>
