@@ -52,10 +52,17 @@ describe("ChainTrace contract suite", function () {
     const bank = await BankVault.deploy(riskOfficer.address);
     await bank.waitForDeployment();
 
-    await bank.setSupportedAsset(await stablecoin.getAddress(), true);
-    await stablecoin.approve(await bank.getAddress(), ethers.parseUnits("100000", 6));
-    await bank.depositLiquidity(await stablecoin.getAddress(), ethers.parseUnits("100000", 6));
-    await bank.connect(riskOfficer).grantCreditLine(borrower.address, await stablecoin.getAddress(), ethers.parseUnits("50000", 6));
+    const FinancierPool = await ethers.getContractFactory("FinancierPool");
+    const pool = await FinancierPool.deploy(await bank.getAddress(), await stablecoin.getAddress(), riskOfficer.address);
+    await pool.waitForDeployment();
+    await bank.transferOwnership(await pool.getAddress());
+
+    await stablecoin.issue(financier.address, ethers.parseUnits("100000", 6));
+    await stablecoin.connect(financier).approve(await pool.getAddress(), ethers.parseUnits("100000", 6));
+    await pool.connect(financier).deposit(ethers.parseUnits("100000", 6));
+    await pool.connect(riskOfficer).configureSupportedAsset(true);
+    await pool.connect(riskOfficer).fundVault(ethers.parseUnits("100000", 6));
+    await pool.connect(riskOfficer).grantCreditLine(borrower.address, ethers.parseUnits("50000", 6));
 
     const tradeId = id("trade_vn_coffee_sg_2026_0007");
     const poSlot = id("sign_po_buyer");
@@ -113,7 +120,7 @@ describe("ChainTrace contract suite", function () {
       [packingGate, sealVgmGate, exportClearanceGate, sgPermitGate, warehouseGate, arrivalQcGate]
     );
     await loan.waitForDeployment();
-    await bank.approveLoanContract(await loan.getAddress(), true);
+    await pool.connect(riskOfficer).approveLoanContract(await loan.getAddress(), true);
 
     return {
       owner,
@@ -129,6 +136,7 @@ describe("ChainTrace contract suite", function () {
       registry,
       evidence,
       bank,
+      pool,
       loan,
       slots: { poSlot, invoiceSlot, qualitySlot, blSlot, warehouseSlot, acceptanceSlot },
       gates: { packingGate, sealVgmGate, exportClearanceGate, sgPermitGate, warehouseGate, arrivalQcGate },
@@ -146,6 +154,13 @@ describe("ChainTrace contract suite", function () {
     await evidence.connect(warehouse).verifyEvidence(gates.warehouseGate, id("warehouse-receipt-final"), "ipfs://warehouse-receipt-final");
     await evidence.connect(buyer).verifyEvidence(gates.arrivalQcGate, id("arrival-qc-final"), "ipfs://arrival-qc-final");
   }
+
+  it("routes lender liquidity from FinancierPool into BankVault", async function () {
+    const { financier, stablecoin, bank, pool } = await fixture();
+    expect(await pool.sharesOf(financier.address)).to.equal(ethers.parseUnits("100000", 6));
+    expect(await pool.totalFundedToVault()).to.equal(ethers.parseUnits("100000", 6));
+    expect(await stablecoin.balanceOf(await bank.getAddress())).to.equal(ethers.parseUnits("100000", 6));
+  });
 
   it("blocks loan disbursement until signing and logistics gates pass", async function () {
     const { loan, financier } = await fixture();
