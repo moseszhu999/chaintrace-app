@@ -19,6 +19,7 @@ function statusClass(status: AgentRunStatus) {
 
 export function AgentWorkbenchView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
   const { activeTrade } = workspace;
+  const runnableGetEndpoints = agentApiEndpoints.filter((endpoint) => endpoint.method === "GET");
 
   return (
     <section className="workspace">
@@ -53,13 +54,13 @@ export function AgentWorkbenchView({ zh, workspace }: { zh: boolean; workspace: 
               `${t(zh, "输出：", "Output: ")}${t(zh, endpoint.outputZh, endpoint.outputEn)}`,
               `${t(zh, "替代人工：", "Replaces manual work: ")}${t(zh, endpoint.replacesZh, endpoint.replacesEn)}`,
             ],
-            status: endpoint.id === "agent_run" ? "pipeline" : "api",
+            status: endpoint.id === "agent_run" ? "pipeline" : endpoint.method.toLowerCase(),
             statusClassName: `${styles.statusChip} ${endpoint.id === "agent_run" ? styles.statusVerified : styles.statusOpen}`,
           }))}
         />
         <div style={{ marginTop: 18 }}>
           <ActionRow
-            actions={agentApiEndpoints.slice(0, 4).map((endpoint, index) => ({
+            actions={runnableGetEndpoints.slice(0, 4).map((endpoint, index) => ({
               href: endpoint.path,
               label: index === 0 ? t(zh, "运行 Agent Pipeline", "Run Agent pipeline") : endpoint.nameEn,
               primary: index === 0,
