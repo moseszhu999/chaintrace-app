@@ -3,8 +3,8 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const [deployer] = await hre.ethers.getSigners();
-  if (!deployer) {
+  const [deployer, riskOfficer] = await hre.ethers.getSigners();
+  if (!deployer || !riskOfficer) {
     throw new Error("Missing Hardhat dev deployer.");
   }
 
@@ -13,6 +13,12 @@ async function main() {
   console.log(`Deploying ChainTrace dev contracts to ${network.name} (${network.chainId})`);
   console.log(`Deployer: ${deployer.address}`);
   console.log(`Deployer balance: ${hre.ethers.formatEther(balance)} ETH`);
+
+  const MockStablecoin = await hre.ethers.getContractFactory("MockStablecoin");
+  const mockStablecoin = await MockStablecoin.deploy();
+  await mockStablecoin.waitForDeployment();
+  const mockStablecoinAddress = await mockStablecoin.getAddress();
+  console.log(`MockStablecoin: ${mockStablecoinAddress}`);
 
   const TradeSigningRegistry = await hre.ethers.getContractFactory("TradeSigningRegistry");
   const signingRegistry = await TradeSigningRegistry.deploy();
@@ -27,27 +33,40 @@ async function main() {
   console.log(`LogisticsEvidenceRegistry: ${logisticsEvidenceRegistryAddress}`);
 
   const BankVault = await hre.ethers.getContractFactory("BankVault");
-  const bankVault = await BankVault.deploy(deployer.address);
+  const bankVault = await BankVault.deploy(riskOfficer.address);
   await bankVault.waitForDeployment();
   const bankVaultAddress = await bankVault.getAddress();
   console.log(`BankVault: ${bankVaultAddress}`);
+
+  const FinancierPool = await hre.ethers.getContractFactory("FinancierPool");
+  const financierPool = await FinancierPool.deploy(bankVaultAddress, mockStablecoinAddress, riskOfficer.address);
+  await financierPool.waitForDeployment();
+  const financierPoolAddress = await financierPool.getAddress();
+  console.log(`FinancierPool: ${financierPoolAddress}`);
+
+  await bankVault.transferOwnership(financierPoolAddress);
 
   const deployment = {
     network: "hardhat",
     chainId: Number(network.chainId),
     deployer: deployer.address,
+    riskOfficer: riskOfficer.address,
     deployerBalanceEth: hre.ethers.formatEther(balance),
     deployedAt: new Date().toISOString(),
     contracts: {
+      MockStablecoin: mockStablecoinAddress,
       TradeSigningRegistry: signingRegistryAddress,
       LogisticsEvidenceRegistry: logisticsEvidenceRegistryAddress,
+      FinancierPool: financierPoolAddress,
       BankVault: bankVaultAddress,
     },
     nextSteps: [
+      "Financiers deposit test stablecoin into FinancierPool.",
+      "FinancierPool funds BankVault and configures borrower credit lines.",
       "Create signing slots for PO, invoice, QC, B/L, warehouse receipt, and buyer acceptance.",
       "Create logistics evidence gates for packing, VGM, export clearance, import permit, warehouse receipt, and arrival QC.",
       "Deploy ReceivableLoan with both required signing slots and required logistics evidence IDs.",
-      "Approve the loan contract in BankVault.",
+      "Approve the loan contract through FinancierPool.",
     ],
     note: "Ephemeral Hardhat dev-chain deployment. Addresses are for CI validation only and are not persistent.",
   };
