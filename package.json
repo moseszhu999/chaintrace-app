@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "contracts:compile": "hardhat compile",
+    "contracts:test": "hardhat test",
     "contracts:deploy:dev": "hardhat run scripts/deploy-dev.js --network hardhat",
     "contracts:deploy:base-sepolia": "hardhat run scripts/deploy-base-sepolia.js --network baseSepolia"
   },
