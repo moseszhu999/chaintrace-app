@@ -2,9 +2,9 @@ export default function DeployCheckPage() {
   return (
     <main style={{ padding: 40, fontFamily: "system-ui, sans-serif" }}>
       <h1>ChainTrace Deploy Check</h1>
-      <p>Current intended build: Business Sidecar workspace.</p>
+      <p>Current intended build: Trade Agent workspace.</p>
       <ul>
-        <li>Expected public nav item: Business sidecar / 业务 Sidecar</li>
+        <li>Expected public nav item: Trade agent / 交易 Agent</li>
         <li>Expected workspace route: /business-ops</li>
         <li>Expected legacy redirect: /business → /business-ops</li>
       </ul>
