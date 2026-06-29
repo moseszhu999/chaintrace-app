@@ -5,13 +5,13 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
-    { href: "/#product", label: zh ? "产品" : "Product" },
-    { href: "/#workflow", label: zh ? "流程" : "Workflow" },
-    { href: "/#security", label: zh ? "权限边界" : "Security" },
-    { href: "/verify/uy-beef-cn-2026-0001", label: zh ? "公开验证" : "Public verify" },
+    { href: "/business-ops", label: zh ? "交易 Sidecar" : "Trade sidecar" },
+    { href: "/#workflow", label: zh ? "交易流程" : "Trade flow" },
+    { href: "/evidence", label: zh ? "文件" : "Documents" },
+    { href: "/tasks", label: zh ? "履约 / 验收" : "Fulfillment" },
+    { href: "/assistant/approvals", label: zh ? "收款 / 融资" : "Collection" },
+    { href: "/proof-packs", label: zh ? "证明 / 风控" : "Proof & risk" },
     { href: "/login", label: zh ? "登录" : "Login" },
-    { href: "/dashboard", label: zh ? "工作台" : "Workspace" },
-    { href: "/business-ops", label: zh ? "业务 Sidecar" : "Business sidecar" },
   ];
 
   return (
