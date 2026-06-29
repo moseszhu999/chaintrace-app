@@ -14,57 +14,57 @@ function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-const workflow = [
+const tradeFlow = [
   {
-    zh: "登录 / 选择组织角色",
-    en: "Login / choose org and role",
-    descZh: "不同角色看到不同证明包、任务、审批和公开链接。",
-    descEn: "Different roles see different proof packs, tasks, approvals, and public links.",
+    zh: "交易建档",
+    en: "Deal setup",
+    descZh: "记录买家、供应商、订单、金额、交付条件和付款节点。",
+    descEn: "Capture buyer, supplier, order, amount, delivery terms, and payment milestones.",
   },
   {
-    zh: "创建证明包",
-    en: "Create proof pack",
-    descZh: "围绕一票货、一个订单或一笔应收账款创建事实锚点。",
-    descEn: "Create a fact anchor around one shipment, order, or receivable.",
+    zh: "文件补齐",
+    en: "Document completion",
+    descZh: "把合同、订单、发票、提单、质检、冷链、入库、验收放到交易对象下。",
+    descEn: "Attach contract, order, invoice, bill of lading, inspection, cold-chain, warehouse, and acceptance records to the deal.",
   },
   {
-    zh: "补证据 / 生成任务",
-    en: "Complete evidence / generate tasks",
-    descZh: "系统把缺失的入库、验收、质检、冷链等证据变成责任方任务。",
-    descEn: "The system turns missing warehouse, acceptance, inspection, and cold-chain evidence into owner tasks.",
+    zh: "履约闭环",
+    en: "Fulfillment closure",
+    descZh: "跟踪发货、清关、入库、交付和验收，不让关键环节卡在聊天记录里。",
+    descEn: "Track shipment, customs, warehouse entry, delivery, and acceptance without burying blockers in chat.",
   },
   {
-    zh: "助手建议 / 人工审批",
-    en: "Assistant suggestion / human approval",
-    descZh: "AI 可生成草稿和下一步建议，但发送、融资、验收等动作必须确认。",
-    descEn: "AI can draft and suggest next steps, but sending, financing, and acceptance actions require confirmation.",
+    zh: "收款 / 融资准备",
+    en: "Collection / financing readiness",
+    descZh: "根据事实链判断能不能催款、能不能给资金方看、还缺什么。",
+    descEn: "Use the fact trail to judge whether to collect, share with financiers, and identify remaining gaps.",
   },
   {
-    zh: "公开验证链接",
-    en: "Public verification link",
-    descZh: "外部买家、资金方、审计方不用登录也能查看公开状态、哈希和必要元数据。",
-    descEn: "External buyers, financiers, and auditors can see public status, hashes, and necessary metadata without login.",
+    zh: "选择性证明",
+    en: "Selective proof",
+    descZh: "对外只暴露状态、哈希和必要元数据，不把商业机密全公开。",
+    descEn: "Expose only status, hashes, and necessary metadata externally, not all business secrets.",
   },
 ];
 
-const productBlocks = [
+const differentiationBlocks = [
   {
-    titleZh: "证明包工作台",
-    titleEn: "Proof pack workspace",
-    textZh: "把订单、发票、装柜、质检、冷链、入库、验收放进同一个业务对象。",
-    textEn: "Put order, invoice, loading, inspection, cold chain, warehouse entry, and acceptance into one business object.",
+    titleZh: "不是飞书",
+    titleEn: "Not Feishu",
+    textZh: "不做通用聊天、会议、文档协作。ChainTrace 只围绕跨公司交易闭环。",
+    textEn: "Not generic chat, meetings, or document collaboration. ChainTrace focuses on cross-company trade closure.",
   },
   {
-    titleZh: "客户上下文助手",
-    titleEn: "Customer-context assistant",
-    textZh: "像理解项目一样理解客户：常做什么贸易、历史缺什么、当前卡在哪、下一步找谁。",
-    textEn: "Understand the customer like a project: common trades, historical gaps, current blockers, and whom to chase next.",
+    titleZh: "不是 ERP",
+    titleEn: "Not ERP",
+    textZh: "不替代库存、财务总账和内部流程；只抓交易对外可信所需的关键事实。",
+    textEn: "Not inventory, general ledger, or internal process replacement; it captures facts needed for external trust.",
   },
   {
-    titleZh: "任务与审批",
-    titleEn: "Tasks and approvals",
-    textZh: "缺口自动变任务；AI 建议自动变草稿；关键商业动作必须人工确认。",
-    textEn: "Gaps become tasks; AI suggestions become drafts; key commercial actions require human approval.",
+    titleZh: "不是单纯溯源",
+    titleEn: "Not only traceability",
+    textZh: "溯源只是证据能力之一，最终目标是验收、收款、融资、理赔和减少纠纷。",
+    textEn: "Traceability is one evidence capability; the goal is acceptance, collection, financing, claims, and fewer disputes.",
   },
 ];
 
@@ -83,40 +83,41 @@ export default function Home() {
         <section className="hero landing-hero">
           <div className="landing-grid">
             <div className="hero-copy">
-              <div className="eyebrow">{t(zh, "ChainTrace · 供应链事实 SaaS", "ChainTrace · Supply Chain Fact SaaS")}</div>
-              <h1>{t(zh, "让一票货的事实、任务和下一步都清楚。", "Make every shipment's facts, tasks, and next steps clear.")}</h1>
+              <div className="eyebrow">{t(zh, "ChainTrace · 小微企业交易 Sidecar", "ChainTrace · SME trade sidecar")}</div>
+              <h1>{t(zh, "从订单到收款，把每一笔生意做完。", "From order to collection, finish every trade.")}</h1>
               <p>
                 {t(
                   zh,
-                  "ChainTrace 是给小供应商、贸易商、进口商、买家和资金方使用的供应链事实工作台。登录前，用户理解它能解决什么；登录后，用户直接处理证明包、缺证任务、AI 草稿、审批和公开验证链接。",
-                  "ChainTrace is a supply-chain fact workspace for small suppliers, traders, importers, buyers, and financiers. Before login, users understand what it solves; after login, they work directly with proof packs, missing-evidence tasks, AI drafts, approvals, and public verification links.",
+                  "ChainTrace 不是飞书式协作工具，而是小微企业跨公司交易 Sidecar。它围绕订单、发票、物流、验收、收款和融资，帮企业发现缺口、催办责任方、准备选择性证明，让买家、资金方和合作伙伴更容易相信你。",
+                  "ChainTrace is not another collaboration suite. It is a cross-company trade sidecar for SMEs. Around orders, invoices, logistics, acceptance, collection, and financing, it finds gaps, nudges owners, prepares selective proof, and helps buyers, financiers, and partners trust you.",
                 )}
               </p>
               <div className="hero-actions">
-                <a href="/login" className="primary-button">{t(zh, "登录进入工作台", "Login to workspace")}</a>
-                <a href="/dashboard" className="secondary-button">{t(zh, "直接看登录后效果", "View logged-in demo")}</a>
-                <a href="/verify/uy-beef-cn-2026-0001" className="secondary-button">{t(zh, "查看公开验证页", "View public verification")}</a>
+                <a href="/business-ops" className="primary-button">{t(zh, "打开交易 Sidecar", "Open trade sidecar")}</a>
+                <a href="/login" className="secondary-button">{t(zh, "登录", "Login")}</a>
+                <a href="/verify/uy-beef-cn-2026-0001" className="secondary-button">{t(zh, "查看选择性证明", "View selective proof")}</a>
               </div>
               <div className="hero-badges">
-                <span className="badge-chip">ProofPack</span>
-                <span className="badge-chip">EvidenceSlot</span>
-                <span className="badge-chip">Task / Approval</span>
-                <span className="badge-chip">Customer Memory</span>
+                <span className="badge-chip">Deal</span>
+                <span className="badge-chip">Invoice</span>
+                <span className="badge-chip">Fulfillment</span>
+                <span className="badge-chip">Acceptance</span>
+                <span className="badge-chip">Receivable</span>
               </div>
             </div>
             <div className="hero-visual">
               <div className="signal-board">
-                <div className="signal-board-header"><span>{t(zh, "登录后首页", "Logged-in home")}</span><strong>UY-BEEF-CN-2026-0001</strong></div>
+                <div className="signal-board-header"><span>{t(zh, "当前交易", "Active deal")}</span><strong>UY-BEEF-CN-2026-0001</strong></div>
                 <div className="signal-card-grid">
-                  <div className="mini-proof-card present"><span>{t(zh, "已验证", "Verified")}</span><strong>3/5</strong></div>
-                  <div className="mini-proof-card pending"><span>{t(zh, "缺口", "Gaps")}</span><strong>2</strong></div>
-                  <div className="mini-proof-card pending"><span>{t(zh, "任务", "Tasks")}</span><strong>5</strong></div>
-                  <div className="mini-proof-card pending"><span>{t(zh, "审批", "Approvals")}</span><strong>1</strong></div>
+                  <div className="mini-proof-card present"><span>{t(zh, "订单", "Order")}</span><strong>{t(zh, "已确认", "Confirmed")}</strong></div>
+                  <div className="mini-proof-card present"><span>{t(zh, "发票", "Invoice")}</span><strong>{t(zh, "已齐", "Ready")}</strong></div>
+                  <div className="mini-proof-card pending"><span>{t(zh, "入库", "Warehouse")}</span><strong>{t(zh, "缺失", "Missing")}</strong></div>
+                  <div className="mini-proof-card pending"><span>{t(zh, "验收", "Acceptance")}</span><strong>{t(zh, "待确认", "Open")}</strong></div>
                 </div>
                 <div className="signal-status-box">
-                  <span>{t(zh, "助手建议", "Assistant advice")}</span>
-                  <strong>{t(zh, "先补入库记录，再催买家验收。", "Complete warehouse entry first, then chase buyer acceptance.")}</strong>
-                  <p>{t(zh, "因为这两项最影响 Ready、收款和融资审核。", "Because these two most affect Ready, collection, and financing review.")}</p>
+                  <span>{t(zh, "Sidecar 建议", "Sidecar advice")}</span>
+                  <strong>{t(zh, "先补入库和买家验收，再进入催款 / 融资。", "Complete warehouse entry and buyer acceptance before collection / financing.")}</strong>
+                  <p>{t(zh, "这不是内部协作提醒，而是影响收款和融资的交易事实缺口。", "This is not an internal collaboration reminder; it is a trade-fact gap that affects collection and financing.")}</p>
                 </div>
               </div>
             </div>
@@ -125,12 +126,12 @@ export default function Home() {
 
         <section id="product" className="panel product-showcase">
           <div className="section-heading">
-            <span>{t(zh, "产品结构", "Product structure")}</span>
-            <h2>{t(zh, "登录前讲清楚价值，登录后进入工作台。", "Before login, explain value; after login, enter the workspace.")}</h2>
-            <p>{t(zh, "官网不再堆 PPT 页。用户点登录后看到的是正常 SaaS 的侧边栏、列表、表单、任务、草稿和审批。", "The public site no longer stacks presentation pages. After login, users see a normal SaaS sidebar, lists, forms, tasks, drafts, and approvals.")}</p>
+            <span>{t(zh, "差异化", "Differentiation")}</span>
+            <h2>{t(zh, "ChainTrace 不做办公协作，做跨公司交易可信闭环。", "ChainTrace does not do office collaboration; it closes cross-company trades with trust.")}</h2>
+            <p>{t(zh, "飞书解决公司内部怎么协作；ChainTrace 解决小微企业对外怎么被相信、怎么验收、怎么收款、怎么融资。", "Feishu solves internal collaboration; ChainTrace helps SMEs be trusted externally, get acceptance, collect, and prepare financing.")}</p>
           </div>
           <div className="principles-grid">
-            {productBlocks.map((item) => (
+            {differentiationBlocks.map((item) => (
               <article key={item.titleEn}>
                 <strong>{t(zh, item.titleZh, item.titleEn)}</strong>
                 <p>{t(zh, item.textZh, item.textEn)}</p>
@@ -141,12 +142,12 @@ export default function Home() {
 
         <section id="workflow" className="panel product-showcase">
           <div className="section-heading">
-            <span>{t(zh, "登录后的功能流程", "Post-login workflow")}</span>
-            <h2>{t(zh, "客户不是看介绍，而是推进交易。", "Customers are not reading slides; they are moving trade forward.")}</h2>
-            <p>{t(zh, "这条流程对应 `/dashboard` 里的真实前端交互。", "This workflow maps to the real frontend interaction in `/dashboard`.")}</p>
+            <span>{t(zh, "交易流程", "Trade flow")}</span>
+            <h2>{t(zh, "核心不是任务管理，而是把交易推进到验收和收款。", "The core is not task management; it is moving the trade to acceptance and collection.")}</h2>
+            <p>{t(zh, "任务、AI、审批都是辅助，主对象永远是交易事实。", "Tasks, AI, and approvals are helpers; the main object is always trade facts.")}</p>
           </div>
           <div className="pack-step-grid">
-            {workflow.map((step, index) => (
+            {tradeFlow.map((step, index) => (
               <article key={step.en} className="pack-step-card">
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <strong>{t(zh, step.zh, step.en)}</strong>
@@ -157,23 +158,23 @@ export default function Home() {
         </section>
 
         <section id="security" className="clarity-strip">
-          <article><span>{t(zh, "可读取", "Can read")}</span><strong>{t(zh, "用户授权的客户画像、证明包、证据槽、任务、风险和操作历史。", "Authorized customer profile, proof packs, evidence slots, tasks, risks, and action history.")}</strong></article>
-          <article><span>{t(zh, "需授权", "Needs permission")}</span><strong>{t(zh, "原始合同、发票、私有文件、邮箱、ERP 和外部系统数据。", "Raw contracts, invoices, private files, email, ERP, and external system data.")}</strong></article>
-          <article><span>{t(zh, "不能自动决定", "Cannot decide")}</span><strong>{t(zh, "付款、融资、验收、理赔、法律责任等关键商业动作。", "Payment, financing, acceptance, claims, legal responsibility, and other key commercial actions.")}</strong></article>
+          <article><span>{t(zh, "对外结果", "External outcome")}</span><strong>{t(zh, "买家验收更快，资金方更容易初审，合作伙伴更容易相信交易事实。", "Buyers accept faster, financiers can pre-review more easily, and partners can trust trade facts.")}</strong></article>
+          <article><span>{t(zh, "最小披露", "Minimal disclosure")}</span><strong>{t(zh, "只分享状态、哈希和必要元数据，不公开原始合同和商业机密。", "Share only status, hashes, and necessary metadata, not raw contracts or trade secrets.")}</strong></article>
+          <article><span>{t(zh, "人工确认", "Human approval")}</span><strong>{t(zh, "催款、融资、验收、理赔和法律责任不能由 AI 自动决定。", "AI cannot automatically decide collection, financing, acceptance, claims, or legal responsibility.")}</strong></article>
         </section>
 
         <section className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">{t(zh, "开始使用", "Get started")}</span>
-              <h3>{t(zh, "先走正常网站路径：官网说明 → 登录 → 工作台 → 证明包 → 任务 / 助手 / 审批。", "Use the normal website path first: public site → login → workspace → proof pack → tasks / assistant / approvals.")}</h3>
+              <span className="proof-type">Trade Sidecar</span>
+              <h3>{t(zh, "下一步从交易 Sidecar 开始，而不是从通用工作台开始。", "Start from the trade sidecar, not a generic workspace.")}</h3>
             </div>
-            <div className="status-pill">SaaS</div>
+            <div className="status-pill">SME</div>
           </div>
           <dl className="proof-details">
-            <div><dt>{t(zh, "登录页", "Login")}</dt><dd><a href="/login" className="inline-link">/login</a></dd></div>
-            <div><dt>{t(zh, "登录后工作台", "Logged-in workspace")}</dt><dd><a href="/dashboard" className="inline-link">/dashboard</a></dd></div>
-            <div><dt>{t(zh, "公开验证", "Public verification")}</dt><dd><a href="/verify/uy-beef-cn-2026-0001" className="inline-link">/verify/uy-beef-cn-2026-0001</a></dd></div>
+            <div><dt>{t(zh, "交易 Sidecar", "Trade sidecar")}</dt><dd><a href="/business-ops" className="inline-link">/business-ops</a></dd></div>
+            <div><dt>{t(zh, "登录", "Login")}</dt><dd><a href="/login" className="inline-link">/login</a></dd></div>
+            <div><dt>{t(zh, "选择性证明", "Selective proof")}</dt><dd><a href="/verify/uy-beef-cn-2026-0001" className="inline-link">/verify/uy-beef-cn-2026-0001</a></dd></div>
           </dl>
         </section>
       </main>
