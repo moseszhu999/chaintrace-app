@@ -86,8 +86,8 @@ export function BusinessArchitectureView({ zh, workspace }: { zh: boolean; works
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "咨询方案级总览", "Consulting-grade blueprint")}</span>
-          <h2>{t(zh, "BLM → 价值链 → 业务架构 → 应用架构 → 数据架构 → 技术架构。", "BLM → value chain → business architecture → application architecture → data architecture → technical architecture.")}</h2>
-          <p>{t(zh, "出圈点：AI Agent 替代人工证据整理、缺口追踪、催办和预审 memo，而不是单纯做一个区块链 demo。", "Breakout point: AI agents replace manual evidence operations, gap tracking, follow-up, and pre-review memo creation—not just another blockchain demo.")}</p>
+          <h2>{t(zh, "BLM → 业务架构 → 应用架构 → 数据架构 → 技术架构。", "BLM → business architecture → application architecture → data architecture → technical architecture.")}</h2>
+          <p>{t(zh, "价值链是 BLM 内部的一环；出圈点是 AI Agent 替代人工证据整理、缺口追踪、催办和预审 memo。", "Value chain is part of BLM; the breakout point is AI agents replacing manual evidence operations, gap tracking, follow-up, and pre-review memo creation.")}</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
           <article style={{ border: "1px solid var(--border)", borderRadius: 26, padding: 20 }}>
@@ -108,17 +108,16 @@ export function BusinessArchitectureView({ zh, workspace }: { zh: boolean; works
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "1. BLM", "1. BLM")}</span>
-          <h2>{t(zh, "先确定业务领导力模型：市场洞察、战略意图、创新焦点、业务设计。", "Start with the Business Leadership Model: insight, intent, innovation focus, and business design.")}</h2>
+          <h2>{t(zh, "BLM 包括市场洞察、战略意图、创新焦点、业务设计，以及价值链判断。", "BLM includes market insight, strategic intent, innovation focus, business design, and value-chain judgment.")}</h2>
         </div>
         <div className={styles.list}>{blmSections.map((section) => <SectionCard zh={zh} section={section} key={section.id} />)}</div>
-      </div>
-
-      <div className="panel">
-        <div className="section-heading">
-          <span>{t(zh, "1.1 价值链", "1.1 Value chain")}</span>
-          <h2>{t(zh, "BLM 必须回答价值链：谁创造价值、谁验证价值、谁转化价值、谁消费价值、平台如何捕获价值。", "BLM must answer the value chain: who creates value, who verifies it, who converts it, who consumes it, and how the platform captures it.")}</h2>
+        <div style={{ marginTop: 18 }}>
+          <div className="section-heading">
+            <span>{t(zh, "1.1 BLM 内部：价值链", "1.1 Inside BLM: value chain")}</span>
+            <h2>{t(zh, "价值链回答：谁创造价值、谁验证价值、谁转化价值、谁消费价值、平台如何捕获价值。", "The value chain answers who creates value, who verifies it, who converts it, who consumes it, and how the platform captures it.")}</h2>
+          </div>
+          <div className={styles.list}>{valueChainSections.map((section) => <SectionCard zh={zh} section={section} key={section.id} />)}</div>
         </div>
-        <div className={styles.list}>{valueChainSections.map((section) => <SectionCard zh={zh} section={section} key={section.id} />)}</div>
       </div>
 
       <div className="panel">
