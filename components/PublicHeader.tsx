@@ -5,17 +5,12 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
-    { href: "/business-flows", label: zh ? "四流合一" : "Four flows" },
-    { href: "/business-signing", label: zh ? "签章合约" : "Signing contract" },
-    { href: "/business-loan", label: zh ? "贷款合约" : "Loan contract" },
-    { href: "/business-ops", label: zh ? "交易 Agent" : "Trade agent" },
-    { href: "/evidence", label: zh ? "文件" : "Documents" },
-    { href: "/tasks", label: zh ? "履约 / 验收" : "Fulfillment" },
-    { href: "/business-funds", label: zh ? "资金" : "Funds" },
-    { href: "/business-wallet", label: zh ? "钱包" : "Wallet" },
-    { href: "/business-financing", label: zh ? "RWA 代币化" : "RWA tokenization" },
-    { href: "/proof-packs", label: zh ? "证明 / 风控" : "Proof & risk" },
-    { href: "/login", label: zh ? "登录" : "Login" },
+    { href: "/business-architecture", label: zh ? "业务架构" : "Architecture", primary: false },
+    { href: "/business-ops", label: zh ? "Agent 工作台" : "Agent workbench", primary: true },
+    { href: "/business-readiness", label: zh ? "融资评分" : "Readiness", primary: false },
+    { href: "/business-professional-review", label: zh ? "专业审查" : "Professional review", primary: false },
+    { href: "/business-contracts", label: zh ? "合约控制台" : "Contracts", primary: false },
+    { href: "/login", label: zh ? "登录" : "Login", primary: false },
   ];
 
   return (
@@ -78,28 +73,25 @@ export function PublicHeader({ zh }: { zh: boolean }) {
           flex: 1,
         }}
       >
-        {navItems.map((item) => {
-          const isPrimary = item.href === "/business-flows";
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                minHeight: 36,
-                padding: "0 12px",
-                borderRadius: 999,
-                color: isPrimary ? "#fff" : "#4d443b",
-                background: isPrimary ? "#111827" : "transparent",
-                fontSize: 14,
-                fontWeight: 850,
-              }}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              minHeight: 36,
+              padding: "0 12px",
+              borderRadius: 999,
+              color: item.primary ? "#fff" : "#4d443b",
+              background: item.primary ? "#111827" : "transparent",
+              fontSize: 14,
+              fontWeight: 850,
+            }}
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
       <LanguageSwitcher />
