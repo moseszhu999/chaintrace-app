@@ -20,7 +20,7 @@ export function WorkspaceShell({
   children: ReactNode;
   actionSlot?: ReactNode;
 }) {
-  const { businessContext, organization } = workspace;
+  const { businessContext, operatingSummary, organization } = workspace;
 
   return (
     <main className="page-shell">
@@ -39,17 +39,17 @@ export function WorkspaceShell({
               ))}
             </nav>
             <div className="proof-flow-card workspace-org-card">
-              <strong>{t(zh, "当前组织", "Current org")}</strong>
+              <strong>{t(zh, "当前企业", "Current business")}</strong>
               <span>{organization.name}</span>
             </div>
-            <Link className="secondary-button workspace-exit-link" href="/login">{t(zh, "退出模拟登录", "Exit mock login")}</Link>
+            <Link className="secondary-button workspace-exit-link" href="/login">{t(zh, "退出", "Exit")}</Link>
           </aside>
 
           <section className="workspace-main">
             <div className="workspace-topbar">
               <div>
-                <div className="eyebrow">{t(zh, "登录后工作台", "Logged-in workspace")}</div>
-                <h1 className="workspace-title">{t(zh, "今天先处理当前卡住的这票货。", "Start with the blocked shipment today.")}</h1>
+                <div className="eyebrow">{t(zh, "小微企业工作台", "SME workspace")}</div>
+                <h1 className="workspace-title">{t(zh, operatingSummary.headlineZh, operatingSummary.headlineEn)}</h1>
                 <p className="workspace-subtitle">{organization.name} · {businessContext.batchNo}</p>
               </div>
               <div className="hero-actions workspace-action">
