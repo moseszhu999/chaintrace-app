@@ -6,7 +6,7 @@ export default async function AssistantPage() {
   const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceFrame zh={zh} active="assistant" workspace={workspace} actionSlot={<a className="primary-button" href="/assistant/approvals">{zh ? "进入审批" : "Open approvals"}</a>}>
+    <WorkspaceFrame zh={zh} active="assistant" workspace={workspace} action={{ href: "/assistant/approvals", labelZh: "进入审批", labelEn: "Open approvals" }}>
       <AssistantView zh={zh} workspace={workspace} />
     </WorkspaceFrame>
   );
