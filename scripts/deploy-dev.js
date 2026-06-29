@@ -20,6 +20,12 @@ async function main() {
   const mockStablecoinAddress = await mockStablecoin.getAddress();
   console.log(`MockStablecoin: ${mockStablecoinAddress}`);
 
+  const LoanRequestRegistry = await hre.ethers.getContractFactory("LoanRequestRegistry");
+  const loanRequestRegistry = await LoanRequestRegistry.deploy();
+  await loanRequestRegistry.waitForDeployment();
+  const loanRequestRegistryAddress = await loanRequestRegistry.getAddress();
+  console.log(`LoanRequestRegistry: ${loanRequestRegistryAddress}`);
+
   const TradeSigningRegistry = await hre.ethers.getContractFactory("TradeSigningRegistry");
   const signingRegistry = await TradeSigningRegistry.deploy();
   await signingRegistry.waitForDeployment();
@@ -55,17 +61,19 @@ async function main() {
     deployedAt: new Date().toISOString(),
     contracts: {
       MockStablecoin: mockStablecoinAddress,
+      LoanRequestRegistry: loanRequestRegistryAddress,
       TradeSigningRegistry: signingRegistryAddress,
       LogisticsEvidenceRegistry: logisticsEvidenceRegistryAddress,
       FinancierPool: financierPoolAddress,
       BankVault: bankVaultAddress,
     },
     nextSteps: [
+      "Submit SME financing requests into LoanRequestRegistry with evidence-pack URI/hash.",
       "Financiers deposit test stablecoin into FinancierPool.",
       "FinancierPool funds BankVault and configures borrower credit lines.",
       "Create signing slots for PO, invoice, QC, B/L, warehouse receipt, and buyer acceptance.",
       "Create logistics evidence gates for packing, VGM, export clearance, import permit, warehouse receipt, and arrival QC.",
-      "Deploy ReceivableLoan with both required signing slots and required logistics evidence IDs.",
+      "Deploy ReceivableLoan with both required signing slots and required logistics evidence IDs after review approval.",
       "Approve the loan contract through FinancierPool.",
     ],
     note: "Ephemeral Hardhat dev-chain deployment. Addresses are for CI validation only and are not persistent.",
