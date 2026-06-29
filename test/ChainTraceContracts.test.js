@@ -8,6 +8,20 @@ const FlowType = {
   Information: 3,
 };
 
+const EvidenceType = {
+  Container: 0,
+  Seal: 1,
+  Packing: 2,
+  VGM: 3,
+  ExportCustoms: 4,
+  BillOfLading: 5,
+  ImportPermit: 6,
+  WarehouseReceipt: 7,
+  QualityInspection: 8,
+  BuyerAcceptance: 9,
+  Other: 10,
+};
+
 function id(value) {
   return ethers.id(value);
 }
@@ -30,6 +44,10 @@ describe("ChainTrace contract suite", function () {
     const registry = await Registry.deploy();
     await registry.waitForDeployment();
 
+    const EvidenceRegistry = await ethers.getContractFactory("LogisticsEvidenceRegistry");
+    const evidence = await EvidenceRegistry.deploy();
+    await evidence.waitForDeployment();
+
     const BankVault = await ethers.getContractFactory("BankVault");
     const bank = await BankVault.deploy(riskOfficer.address);
     await bank.waitForDeployment();
@@ -47,6 +65,13 @@ describe("ChainTrace contract suite", function () {
     const warehouseSlot = id("seal_warehouse_entry");
     const acceptanceSlot = id("sign_buyer_acceptance");
 
+    const packingGate = id("log_stuffing");
+    const sealVgmGate = id("log_vgm");
+    const exportClearanceGate = id("log_export_clearance");
+    const sgPermitGate = id("log_sg_permit");
+    const warehouseGate = id("log_warehouse");
+    const arrivalQcGate = id("log_qc_acceptance");
+
     const dueAt = Math.floor(Date.now() / 1000) + 86400;
 
     await registry.createSlot(tradeId, poSlot, FlowType.Commercial, buyer.address, id("BUYER"), id("po-initial"), dueAt, "ipfs://po");
@@ -56,14 +81,26 @@ describe("ChainTrace contract suite", function () {
     await registry.createSlot(tradeId, warehouseSlot, FlowType.Logistics, warehouse.address, id("WAREHOUSE"), id("warehouse-initial"), dueAt, "ipfs://warehouse");
     await registry.createSlot(tradeId, acceptanceSlot, FlowType.Logistics, buyer.address, id("BUYER"), id("acceptance-initial"), dueAt, "ipfs://acceptance");
 
+    await evidence.createGate(tradeId, packingGate, EvidenceType.Packing, exporter.address, id("EXPORTER"), id("packing-initial"), dueAt, "ipfs://packing");
+    await evidence.createGate(tradeId, sealVgmGate, EvidenceType.VGM, logistics.address, id("LOGISTICS"), id("vgm-initial"), dueAt, "ipfs://vgm");
+    await evidence.createGate(tradeId, exportClearanceGate, EvidenceType.ExportCustoms, logistics.address, id("LOGISTICS"), id("export-initial"), dueAt, "ipfs://export-clearance");
+    await evidence.createGate(tradeId, sgPermitGate, EvidenceType.ImportPermit, buyer.address, id("BUYER"), id("sg-permit-initial"), dueAt, "ipfs://sg-permit");
+    await evidence.createGate(tradeId, warehouseGate, EvidenceType.WarehouseReceipt, warehouse.address, id("WAREHOUSE"), id("warehouse-initial"), dueAt, "ipfs://warehouse-receipt");
+    await evidence.createGate(tradeId, arrivalQcGate, EvidenceType.QualityInspection, buyer.address, id("BUYER"), id("qc-initial"), dueAt, "ipfs://arrival-qc");
+
     await registry.connect(buyer).signSlot(poSlot, id("po-final"), "ipfs://po-final");
     await registry.connect(exporter).signSlot(invoiceSlot, id("invoice-final"), "ipfs://invoice-final");
     await registry.connect(exporter).signSlot(qualitySlot, id("quality-final"), "ipfs://quality-final");
+
+    await evidence.connect(exporter).verifyEvidence(packingGate, id("packing-final"), "ipfs://packing-final");
+    await evidence.connect(logistics).verifyEvidence(sealVgmGate, id("vgm-final"), "ipfs://vgm-final");
+    await evidence.connect(logistics).verifyEvidence(exportClearanceGate, id("export-final"), "ipfs://export-final");
 
     const ReceivableLoan = await ethers.getContractFactory("ReceivableLoan");
     const loan = await ReceivableLoan.deploy(
       await bank.getAddress(),
       await registry.getAddress(),
+      await evidence.getAddress(),
       tradeId,
       await stablecoin.getAddress(),
       borrower.address,
@@ -72,7 +109,8 @@ describe("ChainTrace contract suite", function () {
       ethers.parseUnits("29500", 6),
       ethers.parseUnits("737.5", 6),
       dueAt + 45 * 86400,
-      [poSlot, invoiceSlot, qualitySlot, blSlot, warehouseSlot, acceptanceSlot]
+      [poSlot, invoiceSlot, qualitySlot, blSlot, warehouseSlot, acceptanceSlot],
+      [packingGate, sealVgmGate, exportClearanceGate, sgPermitGate, warehouseGate, arrivalQcGate]
     );
     await loan.waitForDeployment();
     await bank.approveLoanContract(await loan.getAddress(), true);
@@ -89,33 +127,71 @@ describe("ChainTrace contract suite", function () {
       investor,
       stablecoin,
       registry,
+      evidence,
       bank,
       loan,
       slots: { poSlot, invoiceSlot, qualitySlot, blSlot, warehouseSlot, acceptanceSlot },
+      gates: { packingGate, sealVgmGate, exportClearanceGate, sgPermitGate, warehouseGate, arrivalQcGate },
     };
   }
 
-  it("blocks loan disbursement until all signing gates pass", async function () {
+  async function completeSigningGates({ registry, buyer, logistics, warehouse, slots }) {
+    await registry.connect(logistics).signSlot(slots.blSlot, id("bl-final"), "ipfs://bl-final");
+    await registry.connect(warehouse).signSlot(slots.warehouseSlot, id("warehouse-final"), "ipfs://warehouse-final");
+    await registry.connect(buyer).signSlot(slots.acceptanceSlot, id("acceptance-final"), "ipfs://acceptance-final");
+  }
+
+  async function completeRemainingLogisticsGates({ evidence, buyer, warehouse, gates }) {
+    await evidence.connect(buyer).verifyEvidence(gates.sgPermitGate, id("sg-permit-final"), "ipfs://sg-permit-final");
+    await evidence.connect(warehouse).verifyEvidence(gates.warehouseGate, id("warehouse-receipt-final"), "ipfs://warehouse-receipt-final");
+    await evidence.connect(buyer).verifyEvidence(gates.arrivalQcGate, id("arrival-qc-final"), "ipfs://arrival-qc-final");
+  }
+
+  it("blocks loan disbursement until signing and logistics gates pass", async function () {
     const { loan, financier } = await fixture();
 
     const [passed, total, allPassed] = await loan.checkGates();
-    expect(passed).to.equal(3n);
-    expect(total).to.equal(6n);
+    expect(passed).to.equal(6n);
+    expect(total).to.equal(12n);
+    expect(allPassed).to.equal(false);
+
+    const [signingPassed, signingTotal, signingAllPassed] = await loan.checkSigningGates();
+    expect(signingPassed).to.equal(3n);
+    expect(signingTotal).to.equal(6n);
+    expect(signingAllPassed).to.equal(false);
+
+    const [logisticsPassed, logisticsTotal, logisticsAllPassed] = await loan.checkLogisticsGates();
+    expect(logisticsPassed).to.equal(3n);
+    expect(logisticsTotal).to.equal(6n);
+    expect(logisticsAllPassed).to.equal(false);
+
+    await expect(loan.connect(financier).disburse()).to.be.revertedWith("GATES_NOT_PASSED");
+  });
+
+  it("still blocks disbursement when signing passes but logistics evidence is incomplete", async function () {
+    const context = await fixture();
+    const { loan, financier } = context;
+
+    await completeSigningGates(context);
+
+    const [passed, total, allPassed] = await loan.checkGates();
+    expect(passed).to.equal(9n);
+    expect(total).to.equal(12n);
     expect(allPassed).to.equal(false);
 
     await expect(loan.connect(financier).disburse()).to.be.revertedWith("GATES_NOT_PASSED");
   });
 
-  it("disburses through BankVault after all signing gates pass", async function () {
-    const { borrower, financier, buyer, logistics, warehouse, stablecoin, registry, loan, slots } = await fixture();
+  it("disburses through BankVault after signing and logistics gates pass", async function () {
+    const context = await fixture();
+    const { borrower, financier, stablecoin, loan } = context;
 
-    await registry.connect(logistics).signSlot(slots.blSlot, id("bl-final"), "ipfs://bl-final");
-    await registry.connect(warehouse).signSlot(slots.warehouseSlot, id("warehouse-final"), "ipfs://warehouse-final");
-    await registry.connect(buyer).signSlot(slots.acceptanceSlot, id("acceptance-final"), "ipfs://acceptance-final");
+    await completeSigningGates(context);
+    await completeRemainingLogisticsGates(context);
 
     const [passed, total, allPassed] = await loan.checkGates();
-    expect(passed).to.equal(6n);
-    expect(total).to.equal(6n);
+    expect(passed).to.equal(12n);
+    expect(total).to.equal(12n);
     expect(allPassed).to.equal(true);
 
     await expect(loan.connect(financier).disburse()).to.emit(loan, "Disbursed");
@@ -123,11 +199,11 @@ describe("ChainTrace contract suite", function () {
   });
 
   it("records repayment and closes the loan", async function () {
-    const { borrower, financier, buyer, logistics, warehouse, stablecoin, registry, loan, slots } = await fixture();
+    const context = await fixture();
+    const { borrower, financier, stablecoin, loan } = context;
 
-    await registry.connect(logistics).signSlot(slots.blSlot, id("bl-final"), "ipfs://bl-final");
-    await registry.connect(warehouse).signSlot(slots.warehouseSlot, id("warehouse-final"), "ipfs://warehouse-final");
-    await registry.connect(buyer).signSlot(slots.acceptanceSlot, id("acceptance-final"), "ipfs://acceptance-final");
+    await completeSigningGates(context);
+    await completeRemainingLogisticsGates(context);
     await loan.connect(financier).disburse();
 
     const repayment = ethers.parseUnits("30237.5", 6);
@@ -136,6 +212,12 @@ describe("ChainTrace contract suite", function () {
     await expect(loan.connect(borrower).repay(repayment)).to.emit(loan, "Repaid");
 
     expect(await loan.status()).to.equal(4n); // Repaid
+  });
+
+  it("enforces required verifier control on logistics evidence", async function () {
+    const { evidence, buyer, gates } = await fixture();
+
+    await expect(evidence.connect(buyer).verifyEvidence(gates.warehouseGate, id("warehouse-wrong-signer"), "ipfs://wrong")).to.be.revertedWith("NOT_REQUIRED_VERIFIER");
   });
 
   it("enforces whitelist transfer controls on restricted receivable token", async function () {
