@@ -11,7 +11,7 @@ export function PublicHeader({ zh }: { zh: boolean }) {
     { href: "/tasks", label: zh ? "履约 / 验收" : "Fulfillment" },
     { href: "/business-funds", label: zh ? "资金" : "Funds" },
     { href: "/business-wallet", label: zh ? "钱包" : "Wallet" },
-    { href: "/business-financing", label: zh ? "融资 / RWA" : "Financing / RWA" },
+    { href: "/business-financing", label: zh ? "RWA 代币化" : "RWA tokenization" },
     { href: "/proof-packs", label: zh ? "证明 / 风控" : "Proof & risk" },
     { href: "/login", label: zh ? "登录" : "Login" },
   ];
