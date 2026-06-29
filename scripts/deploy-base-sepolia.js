@@ -12,6 +12,12 @@ async function main() {
   console.log(`Deploying ChainTrace contracts to ${network.name} (${network.chainId})`);
   console.log(`Deployer: ${deployer.address}`);
 
+  const LoanRequestRegistry = await hre.ethers.getContractFactory("LoanRequestRegistry");
+  const loanRequestRegistry = await LoanRequestRegistry.deploy();
+  await loanRequestRegistry.waitForDeployment();
+  const loanRequestRegistryAddress = await loanRequestRegistry.getAddress();
+  console.log(`LoanRequestRegistry: ${loanRequestRegistryAddress}`);
+
   const TradeSigningRegistry = await hre.ethers.getContractFactory("TradeSigningRegistry");
   const signingRegistry = await TradeSigningRegistry.deploy();
   await signingRegistry.waitForDeployment();
@@ -36,16 +42,18 @@ async function main() {
     deployer: deployer.address,
     deployedAt: new Date().toISOString(),
     contracts: {
+      LoanRequestRegistry: loanRequestRegistryAddress,
       TradeSigningRegistry: signingRegistryAddress,
       LogisticsEvidenceRegistry: logisticsEvidenceRegistryAddress,
       BankVault: bankVaultAddress,
     },
     nextSteps: [
+      "Submit pre-review requests into LoanRequestRegistry with evidence-pack URI/hash.",
       "Set supported USDC asset on BankVault.",
       "Deposit test USDC liquidity.",
       "Create signing slots for the concrete trade.",
       "Create logistics evidence gates for packing, VGM, export clearance, import permit, warehouse receipt, and arrival QC.",
-      "Deploy ReceivableLoan with required signing slot IDs and logistics evidence IDs.",
+      "Deploy ReceivableLoan with required signing slot IDs and logistics evidence IDs after review approval.",
       "Approve the loan contract in BankVault.",
     ],
   };
