@@ -23,6 +23,27 @@ export type FinancingPackSection = {
   detailEn: string;
 };
 
+export type FinancierMemoItem = {
+  labelZh: string;
+  labelEn: string;
+  valueZh: string;
+  valueEn: string;
+};
+
+export type FinancierMemo = {
+  titleZh: string;
+  titleEn: string;
+  executiveDecisionZh: string;
+  executiveDecisionEn: string;
+  items: FinancierMemoItem[];
+  riskFlagsZh: string[];
+  riskFlagsEn: string[];
+  approvalConditionsZh: string[];
+  approvalConditionsEn: string[];
+  memoTextZh: string;
+  memoTextEn: string;
+};
+
 export type ReceivableReadinessReport = {
   tradeId: string;
   score: number;
@@ -33,6 +54,7 @@ export type ReceivableReadinessReport = {
   recommendationEn: string;
   categories: ReadinessCategory[];
   financingPack: FinancingPackSection[];
+  financierMemo: FinancierMemo;
   nextActionsZh: string[];
   nextActionsEn: string[];
 };
@@ -133,6 +155,48 @@ export const receivableReadinessReport: ReceivableReadinessReport = {
       detailEn: "Recommend financier pre-review, not formal disbursement; calculate advance rate only after buyer acceptance or discount decision is clear.",
     },
   ],
+  financierMemo: {
+    titleZh: "资金方预审备忘录",
+    titleEn: "Financier pre-review memo",
+    executiveDecisionZh: "建议进入预审队列；暂不批准 USDC 29,500 正式放款。",
+    executiveDecisionEn: "Move to pre-review queue; do not approve the USDC 29,500 formal disbursement yet.",
+    items: [
+      { labelZh: "交易", labelEn: "Trade", valueZh: "越南罗布斯塔生咖啡豆 10.8 吨 → 新加坡买家", valueEn: "Vietnam Robusta green coffee beans, 10.8 tons → Singapore buyer" },
+      { labelZh: "贸易金额", labelEn: "Trade value", valueZh: "USD 52,800", valueEn: "USD 52,800" },
+      { labelZh: "拟融资应收", labelEn: "Receivable", valueZh: "70% 尾款 USD 36,960", valueEn: "70% balance USD 36,960" },
+      { labelZh: "申请垫款", labelEn: "Requested advance", valueZh: "USDC 29,500", valueEn: "USDC 29,500" },
+      { labelZh: "融资评分", labelEn: "Readiness score", valueZh: "62/100，仅可预审", valueEn: "62/100, pre-review only" },
+      { labelZh: "链上 gate", labelEn: "On-chain gates", valueZh: "6/12 已通过", valueEn: "6/12 passed" },
+    ],
+    riskFlagsZh: [
+      "到港快检水分 13.2%，超过合同上限 12.5%。",
+      "买家尚未签署 accept / discount / reject。",
+      "仓库入库回执未形成。",
+      "最终提单和新加坡进口许可仍未最终核验。",
+    ],
+    riskFlagsEn: [
+      "Arrival quick-test moisture is 13.2%, above the 12.5% contractual cap.",
+      "Buyer has not signed accept / discount / reject.",
+      "Warehouse receipt is not available yet.",
+      "Final B/L and Singapore import permit have not been finally verified.",
+    ],
+    approvalConditionsZh: [
+      "最终 on-board B/L 由物流方签章。",
+      "新加坡进口许可状态由买家或报关代理确认。",
+      "Jurong 仓库入库回执绑定柜号、铅封、袋数和重量。",
+      "到港质检争议形成实验室结论。",
+      "买家签署接受、扣款或拒收决定。",
+    ],
+    approvalConditionsEn: [
+      "Final on-board B/L sealed by logistics provider.",
+      "Singapore import permit status confirmed by buyer or customs agent.",
+      "Jurong warehouse receipt binds container, seal, bag count, and weight.",
+      "Arrival QC dispute has a lab result.",
+      "Buyer signs accept, discount, or reject decision.",
+    ],
+    memoTextZh: "本案具备融资预审基础：PO、发票、装箱单、装运前质检、VGM 与越南出口放行已形成初步贸易事实链。但由于到港水分争议、仓库回执、最终提单、新加坡进口许可及买家验收仍未闭合，当前不建议正式放款。建议资金方保留 USDC 29,500 额度预审，待关键 gate 完成后重新计算 advance rate 与放款条件。",
+    memoTextEn: "This case is suitable for financing pre-review: PO, invoice, packing list, pre-shipment QC, VGM, and Vietnam export release form an initial trade-fact chain. However, because arrival moisture dispute, warehouse receipt, final B/L, Singapore import permit, and buyer acceptance remain open, formal disbursement is not recommended yet. The financier may reserve the USDC 29,500 review capacity and recalculate advance rate and disbursement conditions after the key gates close.",
+  },
   nextActionsZh: [
     "要求物流商补最终 on-board B/L 签章。",
     "要求买家或报关代理补新加坡进口许可最终状态。",
