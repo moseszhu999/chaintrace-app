@@ -11,6 +11,7 @@ export function PublicHeader({ zh }: { zh: boolean }) {
     { href: "/verify/uy-beef-cn-2026-0001", label: zh ? "公开验证" : "Public verify" },
     { href: "/login", label: zh ? "登录" : "Login" },
     { href: "/dashboard", label: zh ? "工作台" : "Workspace" },
+    { href: "/business-ops", label: zh ? "业务 Sidecar" : "Business sidecar" },
   ];
 
   return (
@@ -73,25 +74,28 @@ export function PublicHeader({ zh }: { zh: boolean }) {
           flex: 1,
         }}
       >
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              minHeight: 36,
-              padding: "0 12px",
-              borderRadius: 999,
-              color: item.href === "/dashboard" ? "#fff" : "#4d443b",
-              background: item.href === "/dashboard" ? "#111827" : "transparent",
-              fontSize: 14,
-              fontWeight: 850,
-            }}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {navItems.map((item) => {
+          const isPrimary = item.href === "/business-ops";
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                minHeight: 36,
+                padding: "0 12px",
+                borderRadius: 999,
+                color: isPrimary ? "#fff" : "#4d443b",
+                background: isPrimary ? "#111827" : "transparent",
+                fontSize: 14,
+                fontWeight: 850,
+              }}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       <LanguageSwitcher />
