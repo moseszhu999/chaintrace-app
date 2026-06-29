@@ -20,7 +20,7 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
     <>
       <section className="panel">
         <div className="section-heading">
-          <span>{t(zh, "经营工作台", "Operating workspace")}</span>
+          <span>{t(zh, "业务 Sidecar", "Business sidecar")}</span>
           <h2>{t(zh, operatingSummary.headlineZh, operatingSummary.headlineEn)}</h2>
           <p>{t(zh, operatingSummary.promiseZh, operatingSummary.promiseEn)}</p>
         </div>
@@ -51,10 +51,10 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
             <article className={styles.listRow}>
               <div className={styles.rowHeader}>
                 <div className={styles.rowMain}>
-                  <h3 className={styles.rowTitle}>{t(zh, "业务流程进度", "Business flow progress")}</h3>
+                  <h3 className={styles.rowTitle}>{t(zh, "业务 Sidecar 总览", "Business sidecar overview")}</h3>
                   <p className={styles.rowMeta}>{workingStages}/{businessStages.length} {t(zh, "个环节正在推进；当前卡点：", "stages need attention; blockers: ")}{blockerText}</p>
                 </div>
-                <Link className="primary-button" href="/business">{t(zh, "打开业务流程", "Open business flow")}</Link>
+                <Link className="primary-button" href="/business-ops">{t(zh, "打开 Sidecar", "Open sidecar")}</Link>
               </div>
             </article>
           </div>
