@@ -1,29 +1,16 @@
 import { NextResponse } from "next/server";
 import { agentRuns } from "@/lib/agent-workbench-fixture";
+import { getLoanGateChecklist, getLoanGateSummary } from "@/lib/loan-gate-fixture";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
 import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
 
 export const dynamic = "force-static";
 
-const gateChecklist = [
-  { id: "po_signed", labelZh: "采购订单已签署", labelEn: "Purchase order signed", status: "passed", evidenceId: "doc_po" },
-  { id: "invoice_matched", labelZh: "发票与 PO 匹配", labelEn: "Invoice matches PO", status: "passed", evidenceId: "doc_invoice" },
-  { id: "packing_verified", labelZh: "装箱单绑定柜号", labelEn: "Packing list binds container", status: "passed", evidenceId: "doc_packing" },
-  { id: "pre_qc_passed", labelZh: "装运前质检通过", labelEn: "Pre-shipment QC passed", status: "passed", evidenceId: "doc_quality" },
-  { id: "vgm_verified", labelZh: "VGM 重量声明已核验", labelEn: "VGM verified", status: "passed", evidenceId: "doc_vgm" },
-  { id: "export_released", labelZh: "越南出口放行", labelEn: "Vietnam export released", status: "passed", evidenceId: "doc_export_customs" },
-  { id: "final_bl", labelZh: "最终 on-board B/L", labelEn: "Final on-board B/L", status: "pending", evidenceId: "doc_bl" },
-  { id: "sg_import_permit", labelZh: "新加坡进口许可最终确认", labelEn: "Singapore import permit final confirmation", status: "pending", evidenceId: "doc_sg_permit" },
-  { id: "warehouse_receipt", labelZh: "仓库入库回执", labelEn: "Warehouse receipt", status: "blocked", evidenceId: "doc_warehouse" },
-  { id: "arrival_qc", labelZh: "到港质检争议闭合", labelEn: "Arrival QC dispute closed", status: "blocked", evidenceId: "doc_arrival_qc" },
-  { id: "buyer_acceptance", labelZh: "买家验收 / 扣款 / 拒收决定", labelEn: "Buyer accept / discount / reject decision", status: "blocked", evidenceId: "doc_acceptance" },
-  { id: "financier_multisig", labelZh: "资金方放款多签", labelEn: "Financier disbursement multisig", status: "blocked", evidenceId: "loan_receivable_vn_sg_0007" },
-] as const;
-
 export async function GET() {
   const workspace = await getWorkspaceSnapshot();
   const trade = workspace.activeTrade;
-  const passed = gateChecklist.filter((gate) => gate.status === "passed").length;
+  const gateChecklist = getLoanGateChecklist();
+  const gateSummary = getLoanGateSummary();
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
@@ -33,11 +20,11 @@ export async function GET() {
     decision: {
       readinessScore: receivableReadinessReport.score,
       maxScore: receivableReadinessReport.maxScore,
-      gatesPassed: passed,
-      totalGates: gateChecklist.length,
-      preReviewAllowed: true,
-      disbursementAllowed: false,
-      blockerCode: "GATES_NOT_PASSED",
+      gatesPassed: gateSummary.passed,
+      totalGates: gateSummary.total,
+      preReviewAllowed: gateSummary.preReviewAllowed,
+      disbursementAllowed: gateSummary.disbursementAllowed,
+      blockerCode: gateSummary.blockerCode,
     },
     gates: gateChecklist,
     nextAgent: "/api/agents/gaps",
