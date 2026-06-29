@@ -37,10 +37,10 @@ export type BusinessOperatingSummary = {
 };
 
 export const sampleOperatingSummary: BusinessOperatingSummary = {
-  headlineZh: "小微企业业务操作台",
-  headlineEn: "SME operating workspace",
-  promiseZh: "从客户、订单、文件、物流、收款、融资到纠纷处理，都在同一条事实链上推进。",
-  promiseEn: "Run customers, orders, documents, logistics, collection, financing, and disputes on one shared fact trail.",
+  headlineZh: "小微企业业务 Sidecar",
+  headlineEn: "SME business sidecar",
+  promiseZh: "从客户、订单、文件、物流、收款、融资到纠纷处理，都由一个业务副驾驶协助推进。",
+  promiseEn: "A business sidecar helps move customers, orders, documents, logistics, collection, financing, and disputes forward.",
   activeDealZh: "当前主线：UY-BEEF-CN-2026-0001 从发货后文件补齐进入收款和融资准备。",
   activeDealEn: "Active lane: UY-BEEF-CN-2026-0001 is moving from post-shipment document completion into collection and financing readiness.",
 };
@@ -52,7 +52,7 @@ export const sampleBusinessModules: BusinessModule[] = [
     titleEn: "Customers & deals",
     descriptionZh: "管理买家、供应商、联系人、报价、订单和合同摘要。",
     descriptionEn: "Manage buyers, suppliers, contacts, quotations, orders, and contract summaries.",
-    entryHref: "/business",
+    entryHref: "/business-ops",
     statusZh: "当前 3 个交易进行中",
     statusEn: "3 active deals",
   },
@@ -98,8 +98,8 @@ export const sampleBusinessModules: BusinessModule[] = [
   },
   {
     id: "module_agent",
-    titleZh: "业务助手",
-    titleEn: "Business assistant",
+    titleZh: "业务 Sidecar",
+    titleEn: "Business sidecar",
     descriptionZh: "把缺口变成任务、草稿、审批和对外沟通，但不越权自动发送。",
     descriptionEn: "Turns gaps into tasks, drafts, approvals, and external communication without sending automatically.",
     entryHref: "/assistant",
