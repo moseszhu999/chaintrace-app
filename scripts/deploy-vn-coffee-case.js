@@ -204,7 +204,7 @@ async function main() {
       "Verify warehouse receipt with Jurong warehouse.",
       "Resolve arrival QC moisture dispute.",
       "Collect buyer accept / discount / reject signature.",
-      "Approve the request, convert to ReceivableLoan, then call loan.disburse() from financier or owner.",
+      "Only after professional review approval and all gates pass, convert the request to ReceivableLoan and then allow financier or owner disbursement execution.",
     ],
   };
 

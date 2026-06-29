@@ -49,6 +49,66 @@ export function ContractConsoleView({ zh, workspace }: { zh: boolean; workspace:
 
       <div className="panel">
         <div className="section-heading">
+          <span>{t(zh, "融资申请生命周期", "Loan request lifecycle")}</span>
+          <h2>{t(zh, "LoanRequestRegistry 是 ReceivableLoan 之前的预审入口，不是正式放款合约。", "LoanRequestRegistry is the pre-review entry point before ReceivableLoan, not the formal disbursement contract.")}</h2>
+          <p>{t(zh, "当前越南咖啡案例保持 PreReview；专业审查和 gate 未通过前不能转换或放款。", "The Vietnam coffee case remains in PreReview; it cannot convert or disburse before professional review and gate completion.")}</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, marginBottom: 16 }}>
+          <MetricCard label={t(zh, "当前状态", "Current status")} value="PreReview" note={t(zh, "仅可融资预审", "Pre-review only")} />
+          <MetricCard label={t(zh, "Readiness", "Readiness")} value="62/100" note={t(zh, "证据包仍有缺口", "Evidence pack still has gaps")} />
+          <MetricCard label={t(zh, "阻断码", "Blocker code")} value="GATES_NOT_PASSED" note={t(zh, "贷款 gate 只有 6/12 通过", "Only 6/12 loan gates passed")} />
+          <MetricCard label={t(zh, "正式放款", "Formal disbursement")} value={t(zh, "已阻断", "Blocked")} note={t(zh, "先专业审查，再转换为 ReceivableLoan", "Professional review first, then ReceivableLoan conversion")} />
+        </div>
+        <div className={styles.list}>
+          {[
+            {
+              id: "pre-review",
+              title: "PreReview",
+              metaZh: "上传证据和 Agent memo 形成预审融资申请草稿。",
+              metaEn: "Uploaded evidence and Agent memo become a pre-review financing request draft.",
+              status: "current",
+              className: styles.statusOpen,
+            },
+            {
+              id: "review-blocked",
+              title: "ReviewBlocked",
+              metaZh: "专业审查发现 gate、证据、争议或合规缺口，申请保持阻断。",
+              metaEn: "Professional review finds gate, evidence, dispute, or compliance gaps, so the request remains blocked.",
+              status: "possible",
+              className: styles.statusMissing,
+            },
+            {
+              id: "approved",
+              title: "Approved",
+              metaZh: "只有专业审查通过且关键条件补齐后，才可能批准转换。",
+              metaEn: "Conversion can be approved only after professional review and key conditions are complete.",
+              status: "future",
+              className: styles.statusMissing,
+            },
+            {
+              id: "converted",
+              title: "ConvertedToLoan",
+              metaZh: "批准后的申请才可转换为 ReceivableLoan；放款仍由 gate 和金库规则控制。",
+              metaEn: "Only an approved request can convert to ReceivableLoan; disbursement remains controlled by gates and vault rules.",
+              status: "future",
+              className: styles.statusMissing,
+            },
+          ].map((step) => (
+            <article className={styles.listRow} key={step.id}>
+              <div className={styles.rowHeader}>
+                <div className={styles.rowMain}>
+                  <h3 className={styles.rowTitle}>{step.title}</h3>
+                  <p className={styles.rowMeta}>{t(zh, step.metaZh, step.metaEn)}</p>
+                </div>
+                <span className={`${styles.statusChip} ${step.className}`}>{step.status}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="section-heading">
           <span>{t(zh, "合约层", "Contract layers")}</span>
           <h2>{t(zh, "ChainTrace 的链上部分不是一个 token，而是一组互相约束的合约。", "ChainTrace's on-chain layer is not one token; it is a set of mutually constrained contracts.")}</h2>
         </div>
