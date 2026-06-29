@@ -8,7 +8,7 @@ export const workspaceNavItems: { key: WorkspaceNavKey; href: string; zh: string
   { key: "tasks", href: "/tasks", zh: "业务履约 / 验收", en: "Business fulfillment" },
   { key: "funds", href: "/business-funds", zh: "业务资金", en: "Business funds" },
   { key: "wallet", href: "/business-wallet", zh: "业务钱包", en: "Business wallet" },
-  { key: "approvals", href: "/business-financing", zh: "业务融资 / RWA", en: "Business financing / RWA" },
+  { key: "approvals", href: "/business-financing", zh: "RWA 代币化", en: "RWA tokenization" },
   { key: "proofPacks", href: "/proof-packs", zh: "业务证明 / 风控", en: "Business proof & risk" },
   { key: "assistant", href: "/assistant", zh: "业务建议", en: "Business advice" },
 ];
