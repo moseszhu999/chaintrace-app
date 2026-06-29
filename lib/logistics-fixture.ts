@@ -1,0 +1,297 @@
+export type LogisticsStatus = "verified" | "uploaded" | "pending" | "blocked";
+
+export type LogisticsTimelineItem = {
+  id: string;
+  order: number;
+  titleZh: string;
+  titleEn: string;
+  partyId: string;
+  plannedAt: string;
+  status: LogisticsStatus;
+  evidenceNo: string;
+  evidenceHash?: string;
+  chainAnchor: boolean;
+  noteZh: string;
+  noteEn: string;
+};
+
+export type LogisticsEvidenceItem = {
+  id: string;
+  labelZh: string;
+  labelEn: string;
+  value: string;
+  status: LogisticsStatus;
+  issuerZh: string;
+  issuerEn: string;
+  noteZh: string;
+  noteEn: string;
+};
+
+export const coffeeLogisticsSummary = {
+  tradeId: "trade_vn_coffee_sg_2026_0007",
+  shipmentNo: "SHP-HCM-SG-2026-0412",
+  bookingNo: "BKG-SG-260318-044",
+  containerNo: "TCLU-482913-2",
+  sealNo: "VNCT-739184",
+  shipmentTypeZh: "20GP 干货柜，小批量拼柜 / 部分装载",
+  shipmentTypeEn: "20GP dry container, small-batch consolidated / partial load",
+  carrier: "Regional ocean carrier / forwarder",
+  vessel: "M/V Mekong Star",
+  voyage: "MS2604S",
+  originWarehouseZh: "Dak Lak 咖啡集货仓",
+  originWarehouseEn: "Dak Lak coffee consolidation warehouse",
+  originPortZh: "越南胡志明 Cat Lai 港",
+  originPortEn: "Cat Lai Terminal, Ho Chi Minh City, Vietnam",
+  destinationPortZh: "新加坡 PSA / Pasir Panjang 码头",
+  destinationPortEn: "PSA Singapore / Pasir Panjang terminal",
+  destinationWarehouseZh: "Jurong 食品级干仓",
+  destinationWarehouseEn: "Jurong food-grade dry warehouse",
+  etd: "2026-04-12",
+  eta: "2026-04-18",
+  tradeNetUrn: "DA20260318-004921",
+  importPermitStatus: "pending",
+  vgmWeightKg: 14820,
+  vgmMethodZh: "Method 2：货物、包装、垫料、箱皮重合计",
+  vgmMethodEn: "Method 2: cargo, packing, dunnage, and container tare summed",
+  cargo: {
+    productZh: "越南罗布斯塔生咖啡豆 G1",
+    productEn: "Vietnam Robusta green coffee beans G1",
+    bagTypeZh: "60kg 麻袋 / PP 袋",
+    bagTypeEn: "60kg jute / PP bags",
+    bagCount: 180,
+    netWeightKg: 10800,
+    grossWeightKg: 10980,
+  },
+};
+
+export const logisticsTimeline: LogisticsTimelineItem[] = [
+  {
+    id: "log_booking",
+    order: 1,
+    titleZh: "舱位确认",
+    titleEn: "Booking confirmed",
+    partyId: "party_logistics",
+    plannedAt: "2026-04-06",
+    status: "verified",
+    evidenceNo: "BKG-SG-260318-044",
+    evidenceHash: "0xbkg4...10af",
+    chainAnchor: true,
+    noteZh: "货代确认胡志明至新加坡航线舱位，绑定 PO 与发票。",
+    noteEn: "Forwarder confirms Ho Chi Minh to Singapore space and links the booking to PO and invoice.",
+  },
+  {
+    id: "log_empty_release",
+    order: 2,
+    titleZh: "空柜放出",
+    titleEn: "Empty container released",
+    partyId: "party_logistics",
+    plannedAt: "2026-04-08",
+    status: "verified",
+    evidenceNo: "EIR-TCLU-482913-2",
+    evidenceHash: "0xeir8...44de",
+    chainAnchor: true,
+    noteZh: "空柜从堆场放出，柜号通过 ISO 6346 校验。",
+    noteEn: "Empty container released from depot; container number passes ISO 6346 check digit validation.",
+  },
+  {
+    id: "log_stuffing",
+    order: 3,
+    titleZh: "装柜完成",
+    titleEn: "Stuffing completed",
+    partyId: "party_exporter",
+    plannedAt: "2026-04-09",
+    status: "verified",
+    evidenceNo: "PKL-VN-2026-0410",
+    evidenceHash: "0xpkl1...83bd",
+    chainAnchor: true,
+    noteZh: "180 袋咖啡豆装柜，记录袋数、净重、毛重、装柜照片。",
+    noteEn: "180 bags loaded; bag count, net/gross weight, and stuffing photos recorded.",
+  },
+  {
+    id: "log_seal",
+    order: 4,
+    titleZh: "铅封确认",
+    titleEn: "Seal applied",
+    partyId: "party_logistics",
+    plannedAt: "2026-04-09",
+    status: "verified",
+    evidenceNo: "VNCT-739184",
+    evidenceHash: "0xseal...2ab1",
+    chainAnchor: true,
+    noteZh: "装柜后加封，铅封号与照片进入物流证据包。",
+    noteEn: "Seal applied after stuffing; seal number and photo enter the logistics evidence pack.",
+  },
+  {
+    id: "log_vgm",
+    order: 5,
+    titleZh: "VGM 提交",
+    titleEn: "VGM submitted",
+    partyId: "party_logistics",
+    plannedAt: "2026-04-10",
+    status: "verified",
+    evidenceNo: "VGM-HCM-2026-0410-8821",
+    evidenceHash: "0xvgm8...d31f",
+    chainAnchor: true,
+    noteZh: "VGM 14,820 kg，装船截关前提交。",
+    noteEn: "VGM 14,820 kg submitted before vessel cut-off.",
+  },
+  {
+    id: "log_export_clearance",
+    order: 6,
+    titleZh: "越南出口放行",
+    titleEn: "Vietnam export customs cleared",
+    partyId: "party_logistics",
+    plannedAt: "2026-04-11",
+    status: "verified",
+    evidenceNo: "VN-EXP-2026-0318-7782",
+    evidenceHash: "0xexp7...90ad",
+    chainAnchor: true,
+    noteZh: "出口报关放行，单证与 PO、发票、装箱单一致。",
+    noteEn: "Export clearance completed; declaration matches PO, invoice, and packing list.",
+  },
+  {
+    id: "log_loaded",
+    order: 7,
+    titleZh: "已装船 / 提单草稿",
+    titleEn: "Loaded on vessel / B/L draft",
+    partyId: "party_logistics",
+    plannedAt: "2026-04-12",
+    status: "uploaded",
+    evidenceNo: "BL-HCM-SIN-448812",
+    evidenceHash: "0xfe91...440c",
+    chainAnchor: false,
+    noteZh: "提单已上传，但物流商最终签章仍待确认。",
+    noteEn: "Bill of lading uploaded, but final logistics seal is still pending.",
+  },
+  {
+    id: "log_sg_permit",
+    order: 8,
+    titleZh: "新加坡进口许可 / TradeNet URN",
+    titleEn: "Singapore import permit / TradeNet URN",
+    partyId: "party_buyer",
+    plannedAt: "2026-04-17",
+    status: "pending",
+    evidenceNo: "DA20260318-004921",
+    chainAnchor: false,
+    noteZh: "买方已提交进口许可申请，状态仍为 pending。",
+    noteEn: "Buyer submitted import permit application; status remains pending.",
+  },
+  {
+    id: "log_warehouse",
+    order: 9,
+    titleZh: "新加坡仓库入库",
+    titleEn: "Singapore warehouse receipt",
+    partyId: "party_warehouse",
+    plannedAt: "2026-04-18",
+    status: "blocked",
+    evidenceNo: "WR-SG-2026-0318-07",
+    chainAnchor: false,
+    noteZh: "仓库尚未出具最终入库回执，资金方无法确认货权到仓。",
+    noteEn: "Warehouse has not issued final receipt; financier cannot confirm goods reached warehouse.",
+  },
+  {
+    id: "log_qc_acceptance",
+    order: 10,
+    titleZh: "质检争议 / 买方验收",
+    titleEn: "QC dispute / buyer acceptance",
+    partyId: "party_buyer",
+    plannedAt: "2026-04-19",
+    status: "blocked",
+    evidenceNo: "QC-SG-PENDING",
+    chainAnchor: false,
+    noteZh: "新加坡仓库快检水分 13.2%，超过合同上限 12.5%，第三方实验室结果待出。",
+    noteEn: "Singapore warehouse quick test shows 13.2% moisture, above 12.5% contract cap; third-party lab result is pending.",
+  },
+];
+
+export const logisticsEvidenceItems: LogisticsEvidenceItem[] = [
+  {
+    id: "container",
+    labelZh: "柜号",
+    labelEn: "Container No.",
+    value: coffeeLogisticsSummary.containerNo,
+    status: "verified",
+    issuerZh: "物流商",
+    issuerEn: "Logistics provider",
+    noteZh: "使用通过校验位的柜号，避免演示数据看起来不真实。",
+    noteEn: "Uses a check-digit-valid container number so the demo looks operationally credible.",
+  },
+  {
+    id: "seal",
+    labelZh: "铅封号",
+    labelEn: "Seal No.",
+    value: coffeeLogisticsSummary.sealNo,
+    status: "verified",
+    issuerZh: "装柜现场 / 物流商",
+    issuerEn: "Stuffing site / forwarder",
+    noteZh: "铅封照片、装柜照片、封条号共同证明货柜未被任意替换。",
+    noteEn: "Seal photo, stuffing photo, and seal number jointly reduce substitution risk.",
+  },
+  {
+    id: "vgm",
+    labelZh: "VGM",
+    labelEn: "VGM",
+    value: `${coffeeLogisticsSummary.vgmWeightKg.toLocaleString()} kg`,
+    status: "verified",
+    issuerZh: "货代 / 托运人",
+    issuerEn: "Forwarder / shipper",
+    noteZh: "装船前提交，用于证明重量口径和船公司收载条件。",
+    noteEn: "Submitted before loading to evidence weight basis and carrier acceptance.",
+  },
+  {
+    id: "bl",
+    labelZh: "提单",
+    labelEn: "Bill of lading",
+    value: "BL-HCM-SIN-448812",
+    status: "uploaded",
+    issuerZh: "承运人 / 货代",
+    issuerEn: "Carrier / forwarder",
+    noteZh: "已上传，但最终签章和 on-board 状态仍需核验。",
+    noteEn: "Uploaded, but final seal and on-board status still need verification.",
+  },
+  {
+    id: "tradenet",
+    labelZh: "TradeNet URN",
+    labelEn: "TradeNet URN",
+    value: coffeeLogisticsSummary.tradeNetUrn,
+    status: "pending",
+    issuerZh: "新加坡买方 / 报关代理",
+    issuerEn: "Singapore buyer / customs agent",
+    noteZh: "ChainTrace 只记录编号、状态和文件 hash，不替代新加坡官方系统。",
+    noteEn: "ChainTrace records reference, status, and document hash; it does not replace Singapore official systems.",
+  },
+  {
+    id: "warehouse",
+    labelZh: "仓库回执",
+    labelEn: "Warehouse receipt",
+    value: "WR-SG-2026-0318-07",
+    status: "blocked",
+    issuerZh: "新加坡收货仓库",
+    issuerEn: "Singapore receiving warehouse",
+    noteZh: "回执缺失是尾款和融资的主要阻塞点。",
+    noteEn: "Missing receipt is the main blocker for balance payment and financing.",
+  },
+  {
+    id: "qc",
+    labelZh: "到港质检",
+    labelEn: "Arrival QC",
+    value: "Moisture 13.2% vs max 12.5%",
+    status: "blocked",
+    issuerZh: "买方 / 第三方实验室",
+    issuerEn: "Buyer / third-party lab",
+    noteZh: "争议不直接判定谁对谁错，而是进入可追责证据链。",
+    noteEn: "The dispute is not judged automatically; it enters an accountable evidence chain.",
+  },
+];
+
+export const qcDispute = {
+  contractMaxMoisturePct: 12.5,
+  exporterPreShipmentMoisturePct: 12.1,
+  singaporeWarehouseQuickTestPct: 13.2,
+  blockedPayment: "USD 36,960",
+  requestedAdvance: "USD 29,500",
+  labStatusZh: "第三方实验室结果待出",
+  labStatusEn: "Third-party lab result pending",
+  recommendedActionZh: "先锁定仓库回执、取样照片、抽样批次和实验室委托单，再让买家给出接受、扣款或拒收的明确签章。",
+  recommendedActionEn: "Lock warehouse receipt, sampling photos, sample batch, and lab request first; then require buyer to sign accept, discount, or reject decision.",
+};
