@@ -18,6 +18,12 @@ async function main() {
   const signingRegistryAddress = await signingRegistry.getAddress();
   console.log(`TradeSigningRegistry: ${signingRegistryAddress}`);
 
+  const LogisticsEvidenceRegistry = await hre.ethers.getContractFactory("LogisticsEvidenceRegistry");
+  const logisticsEvidenceRegistry = await LogisticsEvidenceRegistry.deploy();
+  await logisticsEvidenceRegistry.waitForDeployment();
+  const logisticsEvidenceRegistryAddress = await logisticsEvidenceRegistry.getAddress();
+  console.log(`LogisticsEvidenceRegistry: ${logisticsEvidenceRegistryAddress}`);
+
   const BankVault = await hre.ethers.getContractFactory("BankVault");
   const bankVault = await BankVault.deploy(deployer.address);
   await bankVault.waitForDeployment();
@@ -31,13 +37,15 @@ async function main() {
     deployedAt: new Date().toISOString(),
     contracts: {
       TradeSigningRegistry: signingRegistryAddress,
+      LogisticsEvidenceRegistry: logisticsEvidenceRegistryAddress,
       BankVault: bankVaultAddress,
     },
     nextSteps: [
       "Set supported USDC asset on BankVault.",
       "Deposit test USDC liquidity.",
       "Create signing slots for the concrete trade.",
-      "Deploy ReceivableLoan with required signing slot IDs.",
+      "Create logistics evidence gates for packing, VGM, export clearance, import permit, warehouse receipt, and arrival QC.",
+      "Deploy ReceivableLoan with required signing slot IDs and logistics evidence IDs.",
       "Approve the loan contract in BankVault.",
     ],
   };
