@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { WorkspaceShell, type WorkspaceNavKey } from "@/components/workspace/WorkspaceShell";
+import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
+import type { WorkspaceNavKey } from "@/lib/workspace-navigation";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
 type WorkspaceFrameProps = {
