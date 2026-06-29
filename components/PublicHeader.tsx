@@ -6,6 +6,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
     { href: "/business-flows", label: zh ? "四流合一" : "Four flows" },
+    { href: "/business-signing", label: zh ? "签章合约" : "Signing contract" },
     { href: "/business-ops", label: zh ? "交易 Agent" : "Trade agent" },
     { href: "/evidence", label: zh ? "文件" : "Documents" },
     { href: "/tasks", label: zh ? "履约 / 验收" : "Fulfillment" },
