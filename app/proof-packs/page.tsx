@@ -6,7 +6,7 @@ export default async function ProofPacksPage() {
   const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceFrame zh={zh} active="proofPacks" workspace={workspace} action={{ href: "/evidence", labelZh: "补证据", labelEn: "Complete evidence" }}>
+    <WorkspaceFrame zh={zh} active="proofPacks" workspace={workspace} action={{ href: "/evidence", labelZh: "查看文件", labelEn: "View documents" }}>
       <ProofPacksView zh={zh} workspace={workspace} />
     </WorkspaceFrame>
   );
