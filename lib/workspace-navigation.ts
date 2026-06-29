@@ -1,8 +1,9 @@
-export type WorkspaceNavKey = "flows" | "logistics" | "signing" | "loan" | "contracts" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
+export type WorkspaceNavKey = "flows" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
 export const workspaceNavItems: { key: WorkspaceNavKey; href: string; zh: string; en: string }[] = [
   { key: "flows", href: "/business-flows", zh: "四流合一", en: "Four-flow view" },
   { key: "logistics", href: "/business-logistics", zh: "物流证据", en: "Logistics evidence" },
+  { key: "readiness", href: "/business-readiness", zh: "融资评分", en: "Readiness score" },
   { key: "signing", href: "/business-signing", zh: "签章合约", en: "Signing contract" },
   { key: "loan", href: "/business-loan", zh: "贷款合约", en: "Loan contract" },
   { key: "contracts", href: "/business-contracts", zh: "合约控制台", en: "Contract console" },
