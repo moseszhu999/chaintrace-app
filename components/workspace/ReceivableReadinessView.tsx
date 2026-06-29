@@ -63,6 +63,14 @@ export function ReceivableReadinessView({ zh, workspace }: { zh: boolean; worksp
           <MetricCard label={t(zh, "建议动作", "Recommendation")} value={t(zh, "预审", "Pre-review")} note={t(zh, "不建议正式放款", "Do not formally disburse yet")} />
           <MetricCard label={t(zh, "贷款 Gate", "Loan gates")} value="6/12" note={t(zh, "签章 + 物流 gate 仍未齐", "Signing + logistics gates incomplete")} />
         </div>
+        <div className={styles.rowActions} style={{ marginTop: 18 }}>
+          <Link className="primary-button" href="/api/financing-pack" target="_blank">
+            {t(zh, "打开融资包 API", "Open financing-pack API")}
+          </Link>
+          <Link className="secondary-button" href="/business-loan">
+            {t(zh, "查看贷款 Gate", "View loan gates")}
+          </Link>
+        </div>
       </div>
 
       <div className="panel">
