@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { agentRuns } from "@/lib/agent-workbench-fixture";
-import { getLoanGateChecklist, getLoanGateSummary } from "@/lib/loan-gate-fixture";
-import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { evaluateLoanGates } from "@/lib/gate-evaluator";
+import { evaluateReadiness } from "@/lib/readiness-evaluator";
+import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
 export const dynamic = "force-static";
 
 export async function GET() {
-  const workspace = await getWorkspaceSnapshot();
-  const trade = workspace.activeTrade;
-  const gateChecklist = getLoanGateChecklist();
-  const gateSummary = getLoanGateSummary();
+  const trade = await getCurrentTradeCase();
+  const evidenceRecords = await listEvidenceRecords(trade.id);
+  const gateResult = evaluateLoanGates(evidenceRecords);
+  const readiness = evaluateReadiness(trade, gateResult.summary);
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
@@ -18,15 +18,15 @@ export async function GET() {
     tradeId: trade.id,
     agent: agentRuns.find((run) => run.id === "gate-agent"),
     decision: {
-      readinessScore: receivableReadinessReport.score,
-      maxScore: receivableReadinessReport.maxScore,
-      gatesPassed: gateSummary.passed,
-      totalGates: gateSummary.total,
-      preReviewAllowed: gateSummary.preReviewAllowed,
-      disbursementAllowed: gateSummary.disbursementAllowed,
-      blockerCode: gateSummary.blockerCode,
+      readinessScore: readiness.readinessScore,
+      maxScore: readiness.maxScore,
+      gatesPassed: gateResult.summary.passed,
+      totalGates: gateResult.summary.total,
+      preReviewAllowed: readiness.preReviewAllowed,
+      disbursementAllowed: readiness.disbursementAllowed,
+      blockerCode: readiness.blockerCode,
     },
-    gates: gateChecklist,
+    gates: gateResult.checklist,
     nextAgent: "/api/agents/gaps",
   });
 }

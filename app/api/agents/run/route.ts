@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 import { agentApiEndpoints } from "@/lib/agent-api-fixture";
 import { agentRuns } from "@/lib/agent-workbench-fixture";
-import { getLoanGateChecklist, getLoanGateSummary } from "@/lib/loan-gate-fixture";
+import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { professionalReviewItems } from "@/lib/professional-review-fixture";
+import { evaluateReadiness } from "@/lib/readiness-evaluator";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
 export const dynamic = "force-static";
 
 export async function GET() {
-  const workspace = await getWorkspaceSnapshot();
-  const trade = workspace.activeTrade;
-  const documents = trade.documents;
-  const verified = documents.filter((document) => document.status === "verified");
-  const gateChecklist = getLoanGateChecklist().map(({ id, status, evidenceId }) => ({ id, status, evidenceId }));
-  const gateSummary = getLoanGateSummary();
+  const trade = await getCurrentTradeCase();
+  const evidenceRecords = await listEvidenceRecords(trade.id);
+  const verified = evidenceRecords.filter((record) => record.status === "verified");
+  const gateResult = evaluateLoanGates(evidenceRecords);
+  const gateChecklist = gateResult.checklist.map(({ id, status, evidenceId }) => ({ id, status, evidenceId }));
+  const readiness = evaluateReadiness(trade, gateResult.summary);
   const memo = receivableReadinessReport.financierMemo;
 
   return NextResponse.json({
@@ -27,7 +28,7 @@ export async function GET() {
       poNo: trade.poNo,
       invoiceNo: trade.invoiceNo,
       totalAmount: trade.totalAmount,
-      requestedAdvance: "USDC 29,500",
+      requestedAdvance: trade.requestedAdvance,
     },
     endpoints: agentApiEndpoints,
     pipeline: agentRuns.map((run) => ({
@@ -39,17 +40,17 @@ export async function GET() {
       outputEn: run.outputEn,
     })),
     evidence: {
-      filesReceived: documents.length,
+      filesReceived: evidenceRecords.length,
       verifiedCount: verified.length,
-      openCount: documents.length - verified.length,
-      preReviewUsableEvidenceIds: verified.map((document) => document.id),
+      openCount: evidenceRecords.length - verified.length,
+      preReviewUsableEvidenceIds: verified.map((record) => record.id),
     },
     gates: {
-      passed: gateSummary.passed,
-      total: gateSummary.total,
+      passed: gateResult.summary.passed,
+      total: gateResult.summary.total,
       checklist: gateChecklist,
-      blockerCode: gateSummary.blockerCode,
-      disbursementAllowed: gateSummary.disbursementAllowed,
+      blockerCode: gateResult.summary.blockerCode,
+      disbursementAllowed: gateResult.summary.disbursementAllowed,
     },
     gaps: {
       nextActionsZh: receivableReadinessReport.nextActionsZh,
@@ -70,12 +71,12 @@ export async function GET() {
       queue: professionalReviewItems,
     },
     machineDecision: {
-      readinessScore: receivableReadinessReport.score,
-      maxScore: receivableReadinessReport.maxScore,
-      status: receivableReadinessReport.statusEn,
-      preReviewAllowed: gateSummary.preReviewAllowed,
-      disbursementAllowed: gateSummary.disbursementAllowed,
-      blockerCode: gateSummary.blockerCode,
+      readinessScore: readiness.readinessScore,
+      maxScore: readiness.maxScore,
+      status: readiness.statusEn,
+      preReviewAllowed: readiness.preReviewAllowed,
+      disbursementAllowed: readiness.disbursementAllowed,
+      blockerCode: readiness.blockerCode,
     },
   });
 }
