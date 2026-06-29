@@ -11,12 +11,12 @@ export default async function BusinessOpsPage() {
       active="business"
       workspace={workspace}
       header={{
-        eyebrowZh: "Agent 工作台",
-        eyebrowEn: "Agent workbench",
-        titleZh: "Agent 驱动的证据运营",
-        titleEn: "Agent-driven evidence operations",
-        subtitleZh: "单证分类、Gate 匹配、缺口追踪、Memo 生成",
-        subtitleEn: "Document triage, gate matching, gap tracking, memo generation",
+        eyebrowZh: "操作员工作台",
+        eyebrowEn: "Operator workspace",
+        titleZh: "Agent 驱动的证据运营控制台",
+        titleEn: "Agent-driven evidence operations console",
+        subtitleZh: "登录后的复杂业务流：单证分类、Gate 匹配、缺口追踪、Memo 生成",
+        subtitleEn: "Post-login operating flow: document triage, gate matching, gap tracking, memo generation",
       }}
       action={{ href: "/business-readiness", labelZh: "融资评分", labelEn: "Readiness score" }}
     >
