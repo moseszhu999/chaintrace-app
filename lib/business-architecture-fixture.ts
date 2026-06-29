@@ -67,6 +67,54 @@ export const blmSections: ArchitectureSection[] = [
   },
 ];
 
+export const valueChainSections: ArchitectureSection[] = [
+  {
+    id: "value-creation",
+    titleZh: "价值创造：贸易事实生成",
+    titleEn: "Value creation: trade facts are generated",
+    summaryZh: "出口商、买家、物流、仓库、质检方在真实贸易过程中产生事实，但这些事实原本分散、低结构化、难融资。",
+    summaryEn: "Exporter, buyer, logistics provider, warehouse, and QC provider generate real trade facts, but these facts are scattered, unstructured, and hard to finance.",
+    pointsZh: ["PO、发票、装箱、VGM、报关、B/L、仓库、QC、验收共同构成应收账款事实链。", "AI Agent 先把低结构化材料变成结构化证据。", "ChainTrace 的第一价值是降低证据整理成本。"],
+    pointsEn: ["PO, invoice, packing, VGM, customs, B/L, warehouse, QC, and acceptance form the receivable fact chain.", "AI agents first turn unstructured materials into structured evidence.", "ChainTrace's first value is lowering evidence organization cost."],
+  },
+  {
+    id: "value-verification",
+    titleZh: "价值验证：多方 Gate 确认",
+    titleEn: "Value verification: multi-party gate confirmation",
+    summaryZh: "价值不是平台自己说了算，而是由买家、物流、仓库、质检、资金方在各自职责内验证。",
+    summaryEn: "Value is not self-claimed by the platform; it is verified by buyer, logistics provider, warehouse, QC provider, and financier within their roles.",
+    pointsZh: ["Signing Gate 验证商业义务。", "Logistics Gate 验证货物流转。", "QC / Acceptance Gate 验证争议状态和尾款触发条件。"],
+    pointsEn: ["Signing gates verify commercial obligations.", "Logistics gates verify cargo movement.", "QC / acceptance gates verify dispute status and balance-payment triggers."],
+  },
+  {
+    id: "value-conversion",
+    titleZh: "价值转化：证据变融资判断",
+    titleEn: "Value conversion: evidence becomes a financing decision",
+    summaryZh: "ChainTrace 的核心增值点是把证据链转化为 Readiness Score、Financing Pack 和 Financier Memo。",
+    summaryEn: "ChainTrace's core added value is converting evidence chains into Readiness Score, Financing Pack, and Financier Memo.",
+    pointsZh: ["资金方不需要人工翻 PDF，而是看风险 flags、缺口、前置条件和 machineDecision。", "AI Agent 替代预审助理和风控文书工作。", "API 让银行、保理商、Agent 和平台后台直接消费同一份判断。"],
+    pointsEn: ["Financiers do not manually read PDFs; they review risk flags, gaps, approval conditions, and machineDecision.", "AI agents replace pre-review assistants and risk-documentation work.", "The API lets banks, factors, agents, and platform back offices consume the same decision."],
+  },
+  {
+    id: "value-consumption",
+    titleZh: "价值消费：资金方与小企业使用结果",
+    titleEn: "Value consumption: financiers and SMEs use the result",
+    summaryZh: "出口商消费的是融资可得性，资金方消费的是低成本尽调结果，验证方消费的是低摩擦确认入口。",
+    summaryEn: "Exporters consume financing accessibility, financiers consume low-cost due diligence output, and verifiers consume low-friction confirmation entry points.",
+    pointsZh: ["出口商用它换取更快预审和更高信任。", "资金方用它减少尽调时间和坏账盲区。", "货代、仓库、质检、买家只需确认自己负责的事实节点。"],
+    pointsEn: ["Exporters use it for faster pre-review and higher trust.", "Financiers use it to reduce due-diligence time and blind spots.", "Forwarders, warehouses, QC providers, and buyers only confirm their responsible fact nodes."],
+  },
+  {
+    id: "value-capture",
+    titleZh: "价值捕获：平台收入与网络效应",
+    titleEn: "Value capture: platform revenue and network effects",
+    summaryZh: "平台收入不应先靠发币，而应来自 Agent 处理、融资材料包、SaaS、预审服务和融资成功服务费。",
+    summaryEn: "Platform revenue should not start from token issuance; it should come from agent processing, financing packs, SaaS, pre-review service, and financing success fees.",
+    pointsZh: ["每笔贸易 case 产生可计费的 Agent 工作量。", "每份 Financing Pack 产生可计费的风控交付物。", "越多交易、验证方和资金方接入，Trade Fact Graph 越有复用价值。"],
+    pointsEn: ["Each trade case creates billable agent workload.", "Each Financing Pack creates a billable risk deliverable.", "As more trades, verifiers, and financiers connect, the Trade Fact Graph gains reusable value."],
+  },
+];
+
 export const applicationArchitecture: ArchitectureLayer[] = [
   {
     id: "portal",
