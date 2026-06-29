@@ -104,11 +104,26 @@ function validateRepositoryLayer() {
   assertIncludes(repository, 'missing: "missing"', "default missing evidence");
 }
 
+function validateEvidenceUploadPersistence() {
+  const uploadRoute = read("app/api/evidence/upload/route.ts");
+
+  assertIncludes(uploadRoute, "addEvidenceRecord", "evidence upload route");
+  assertIncludes(uploadRoute, "evidenceId", "evidence upload response");
+  assertIncludes(uploadRoute, "evidenceRecord", "evidence upload response");
+  assertIncludes(uploadRoute, "NextResponse.json(", "evidence upload response");
+  assertIncludes(uploadRoute, "{ status: 400 }", "evidence upload validation");
+  assertIncludes(uploadRoute, "inferredEvidenceStatus", "evidence upload compatibility");
+  assertIncludes(uploadRoute, "gateImpact", "evidence upload compatibility");
+  assertIncludes(uploadRoute, "disbursementAllowed: false", "evidence upload guardrail");
+  assertIncludes(uploadRoute, 'blockerCode: "GATES_NOT_PASSED"', "evidence upload guardrail");
+}
+
 function main() {
   validateAgentPipeline();
   validateGateDecision();
   validatePreReviewDraft();
   validateRepositoryLayer();
+  validateEvidenceUploadPersistence();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
 
