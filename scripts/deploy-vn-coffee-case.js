@@ -53,6 +53,23 @@ async function main() {
   const stablecoinAddress = await stablecoin.getAddress();
   await stablecoin.issue(deployer.address, hre.ethers.parseUnits("1000000", 6));
 
+  const loanRequestRegistry = await deploy("LoanRequestRegistry");
+  const loanRequestRegistryAddress = await loanRequestRegistry.getAddress();
+  await loanRequestRegistry.connect(borrower).submitPreReviewRequest(
+    tradeId,
+    borrower.address,
+    exporter.address,
+    stablecoinAddress,
+    hre.ethers.parseUnits("36960", 6),
+    hre.ethers.parseUnits("29500", 6),
+    62,
+    100,
+    "ipfs://chaintrace/vn-coffee/financing-pack-v0.1.json",
+    id("financing-pack-v0.1"),
+    "GATES_NOT_PASSED"
+  );
+  const [loanRequestId] = await loanRequestRegistry.getRequesterRequestIds(borrower.address);
+
   const signingRegistry = await deploy("TradeSigningRegistry");
   const signingRegistryAddress = await signingRegistry.getAddress();
 
@@ -160,10 +177,18 @@ async function main() {
     },
     contracts: {
       MockStablecoin: stablecoinAddress,
+      LoanRequestRegistry: loanRequestRegistryAddress,
       TradeSigningRegistry: signingRegistryAddress,
       LogisticsEvidenceRegistry: logisticsRegistryAddress,
       BankVault: bankVaultAddress,
       ReceivableLoan: loanAddress,
+    },
+    loanRequest: {
+      requestId: loanRequestId,
+      status: "PreReview",
+      readinessScore: "62/100",
+      blockerCode: "GATES_NOT_PASSED",
+      evidencePackURI: "ipfs://chaintrace/vn-coffee/financing-pack-v0.1.json",
     },
     signingSlots: Object.fromEntries(Object.entries(signingSlots).map(([key, value]) => [key, value])),
     logisticsGates: Object.fromEntries(Object.entries(logisticsGates).map(([key, value]) => [key, value])),
@@ -173,12 +198,13 @@ async function main() {
       allPassed,
     },
     nextSteps: [
+      "Review the pre-review request in LoanRequestRegistry.",
       "Verify final B/L with logistics provider.",
       "Verify Singapore import permit status with buyer or customs agent.",
       "Verify warehouse receipt with Jurong warehouse.",
       "Resolve arrival QC moisture dispute.",
       "Collect buyer accept / discount / reject signature.",
-      "Then call loan.disburse() from financier or owner.",
+      "Approve the request, convert to ReceivableLoan, then call loan.disburse() from financier or owner.",
     ],
   };
 
