@@ -26,9 +26,21 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
   );
 }
 
+function MemoList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div style={{ border: "1px solid var(--border)", borderRadius: 24, padding: 18 }}>
+      <h3 className={styles.rowTitle}>{title}</h3>
+      <ul style={{ margin: "12px 0 0", paddingLeft: 18, color: "var(--muted)", lineHeight: 1.7 }}>
+        {items.map((item) => <li key={item}>{item}</li>)}
+      </ul>
+    </div>
+  );
+}
+
 export function ReceivableReadinessView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
   const { activeTrade } = workspace;
   const report = receivableReadinessReport;
+  const memo = report.financierMemo;
 
   function docLabel(id: string) {
     const doc = activeTrade.documents.find((item) => item.id === id);
@@ -100,6 +112,30 @@ export function ReceivableReadinessView({ zh, workspace }: { zh: boolean; worksp
             </article>
           ))}
         </div>
+      </div>
+
+      <div className="panel">
+        <div className="section-heading">
+          <span>{t(zh, memo.titleZh, memo.titleEn)}</span>
+          <h2>{t(zh, memo.executiveDecisionZh, memo.executiveDecisionEn)}</h2>
+          <p>{t(zh, "这部分是给资金方、保理商、风控经理直接阅读的预审备忘录。", "This section is a pre-review memo for financiers, factors, and risk managers.")}</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+          {memo.items.map((item) => (
+            <article key={item.labelEn} style={{ border: "1px solid var(--border)", borderRadius: 22, padding: 18 }}>
+              <span style={{ color: "#18794e", fontWeight: 900, fontSize: 13 }}>{t(zh, item.labelZh, item.labelEn)}</span>
+              <p style={{ margin: "8px 0 0", fontWeight: 800, lineHeight: 1.45 }}>{t(zh, item.valueZh, item.valueEn)}</p>
+            </article>
+          ))}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14, marginTop: 14 }}>
+          <MemoList title={t(zh, "主要风险", "Key risk flags")} items={zh ? memo.riskFlagsZh : memo.riskFlagsEn} />
+          <MemoList title={t(zh, "正式放款前置条件", "Approval conditions")} items={zh ? memo.approvalConditionsZh : memo.approvalConditionsEn} />
+        </div>
+        <article style={{ marginTop: 14, border: "1px solid var(--border)", borderRadius: 24, padding: 20, background: "rgba(24, 121, 78, 0.05)" }}>
+          <h3 className={styles.rowTitle}>{t(zh, "可复制 Memo", "Copy-ready memo")}</h3>
+          <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.75 }}>{t(zh, memo.memoTextZh, memo.memoTextEn)}</p>
+        </article>
       </div>
 
       <div className="panel">
