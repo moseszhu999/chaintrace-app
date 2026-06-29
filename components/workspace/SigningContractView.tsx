@@ -57,14 +57,14 @@ export function SigningContractView({ zh, workspace }: { zh: boolean; workspace:
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "业务签章合约", "Business signing contract")}</span>
-          <h2>{t(zh, "四流里需要签字盖章的地方，都进入链上智能合约状态机。", "All signature and seal points in the four flows enter an on-chain smart-contract state machine.")}</h2>
+          <h2>{t(zh, "四流里需要签字、盖章、oracle 输入的责任点，都进入链上智能合约状态机。", "Signature, seal, and oracle accountability points across the four flows enter an on-chain smart-contract state machine.")}</h2>
           <p>{t(zh, activeTrade.titleZh, activeTrade.titleEn)} · {tradeSigningContract.network} · {tradeSigningContract.address}</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
           <MetricCard label={t(zh, "合约", "Contract")} value={tradeSigningContract.address} note={t(zh, tradeSigningContract.nameZh, tradeSigningContract.nameEn)} />
           <MetricCard label={t(zh, "已签章", "Signed / sealed")} value={`${signedCount}/${signingSlots.length}`} note={t(zh, "可用于解锁下一步业务状态", "Can unlock the next business state")} />
-          <MetricCard label={t(zh, "待签章", "Pending")} value={`${pendingCount}`} note={t(zh, "提单签章正在等待核验", "Bill-of-lading seal is waiting for verification")} />
-          <MetricCard label={t(zh, "阻塞", "Blocked")} value={`${blockedCount}`} note={t(zh, "入库、验收、RWA 发行多签被卡", "Warehouse, acceptance, and RWA issuance multisig are blocked")} />
+          <MetricCard label={t(zh, "待核验", "Pending")} value={`${pendingCount}`} note={t(zh, "提单与新加坡进口许可仍在等待核验", "B/L and Singapore import permit are waiting for verification")} />
+          <MetricCard label={t(zh, "阻塞", "Blocked")} value={`${blockedCount}`} note={t(zh, "仓库、到港质检、买方验收、RWA 发行多签被卡", "Warehouse, arrival QC, buyer acceptance, and RWA issuance multisig are blocked")} />
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export function SigningContractView({ zh, workspace }: { zh: boolean; workspace:
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "合约边界", "Contract boundary")}</span>
-          <h2>{t(zh, "智能合约处理签章状态和触发条件，但不替代链下法律文件。", "The smart contract manages signing status and triggers, but does not replace off-chain legal documents.")}</h2>
+          <h2>{t(zh, "智能合约处理签章状态和触发条件，但不替代链下法律文件、海关系统、港口系统或仓库系统。", "The smart contract manages signing status and triggers, but does not replace off-chain legal documents, customs, port, or warehouse systems.")}</h2>
         </div>
         <div className={styles.list}>
           <article className={styles.listRow}>
@@ -104,14 +104,14 @@ export function SigningContractView({ zh, workspace }: { zh: boolean; workspace:
           </article>
           <article className={styles.listRow}>
             <h3 className={styles.rowTitle}>{t(zh, "合约不能做", "Contract cannot do")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "不能伪造公章，不能替人签名，不能确认链下货物真实到仓；这些必须由授权签章方或 oracle/人工验真输入。", "It cannot forge seals, sign for people, or confirm off-chain goods arrived; those inputs must come from authorized signers or oracle/human verification.")}</p>
+            <p className={styles.rowMeta}>{t(zh, "不能伪造公章，不能替人签名，不能确认链下货物真实到仓；这些必须由授权签章方、oracle、仓库、货代或人工验真输入。", "It cannot forge seals, sign for people, or confirm off-chain goods arrived; those inputs must come from authorized signers, oracle, warehouse, forwarder, or human verification.")}</p>
           </article>
           <article className={styles.listRow}>
             <h3 className={styles.rowTitle}>{t(zh, "当前 Agent 判断", "Current agent judgement")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "PO、发票、质检已经上链签章；提单待核验；入库、买家验收、贷款放款多签被阻塞。下一步先催物流商签章提单，再催仓库和买家签章。", "PO, invoice, and quality certificate are signed/sealed on-chain; bill of lading is pending; warehouse entry, buyer acceptance, and loan disbursement multisig are blocked. Next, ask the logistics provider to seal the bill of lading, then ask warehouse and buyer to sign/seal.")}</p>
+            <p className={styles.rowMeta}>{t(zh, "PO、发票、装箱单、装运前质检、VGM、出口放行已经闭合；提单和进口许可待核验；入库、到港质检、买家验收、贷款放款多签被阻塞。下一步先补物流证据，再推进贷款和 RWA。", "PO, invoice, packing list, pre-shipment QC, VGM, and export release are closed; B/L and import permit are pending; warehouse entry, arrival QC, buyer acceptance, and disbursement multisig are blocked. Complete logistics evidence before loan and RWA.")}</p>
           </article>
           <div className={styles.rowActions}>
-            <Link className="primary-button" href="/tasks">{t(zh, "处理签章卡点", "Handle signing blockers")}</Link>
+            <Link className="primary-button" href="/business-logistics">{t(zh, "处理物流证据", "Handle logistics evidence")}</Link>
             <Link className="secondary-button" href="/business-loan">{t(zh, "贷款合约", "Loan contract")}</Link>
             <Link className="secondary-button" href="/business-flows">{t(zh, "回到四流合一", "Back to four flows")}</Link>
             <Link className="secondary-button" href="/business-financing">{t(zh, "RWA 代币化", "RWA tokenization")}</Link>
