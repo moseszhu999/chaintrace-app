@@ -6,7 +6,7 @@ export default async function AssistantApprovalsPage() {
   const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceFrame zh={zh} active="approvals" workspace={workspace} actionSlot={<a className="secondary-button" href="/assistant">{zh ? "返回助手" : "Back to assistant"}</a>}>
+    <WorkspaceFrame zh={zh} active="approvals" workspace={workspace} action={{ href: "/assistant", labelZh: "返回助手", labelEn: "Back to assistant", variant: "secondary" }}>
       <ApprovalsView zh={zh} workspace={workspace} />
     </WorkspaceFrame>
   );
