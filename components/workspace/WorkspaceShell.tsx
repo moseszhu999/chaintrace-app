@@ -25,13 +25,13 @@ export function WorkspaceShell({
   return (
     <main className="page-shell">
       <section className="panel workspace-panel">
-        <div className="workspace-layout">
-          <aside className="workspace-sidebar">
+        <div className="workspace-layout" style={{ gridTemplateColumns: "230px minmax(0, 1fr)" }}>
+          <aside className="workspace-sidebar" style={{ borderRight: "1px solid var(--border)", borderBottom: 0 }}>
             <Link href="/" className="workspace-brand">
               <span className="workspace-brand-mark">CT</span>
               ChainTrace
             </Link>
-            <nav className="workspace-nav" aria-label="Workspace navigation">
+            <nav className="workspace-nav" aria-label="Workspace navigation" style={{ gridTemplateColumns: "1fr" }}>
               {workspaceNavItems.map((item) => (
                 <Link key={item.key} href={item.href} className={`${active === item.key ? "primary-button" : "secondary-button"} workspace-nav-link`}>
                   {zh ? item.zh : item.en}
