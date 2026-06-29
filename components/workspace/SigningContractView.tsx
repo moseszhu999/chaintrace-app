@@ -100,7 +100,7 @@ export function SigningContractView({ zh, workspace }: { zh: boolean; workspace:
         <div className={styles.list}>
           <article className={styles.listRow}>
             <h3 className={styles.rowTitle}>{t(zh, "合约可以做", "Contract can do")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "记录文件 hash、签章方、签章状态、时间戳、版本号；在所有必要签章完成后解锁付款、融资提交或 RWA tokenization。", "Record file hashes, signers, signing status, timestamps, and versions; unlock payment, financing submission, or RWA tokenization when all required signatures/seals are complete.")}</p>
+            <p className={styles.rowMeta}>{t(zh, "记录文件 hash、签章方、签章状态、时间戳、版本号；在所有必要签章完成后解锁付款、贷款放款或 RWA tokenization。", "Record file hashes, signers, signing status, timestamps, and versions; unlock payment, loan disbursement, or RWA tokenization when all required signatures/seals are complete.")}</p>
           </article>
           <article className={styles.listRow}>
             <h3 className={styles.rowTitle}>{t(zh, "合约不能做", "Contract cannot do")}</h3>
@@ -108,10 +108,11 @@ export function SigningContractView({ zh, workspace }: { zh: boolean; workspace:
           </article>
           <article className={styles.listRow}>
             <h3 className={styles.rowTitle}>{t(zh, "当前 Agent 判断", "Current agent judgement")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "PO、发票、质检已经上链签章；提单待核验；入库、买家验收、RWA 发行多签被阻塞。下一步先催物流商签章提单，再催仓库和买家签章。", "PO, invoice, and quality certificate are signed/sealed on-chain; bill of lading is pending; warehouse entry, buyer acceptance, and RWA issuance multisig are blocked. Next, ask the logistics provider to seal the bill of lading, then ask warehouse and buyer to sign/seal.")}</p>
+            <p className={styles.rowMeta}>{t(zh, "PO、发票、质检已经上链签章；提单待核验；入库、买家验收、贷款放款多签被阻塞。下一步先催物流商签章提单，再催仓库和买家签章。", "PO, invoice, and quality certificate are signed/sealed on-chain; bill of lading is pending; warehouse entry, buyer acceptance, and loan disbursement multisig are blocked. Next, ask the logistics provider to seal the bill of lading, then ask warehouse and buyer to sign/seal.")}</p>
           </article>
           <div className={styles.rowActions}>
             <Link className="primary-button" href="/tasks">{t(zh, "处理签章卡点", "Handle signing blockers")}</Link>
+            <Link className="secondary-button" href="/business-loan">{t(zh, "贷款合约", "Loan contract")}</Link>
             <Link className="secondary-button" href="/business-flows">{t(zh, "回到四流合一", "Back to four flows")}</Link>
             <Link className="secondary-button" href="/business-financing">{t(zh, "RWA 代币化", "RWA tokenization")}</Link>
           </div>
