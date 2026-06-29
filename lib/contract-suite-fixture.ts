@@ -26,6 +26,17 @@ export type DeploymentMode = {
 
 export const contractLayers: ContractLayer[] = [
   {
+    id: "loan_request_registry",
+    nameZh: "融资申请入口 Registry",
+    nameEn: "Loan request registry",
+    filePath: "contracts/LoanRequestRegistry.sol",
+    status: "implemented",
+    roleZh: "记录小企业应收账款融资申请、证据包 URI/hash、Readiness Score、阻断码和专业审查状态。",
+    roleEn: "Records SME receivable-financing requests, evidence-pack URI/hash, Readiness Score, blocker code, and professional-review status.",
+    unlocksZh: "把上传文件后的融资意图先固化为链上请求；只有审查批准后才转换成具体 ReceivableLoan。",
+    unlocksEn: "Turns the post-upload financing intent into an on-chain request; it converts to a concrete ReceivableLoan only after review approval.",
+  },
+  {
     id: "trade_signing_registry",
     nameZh: "四流签章 Registry",
     nameEn: "Four-flow signing registry",
