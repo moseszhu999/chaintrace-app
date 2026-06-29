@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getContextLabel } from "@/lib/demo-workspace-data";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
@@ -22,7 +23,7 @@ export function AssistantView({ zh, workspace }: { zh: boolean; workspace: Works
           <div><dt>{t(zh, "业务影响", "Business impact")}</dt><dd>{t(zh, suggestion.businessImpactZh, suggestion.businessImpactEn)}</dd></div>
           <div><dt>{t(zh, "引用上下文", "Cited context")}</dt><dd>{suggestion.contextRefs.map((ref) => getContextLabel(ref, zh)).join(" / ")}</dd></div>
         </dl>
-        <a className="primary-button" href="/assistant/approvals">{t(zh, "生成草稿并提交审批", "Create draft and submit approval")}</a>
+        <Link className="primary-button" href="/assistant/approvals">{t(zh, "生成草稿并提交审批", "Create draft and submit approval")}</Link>
       </div>
       <div className="panel">
         <div className="section-heading"><span>{t(zh, "记忆来源", "Memory source")}</span><h2>{t(zh, "必须让用户看得见、关得掉。", "Users must be able to see and disable memory.")}</h2></div>
