@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getBlockerText, getMissingEvidenceSlots, getReadyScore, getVerifiedEvidenceCount } from "@/lib/demo-workspace-data";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
@@ -15,12 +16,12 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
   return (
     <>
       <div className="pack-step-grid">
-        <a href="/proof-packs" className="pack-step-card"><span>{t(zh, "当前证明包", "Current proof pack")}</span><strong>{proofPack.title}</strong><p>{proofPack.status}</p></a>
-        <a href="/evidence" className="pack-step-card"><span>{t(zh, "Ready 分数", "Ready score")}</span><strong>{readyScore}%</strong><p>{verified}/{evidenceSlots.length} {t(zh, "项已验证", "verified")}</p></a>
-        <a href="/tasks" className="pack-step-card"><span>{t(zh, "待办任务", "Open tasks")}</span><strong>{missing}</strong><p>{blockerText}</p></a>
-        <a href="/assistant/approvals" className="pack-step-card"><span>{t(zh, "审批", "Approvals")}</span><strong>pending</strong><p>{t(zh, "买家验收提醒待确认", "Buyer acceptance reminder needs review")}</p></a>
-        <a href="/verify/uy-beef-cn-2026-0001" className="pack-step-card"><span>{t(zh, "公开链接", "Public link")}</span><strong>/verify</strong><p>{t(zh, "只公开状态和哈希", "Status and hashes only")}</p></a>
-        <a href="/assistant" className="pack-step-card"><span>{t(zh, "助手建议", "Assistant advice")}</span><strong>{t(zh, "先补入库", "Warehouse first")}</strong><p>{t(zh, "再催买家验收", "Then chase buyer acceptance")}</p></a>
+        <Link href="/proof-packs" className="pack-step-card"><span>{t(zh, "当前证明包", "Current proof pack")}</span><strong>{proofPack.title}</strong><p>{proofPack.status}</p></Link>
+        <Link href="/evidence" className="pack-step-card"><span>{t(zh, "Ready 分数", "Ready score")}</span><strong>{readyScore}%</strong><p>{verified}/{evidenceSlots.length} {t(zh, "项已验证", "verified")}</p></Link>
+        <Link href="/tasks" className="pack-step-card"><span>{t(zh, "待办任务", "Open tasks")}</span><strong>{missing}</strong><p>{blockerText}</p></Link>
+        <Link href="/assistant/approvals" className="pack-step-card"><span>{t(zh, "审批", "Approvals")}</span><strong>pending</strong><p>{t(zh, "买家验收提醒待确认", "Buyer acceptance reminder needs review")}</p></Link>
+        <Link href="/verify/uy-beef-cn-2026-0001" className="pack-step-card"><span>{t(zh, "公开链接", "Public link")}</span><strong>/verify</strong><p>{t(zh, "只公开状态和哈希", "Status and hashes only")}</p></Link>
+        <Link href="/assistant" className="pack-step-card"><span>{t(zh, "助手建议", "Assistant advice")}</span><strong>{t(zh, "先补入库", "Warehouse first")}</strong><p>{t(zh, "再催买家验收", "Then chase buyer acceptance")}</p></Link>
       </div>
 
       <section className="workspace">
