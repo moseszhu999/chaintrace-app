@@ -6,7 +6,7 @@ export default async function DashboardRoute() {
   const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceFrame zh={zh} active="dashboard" workspace={workspace} action={{ href: "/business-ops", labelZh: "打开 Sidecar", labelEn: "Open sidecar" }}>
+    <WorkspaceFrame zh={zh} active="dashboard" workspace={workspace} action={{ href: "/business-ops", labelZh: "打开 Agent", labelEn: "Open agent" }}>
       <DashboardView zh={zh} workspace={workspace} />
     </WorkspaceFrame>
   );
