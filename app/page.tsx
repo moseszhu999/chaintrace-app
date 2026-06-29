@@ -166,7 +166,7 @@ export default function Home() {
         <section className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">Agent-first MVP</span>
+              <span className="proof-type">AI trade-finance evidence OS</span>
               <h3>{t(zh, "先看公开 Agent 体验，再进入操作员工作台。", "Start with the public Agent experience, then enter the operator workspace.")}</h3>
             </div>
             <div className="status-pill">Pre-review</div>
