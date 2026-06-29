@@ -50,20 +50,21 @@ export function FinancingView({ zh, workspace }: { zh: boolean; workspace: Works
   const uploadedButNotVerified = docs.filter((doc) => doc.status === "uploaded");
   const isRwaEligible = missingDocs.length === 0 && uploadedButNotVerified.length === 0;
   const estimatedAdvance = isRwaEligible ? "USD 29,500" : "USD 0";
+  const tokenizationStatus = isRwaEligible ? t(zh, "可进入受限代币化", "Ready for restricted tokenization") : t(zh, "条件未满足", "Gated");
 
   return (
     <section className="workspace">
       <div className="panel">
         <div className="section-heading">
-          <span>{t(zh, "业务融资 / RWA", "Business financing / RWA")}</span>
-          <h2>{t(zh, "先做应收账款融资资格判断，不急着 tokenization。", "Judge receivable-financing eligibility before tokenization.")}</h2>
+          <span>{t(zh, "业务融资 / RWA Tokenization", "Business financing / RWA tokenization")}</span>
+          <h2>{t(zh, "RWA 可以代币化，但必须先让应收账款 clean。", "RWA can be tokenized, but the receivable must be clean first.")}</h2>
           <p>{t(zh, activeTrade.titleZh, activeTrade.titleEn)} · {activeTrade.poNo} · {activeTrade.invoiceNo}</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, alignItems: "stretch" }}>
           <MetricCard label={t(zh, "应收账款", "Receivable")} value={balance?.amount ?? "-"} note={t(zh, balance?.conditionZh ?? "等待付款条件", balance?.conditionEn ?? "Waiting for payment condition")} />
           <MetricCard label={t(zh, "已收款", "Collected")} value={deposit?.amount ?? "-"} note={deposit?.status ?? "-"} />
-          <MetricCard label={t(zh, "融资状态", "Financing status")} value={t(zh, "仅可预审", "Pre-review only")} note={t(zh, "不能正式提交", "Not ready for formal submission")} />
-          <MetricCard label={t(zh, "RWA 资格", "RWA eligibility")} value={isRwaEligible ? t(zh, "可进入准备", "Preparation ready") : t(zh, "暂不合格", "Not eligible yet")} note={`${missingDocs.length + uploadedButNotVerified.length} ${t(zh, "个阻塞条件", "blocking conditions")}`} />
+          <MetricCard label={t(zh, "融资状态", "Financing status")} value={t(zh, "仅可预审", "Pre-review only")} note={t(zh, "补齐后可正式提交", "Formal submission after gaps close")} />
+          <MetricCard label={t(zh, "Tokenization", "Tokenization")} value={tokenizationStatus} note={t(zh, "非中国大陆业务；许可司法区；KYC/白名单/转让限制", "Non-mainland business; permitted jurisdiction; KYC, whitelist, transfer restrictions")} />
           <MetricCard label={t(zh, "建议融资额", "Suggested advance")} value={estimatedAdvance} note={t(zh, "缺口未补齐前为 0", "Zero until gaps close")} />
           <MetricCard label={t(zh, "资金方", "Financier")} value={financier?.name ?? "-"} note={financier?.email ?? "-"} />
         </div>
@@ -72,7 +73,7 @@ export function FinancingView({ zh, workspace }: { zh: boolean; workspace: Works
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "RWA 事实矩阵", "RWA fact matrix")}</span>
-          <h2>{t(zh, "资金方要看的不是聊天记录，而是这笔应收账款是否 clean。", "Financiers need to know whether this receivable is clean, not read chat logs.")}</h2>
+          <h2>{t(zh, "代币不是事实本身，token 背后必须有可验证的四流事实。", "The token is not the fact itself; it must be backed by verifiable four-flow facts.")}</h2>
         </div>
         <div className={styles.list}>
           {docs.map((doc) => (
@@ -92,26 +93,30 @@ export function FinancingView({ zh, workspace }: { zh: boolean; workspace: Works
 
       <div className="panel">
         <div className="section-heading">
-          <span>{t(zh, "Agent 判断", "Agent judgement")}</span>
-          <h2>{t(zh, "当前不能做正式 RWA tokenization，只能做资金方预审。", "This is not ready for formal RWA tokenization; only financier pre-review is appropriate.")}</h2>
+          <span>{t(zh, "Tokenization 设计", "Tokenization design")}</span>
+          <h2>{t(zh, "目标不是公开发币，而是受限、合规、可追索的应收账款 token。", "The goal is not a public coin offering, but a restricted, compliant, enforceable receivable token.")}</h2>
         </div>
         <div className={styles.list}>
           <article className={styles.listRow}>
-            <h3 className={styles.rowTitle}>{t(zh, "为什么暂不合格", "Why not eligible yet")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "入库确认缺失，买家验收缺失，提单签章仍待核验；尾款触发条件没有满足，应收账款还不够 clean。", "Warehouse entry is missing, buyer acceptance is missing, and the bill of lading stamp is still pending; the balance trigger is not satisfied, so the receivable is not clean enough.")}</p>
+            <h3 className={styles.rowTitle}>{t(zh, "可代币化资产", "Tokenizable asset")}</h3>
+            <p className={styles.rowMeta}>{t(zh, "70% 尾款应收账款 USD 36,960。底层权利来自 PO、发票、提单、入库、买家验收和付款条款。", "The 70% balance receivable of USD 36,960. The underlying right comes from the PO, invoice, bill of lading, warehouse entry, buyer acceptance, and payment terms.")}</p>
           </article>
           <article className={styles.listRow}>
-            <h3 className={styles.rowTitle}>{t(zh, "补齐后可以做什么", "What becomes possible after gaps close")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "生成 receivable financing pack，把融资包 hash 上链，记录资金方查看日志，再考虑 stablecoin 结算或对接 RWA/private credit 平台。", "Generate a receivable financing pack, anchor its hash on-chain, log financier access, then consider stablecoin settlement or RWA/private-credit integrations.")}</p>
+            <h3 className={styles.rowTitle}>{t(zh, "发行边界", "Issuance boundary")}</h3>
+            <p className={styles.rowMeta}>{t(zh, "不面向中国大陆，不做散户池，不承诺收益；只面向许可司法区的 KYC 资金方或合格投资人。", "No mainland-China offering, no retail pool, no promised yield; only KYC financiers or qualified investors in permitted jurisdictions.")}</p>
           </article>
           <article className={styles.listRow}>
-            <h3 className={styles.rowTitle}>{t(zh, "交易主体", "Trade parties")}</h3>
-            <p className={styles.rowMeta}>{t(zh, "出口商：", "Exporter: ")}{exporter?.name} · {t(zh, "买家：", "Buyer: ")}{buyer?.name} · {t(zh, "仓库：", "Warehouse: ")}{warehouse?.name}</p>
+            <h3 className={styles.rowTitle}>{t(zh, "转让控制", "Transfer controls")}</h3>
+            <p className={styles.rowMeta}>{t(zh, "token 必须白名单转让、记录持有人、支持冻结/赎回/到期销毁，并绑定链下法律文件。", "The token must use whitelist transfers, holder records, freeze/redemption/maturity burn, and an off-chain legal wrapper.")}</p>
+          </article>
+          <article className={styles.listRow}>
+            <h3 className={styles.rowTitle}>{t(zh, "当前 gating", "Current gating")}</h3>
+            <p className={styles.rowMeta}>{t(zh, "入库确认缺失，买家验收缺失，提单签章仍待核验；因此可以设计 tokenization，但不能正式发行。", "Warehouse entry is missing, buyer acceptance is missing, and the bill-of-lading stamp is pending; tokenization can be designed, but issuance cannot start.")}</p>
           </article>
           <div className={styles.rowActions}>
-            <Link className="primary-button" href="/assistant">{t(zh, "生成融资 Agent 动作", "Generate financing-agent actions")}</Link>
+            <Link className="primary-button" href="/assistant">{t(zh, "生成 tokenization checklist", "Generate tokenization checklist")}</Link>
             <Link className="secondary-button" href="/evidence">{t(zh, "补齐文件", "Complete documents")}</Link>
-            <Link className="secondary-button" href="/tasks">{t(zh, "查看阻塞任务", "View blockers")}</Link>
+            <Link className="secondary-button" href="/business-wallet">{t(zh, "查看钱包", "View wallet")}</Link>
           </div>
         </div>
       </div>
