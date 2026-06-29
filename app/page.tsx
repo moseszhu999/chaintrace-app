@@ -51,20 +51,20 @@ const differentiationBlocks = [
   {
     titleZh: "不是飞书",
     titleEn: "Not Feishu",
-    textZh: "不做通用聊天、会议、文档协作。ChainTrace 只围绕跨公司交易闭环。",
-    textEn: "Not generic chat, meetings, or document collaboration. ChainTrace focuses on cross-company trade closure.",
+    textZh: "不做通用聊天、会议、文档协作。ChainTrace 的 Agent 只围绕跨公司交易闭环。",
+    textEn: "Not generic chat, meetings, or document collaboration. ChainTrace agents focus on cross-company trade closure.",
   },
   {
     titleZh: "不是 ERP",
     titleEn: "Not ERP",
-    textZh: "不替代库存、财务总账和内部流程；只抓交易对外可信所需的关键事实。",
-    textEn: "Not inventory, general ledger, or internal process replacement; it captures facts needed for external trust.",
+    textZh: "不替代库存、财务总账和内部流程；Agent 只抓交易对外可信所需的关键事实。",
+    textEn: "Not inventory, general ledger, or internal process replacement; the agent captures facts needed for external trust.",
   },
   {
     titleZh: "不是单纯溯源",
     titleEn: "Not only traceability",
-    textZh: "溯源只是证据能力之一，最终目标是验收、收款、融资、理赔和减少纠纷。",
-    textEn: "Traceability is one evidence capability; the goal is acceptance, collection, financing, claims, and fewer disputes.",
+    textZh: "溯源只是证据能力之一，Agent 的目标是推进验收、收款、融资、理赔和减少纠纷。",
+    textEn: "Traceability is one evidence capability; the agent's goal is acceptance, collection, financing, claims, and fewer disputes.",
   },
 ];
 
@@ -83,17 +83,17 @@ export default function Home() {
         <section className="hero landing-hero">
           <div className="landing-grid">
             <div className="hero-copy">
-              <div className="eyebrow">{t(zh, "ChainTrace · 小微企业交易 Sidecar", "ChainTrace · SME trade sidecar")}</div>
-              <h1>{t(zh, "从订单到收款，把每一笔生意做完。", "From order to collection, finish every trade.")}</h1>
+              <div className="eyebrow">{t(zh, "ChainTrace · 小微企业交易 Agent", "ChainTrace · SME trade agent")}</div>
+              <h1>{t(zh, "从订单到收款，让 Agent 推进每一笔生意。", "From order to collection, let agents move every trade forward.")}</h1>
               <p>
                 {t(
                   zh,
-                  "ChainTrace 不是飞书式协作工具，而是小微企业跨公司交易 Sidecar。它围绕订单、发票、物流、验收、收款和融资，帮企业发现缺口、催办责任方、准备选择性证明，让买家、资金方和合作伙伴更容易相信你。",
-                  "ChainTrace is not another collaboration suite. It is a cross-company trade sidecar for SMEs. Around orders, invoices, logistics, acceptance, collection, and financing, it finds gaps, nudges owners, prepares selective proof, and helps buyers, financiers, and partners trust you.",
+                  "ChainTrace 不是飞书式协作工具，而是小微企业跨公司交易 Agent。它围绕订单、发票、物流、验收、收款和融资，主动发现缺口、催办责任方、准备选择性证明，让买家、资金方和合作伙伴更容易相信你。",
+                  "ChainTrace is not another collaboration suite. It is a cross-company trade agent for SMEs. Around orders, invoices, logistics, acceptance, collection, and financing, it actively finds gaps, nudges owners, prepares selective proof, and helps buyers, financiers, and partners trust you.",
                 )}
               </p>
               <div className="hero-actions">
-                <a href="/business-ops" className="primary-button">{t(zh, "打开交易 Sidecar", "Open trade sidecar")}</a>
+                <a href="/business-ops" className="primary-button">{t(zh, "打开交易 Agent", "Open trade agent")}</a>
                 <a href="/login" className="secondary-button">{t(zh, "登录", "Login")}</a>
                 <a href="/verify/uy-beef-cn-2026-0001" className="secondary-button">{t(zh, "查看选择性证明", "View selective proof")}</a>
               </div>
@@ -115,7 +115,7 @@ export default function Home() {
                   <div className="mini-proof-card pending"><span>{t(zh, "验收", "Acceptance")}</span><strong>{t(zh, "待确认", "Open")}</strong></div>
                 </div>
                 <div className="signal-status-box">
-                  <span>{t(zh, "Sidecar 建议", "Sidecar advice")}</span>
+                  <span>{t(zh, "Agent 建议", "Agent advice")}</span>
                   <strong>{t(zh, "先补入库和买家验收，再进入催款 / 融资。", "Complete warehouse entry and buyer acceptance before collection / financing.")}</strong>
                   <p>{t(zh, "这不是内部协作提醒，而是影响收款和融资的交易事实缺口。", "This is not an internal collaboration reminder; it is a trade-fact gap that affects collection and financing.")}</p>
                 </div>
@@ -127,8 +127,8 @@ export default function Home() {
         <section id="product" className="panel product-showcase">
           <div className="section-heading">
             <span>{t(zh, "差异化", "Differentiation")}</span>
-            <h2>{t(zh, "ChainTrace 不做办公协作，做跨公司交易可信闭环。", "ChainTrace does not do office collaboration; it closes cross-company trades with trust.")}</h2>
-            <p>{t(zh, "飞书解决公司内部怎么协作；ChainTrace 解决小微企业对外怎么被相信、怎么验收、怎么收款、怎么融资。", "Feishu solves internal collaboration; ChainTrace helps SMEs be trusted externally, get acceptance, collect, and prepare financing.")}</p>
+            <h2>{t(zh, "ChainTrace 不做办公协作，做跨公司交易 Agent。", "ChainTrace does not do office collaboration; it provides cross-company trade agents.")}</h2>
+            <p>{t(zh, "飞书解决公司内部怎么协作；ChainTrace Agent 解决小微企业对外怎么被相信、怎么验收、怎么收款、怎么融资。", "Feishu solves internal collaboration; ChainTrace agents help SMEs be trusted externally, get acceptance, collect, and prepare financing.")}</p>
           </div>
           <div className="principles-grid">
             {differentiationBlocks.map((item) => (
@@ -143,8 +143,8 @@ export default function Home() {
         <section id="workflow" className="panel product-showcase">
           <div className="section-heading">
             <span>{t(zh, "交易流程", "Trade flow")}</span>
-            <h2>{t(zh, "核心不是任务管理，而是把交易推进到验收和收款。", "The core is not task management; it is moving the trade to acceptance and collection.")}</h2>
-            <p>{t(zh, "任务、AI、审批都是辅助，主对象永远是交易事实。", "Tasks, AI, and approvals are helpers; the main object is always trade facts.")}</p>
+            <h2>{t(zh, "核心不是任务管理，而是 Agent 把交易推进到验收和收款。", "The core is not task management; agents move the trade to acceptance and collection.")}</h2>
+            <p>{t(zh, "任务、审批、证明都是 Agent 的工具，主对象永远是交易事实。", "Tasks, approvals, and proof are tools for the agent; the main object is always trade facts.")}</p>
           </div>
           <div className="pack-step-grid">
             {tradeFlow.map((step, index) => (
@@ -166,13 +166,13 @@ export default function Home() {
         <section className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
-              <span className="proof-type">Trade Sidecar</span>
-              <h3>{t(zh, "下一步从交易 Sidecar 开始，而不是从通用工作台开始。", "Start from the trade sidecar, not a generic workspace.")}</h3>
+              <span className="proof-type">Trade Agent</span>
+              <h3>{t(zh, "下一步从交易 Agent 开始，而不是从通用工作台开始。", "Start from the trade agent, not a generic workspace.")}</h3>
             </div>
             <div className="status-pill">SME</div>
           </div>
           <dl className="proof-details">
-            <div><dt>{t(zh, "交易 Sidecar", "Trade sidecar")}</dt><dd><a href="/business-ops" className="inline-link">/business-ops</a></dd></div>
+            <div><dt>{t(zh, "交易 Agent", "Trade agent")}</dt><dd><a href="/business-ops" className="inline-link">/business-ops</a></dd></div>
             <div><dt>{t(zh, "登录", "Login")}</dt><dd><a href="/login" className="inline-link">/login</a></dd></div>
             <div><dt>{t(zh, "选择性证明", "Selective proof")}</dt><dd><a href="/verify/uy-beef-cn-2026-0001" className="inline-link">/verify/uy-beef-cn-2026-0001</a></dd></div>
           </dl>
