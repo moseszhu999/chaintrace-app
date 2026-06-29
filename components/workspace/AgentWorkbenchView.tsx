@@ -1,6 +1,7 @@
+import { agentApiEndpoints } from "@/lib/agent-api-fixture";
 import { agentRuns, agentWorkbenchMetrics, type AgentRunStatus } from "@/lib/agent-workbench-fixture";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
-import { DecisionPanel, MetricCard, MetricGrid, StatusList, WorkspaceHero } from "./WorkspacePrimitives";
+import { ActionRow, DecisionPanel, MetricCard, MetricGrid, StatusList, WorkspaceHero } from "./WorkspacePrimitives";
 import styles from "./WorkspaceViews.module.css";
 
 function t(zh: boolean, cn: string, en: string) {
@@ -39,6 +40,36 @@ export function AgentWorkbenchView({ zh, workspace }: { zh: boolean; workspace: 
       </WorkspaceHero>
 
       <DecisionPanel
+        eyebrow={t(zh, "Agent API 操作入口", "Agent API operating entry")}
+        title={t(zh, "现在不只是静态工作台：Agent 链路已经有可访问 API，可直接输出融资证据操作结果。", "This is no longer only a static workbench: the agent pipeline now has accessible APIs that output trade-finance evidence operations.")}
+        subtitle={t(zh, "先用 mock 固定输入输出契约，下一步再把上传文件、OCR/解析、gate 计算和 memo 生成接到这些接口后面。", "Use mocks first to freeze the input/output contract, then connect upload, OCR/parsing, gate calculation, and memo generation behind these APIs.")}
+      >
+        <StatusList
+          items={agentApiEndpoints.map((endpoint) => ({
+            id: endpoint.id,
+            title: `${endpoint.method} ${endpoint.path}`,
+            meta: [
+              `${t(zh, "阶段：", "Stage: ")}${t(zh, endpoint.stageZh, endpoint.stageEn)}`,
+              `${t(zh, "输出：", "Output: ")}${t(zh, endpoint.outputZh, endpoint.outputEn)}`,
+              `${t(zh, "替代人工：", "Replaces manual work: ")}${t(zh, endpoint.replacesZh, endpoint.replacesEn)}`,
+            ],
+            status: endpoint.id === "agent_run" ? "pipeline" : "api",
+            statusClassName: `${styles.statusChip} ${endpoint.id === "agent_run" ? styles.statusVerified : styles.statusOpen}`,
+          }))}
+        />
+        <div style={{ marginTop: 18 }}>
+          <ActionRow
+            actions={agentApiEndpoints.slice(0, 4).map((endpoint, index) => ({
+              href: endpoint.path,
+              label: index === 0 ? t(zh, "运行 Agent Pipeline", "Run Agent pipeline") : endpoint.nameEn,
+              primary: index === 0,
+              external: true,
+            }))}
+          />
+        </div>
+      </DecisionPanel>
+
+      <DecisionPanel
         eyebrow={t(zh, "Agent 替代人工链路", "Agent replacement workflow")}
         title={t(zh, "目标不是多一个聊天框，而是把银行、律所、保理商过去大量重复核验和文书环节压缩成 Agent + 合约工作流。", "The goal is not another chat box, but compressing repetitive verification and paperwork done by banks, law firms, and factors into an agent + contract workflow.")}
       >
@@ -60,7 +91,7 @@ export function AgentWorkbenchView({ zh, workspace }: { zh: boolean; workspace: 
 
       <DecisionPanel
         eyebrow={t(zh, "下一步产品化", "Next productization step")}
-        title={t(zh, "把这些 fixture 变成真实 Agent API：上传文件后自动生成 evidence metadata、gate status、gap report、memo 和 follow-up tasks。", "Turn these fixtures into real Agent APIs: after upload, generate evidence metadata, gate status, gap report, memo, and follow-up tasks automatically.")}
+        title={t(zh, "把这些 API 从 mock 变成上传文件后的自动生成流程：evidence metadata、gate status、gap report、memo 和 follow-up tasks。", "Turn these APIs from mocks into the post-upload generation flow: evidence metadata, gate status, gap report, memo, and follow-up tasks.")}
         actions={[
           { href: "/business-readiness", label: t(zh, "查看融资评分", "View readiness score"), primary: true },
           { href: "/business-architecture", label: t(zh, "查看业务架构", "View business architecture") },
