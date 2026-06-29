@@ -93,7 +93,7 @@ export default function Home() {
                 )}
               </p>
               <div className="hero-actions">
-                <a href="/business-ops" className="primary-button">{t(zh, "查看 Agent 工作台", "View Agent workbench")}</a>
+                <a href="/agent" className="primary-button">{t(zh, "看 Agent 如何工作", "See ChainTrace Agent in action")}</a>
                 <a href="/business-readiness" className="secondary-button">{t(zh, "查看融资评分", "View readiness score")}</a>
                 <a href="/api/financing-pack" className="secondary-button">{t(zh, "打开融资包 API", "Open financing-pack API")}</a>
               </div>
@@ -167,12 +167,12 @@ export default function Home() {
           <div className="proof-card-header">
             <div>
               <span className="proof-type">Agent-first MVP</span>
-              <h3>{t(zh, "从 Agent 工作台开始，看一笔贸易如何变成融资预审包。", "Start from the Agent workbench and see how one trade becomes a financing pre-review pack.")}</h3>
+              <h3>{t(zh, "先看公开 Agent 体验，再进入操作员工作台。", "Start with the public Agent experience, then enter the operator workspace.")}</h3>
             </div>
             <div className="status-pill">Pre-review</div>
           </div>
           <dl className="proof-details">
-            <div><dt>{t(zh, "Agent 工作台", "Agent workbench")}</dt><dd><a href="/business-ops" className="inline-link">/business-ops</a></dd></div>
+            <div><dt>{t(zh, "Agent 体验", "Agent experience")}</dt><dd><a href="/agent" className="inline-link">/agent</a></dd></div>
             <div><dt>{t(zh, "融资评分", "Readiness score")}</dt><dd><a href="/business-readiness" className="inline-link">/business-readiness</a></dd></div>
             <div><dt>{t(zh, "专业审查", "Professional review")}</dt><dd><a href="/business-professional-review" className="inline-link">/business-professional-review</a></dd></div>
           </dl>

@@ -5,11 +5,9 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
-    { href: "/business-architecture", label: zh ? "业务架构" : "Architecture", primary: false },
-    { href: "/business-ops", label: zh ? "Agent 工作台" : "Agent workbench", primary: true },
+    { href: "/#product", label: zh ? "产品" : "Product", primary: false },
+    { href: "/agent", label: zh ? "Agent 体验" : "Agent in action", primary: true },
     { href: "/business-readiness", label: zh ? "融资评分" : "Readiness", primary: false },
-    { href: "/business-professional-review", label: zh ? "专业审查" : "Professional review", primary: false },
-    { href: "/business-contracts", label: zh ? "合约控制台" : "Contracts", primary: false },
     { href: "/login", label: zh ? "登录" : "Login", primary: false },
   ];
 
