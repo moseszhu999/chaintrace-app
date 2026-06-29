@@ -15,11 +15,13 @@ import {
   sampleUser,
   type EvidenceSlot,
 } from "@/lib/assistant-product-model";
+import { concreteTradeCase } from "@/lib/concrete-trade-fixture";
 import { sampleBusinessModules, sampleBusinessStages, sampleOperatingSummary } from "@/lib/sme-business-model";
 
 export const demoWorkspace = {
   organization: sampleOrganization,
   user: sampleUser,
+  activeTrade: concreteTradeCase,
   operatingSummary: sampleOperatingSummary,
   businessModules: sampleBusinessModules,
   businessStages: sampleBusinessStages,
