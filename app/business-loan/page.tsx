@@ -6,7 +6,7 @@ export default async function BusinessLoanPage() {
   const { zh, workspace } = await getWorkspaceRouteContext();
 
   return (
-    <WorkspaceFrame zh={zh} active="loan" workspace={workspace} action={{ href: "/business-signing", labelZh: "签章 Gate", labelEn: "Signing gates" }}>
+    <WorkspaceFrame zh={zh} active="loan" workspace={workspace} action={{ href: "/business-logistics", labelZh: "物流 Gate", labelEn: "Logistics gates" }}>
       <LoanContractView zh={zh} workspace={workspace} />
     </WorkspaceFrame>
   );
