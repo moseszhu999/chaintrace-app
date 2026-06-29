@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "api:validate": "node scripts/validate-api-contracts.js",
     "contracts:compile": "hardhat compile",
     "contracts:test": "hardhat test",
     "contracts:deploy:dev": "hardhat run scripts/deploy-dev.js --network hardhat",

@@ -47,6 +47,7 @@ export function ReceivableReadinessView({ zh, workspace }: { zh: boolean; worksp
         subtitle={`${t(zh, activeTrade.titleZh, activeTrade.titleEn)} · ${activeTrade.poNo} · ${activeTrade.invoiceNo}`}
         actions={[
           { href: "/api/financing-pack", label: t(zh, "打开融资包 API", "Open financing-pack API"), primary: true, external: true },
+          { href: "/api/loan-requests/pre-review", label: t(zh, "打开预审融资申请 API", "Open pre-review loan request API"), external: true },
           { href: "/business-loan", label: t(zh, "查看贷款 Gate", "View loan gates") },
         ]}
       >
@@ -59,6 +60,41 @@ export function ReceivableReadinessView({ zh, workspace }: { zh: boolean; worksp
       </WorkspaceHero>
 
       <DecisionPanel eyebrow={t(zh, "资金方结论", "Financier conclusion")} title={t(zh, report.recommendationZh, report.recommendationEn)} />
+
+      <DecisionPanel
+        eyebrow={t(zh, "预审融资申请", "Pre-review loan request")}
+        title={t(zh, "融资包 API 只生成预审材料；预审 API 再把材料转成 LoanRequestRegistry 草稿。", "The Financing Pack API produces pre-review material; the pre-review API turns it into a LoanRequestRegistry draft.")}
+        subtitle={t(zh, "当前 gate 仍是 GATES_NOT_PASSED，正式放款保持阻断。", "Current gates remain GATES_NOT_PASSED, so formal disbursement stays blocked.")}
+        actions={[
+          { href: "/api/loan-requests/pre-review", label: t(zh, "打开预审融资申请 API", "Open pre-review loan request API"), primary: true, external: true },
+        ]}
+      >
+        <StatusList
+          items={[
+            {
+              id: "financing-pack",
+              title: t(zh, "Financing Pack API 生成证据包和风控 memo", "Financing Pack API produces the evidence pack and risk memo"),
+              meta: ["/api/financing-pack"],
+              status: t(zh, "预审材料", "pre-review pack"),
+              statusClassName: `${styles.statusChip} ${styles.statusOpen}`,
+            },
+            {
+              id: "pre-review-api",
+              title: t(zh, "预审 API 生成 submitPreReviewRequest 草稿", "Pre-review API produces the submitPreReviewRequest draft"),
+              meta: ["LoanRequestRegistry.submitPreReviewRequest"],
+              status: "PreReview",
+              statusClassName: `${styles.statusChip} ${styles.statusOpen}`,
+            },
+            {
+              id: "disbursement-blocked",
+              title: t(zh, "专业审查和 gate 未完成前不能转换成正式放款", "No formal loan conversion or disbursement before professional review and gate completion"),
+              meta: ["GATES_NOT_PASSED · disbursementAllowed=false"],
+              status: t(zh, "已阻断", "blocked"),
+              statusClassName: `${styles.statusChip} ${styles.statusRejected}`,
+            },
+          ]}
+        />
+      </DecisionPanel>
 
       <DecisionPanel
         eyebrow={t(zh, "评分拆解", "Score breakdown")}

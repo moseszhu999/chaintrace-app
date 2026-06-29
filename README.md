@@ -1,84 +1,149 @@
-# ChainTrace App
+# ChainTrace
 
-**Proof Page MVP for the ChainTrace Protocol.**
+ChainTrace turns cross-border trade PDFs and logistics evidence into finance-ready receivables for Agent pre-check and professional review.
 
-This repository contains the first user-facing ChainTrace application.
+It is an AI-agent-driven cross-border trade-finance evidence operating system. The product organizes purchase orders, invoices, bills of lading, permits, warehouse receipts, quality reports, signatures, and payment conditions into a financing evidence pack that banks, factors, law firms, and risk teams can review faster.
 
-The goal is simple:
+## Current Demo Case
 
-> Let a small business create a verifiable proof page for a product, shipment, invoice, or trade record in minutes.
+The main demo is a Vietnam Robusta coffee export to Singapore:
+
+- Trade value: USD 52,800
+- Blocked 70% balance receivable: USD 36,960
+- Requested advance: USDC 29,500
+- Readiness Score: 62/100
+- Loan gates: 6/12 passed
+- Status: Pre-review only
+- Blocker code: GATES_NOT_PASSED
+
+The evidence is not complete. Final on-board bill of lading, Singapore import permit final confirmation, warehouse receipt, arrival QC dispute closure, buyer acceptance decision, and financier multisig authorization are still open or blocked.
+
+## Safety Guardrail
+
+This demo does not approve real financing and does not perform real regulated lending. Formal disbursement is blocked until evidence gates pass and professional compliance, legal, and underwriting review is complete.
+
+Use this wording:
+
+- Pre-review only
+- formal disbursement blocked
+- evidence operating system
+- financing-ready receivable package
+- Agent pre-check + professional exception review
+- gate-based execution
+
+Avoid language that implies an approved loan, guaranteed financing, or automatic disbursement.
 
 ## Product Flow
 
 ```text
 Upload evidence
         ↓
-Generate SHA-256 hash in the browser
+AI Agent classifies documents and extracts metadata
         ↓
-Create proof metadata
+Agent checks evidence, gate status, gaps, and risk memo
         ↓
-Preview a public proof page
+Financing Pack API returns a financier-facing evidence pack
         ↓
-Later: anchor hash on-chain and share QR code
+Pre-review loan request API creates a LoanRequestRegistry draft
+        ↓
+Professional review decides blocked / approved / rejected
+        ↓
+ReceivableLoan conversion is possible only after approval and complete gates
 ```
 
-## Current Scope
+## Key App Routes
 
-This is an early MVP frontend.
+- `/business-architecture` - consulting-grade business and architecture blueprint
+- `/business-ops` - Agent workbench for evidence operations
+- `/business-readiness` - financier readiness view and pre-review handoff
+- `/business-professional-review` - bank, law-firm, and exception review queue
+- `/business-contracts` - smart contract console and LoanRequestRegistry lifecycle
 
-The first version focuses on:
+## Key API Routes
 
-- file upload
-- browser-side hash generation
-- proof metadata input
-- proof preview
-- simple Business Passport direction
-- future blockchain anchoring placeholder
+- `GET /api/agents/run` - aggregate Agent pipeline output
+- `GET /api/agents/evidence` - evidence metadata and open/verified counts
+- `GET /api/agents/gates` - 12 gate statuses; current case remains 6/12 passed
+- `GET /api/agents/gaps` - missing evidence and next actions
+- `GET /api/agents/risk-memo` - risk flags, approval conditions, financier memo
+- `POST /api/evidence/upload` - mocked evidence upload classification
+- `GET /api/financing-pack` - financier-facing evidence and memo pack
+- `GET /api/professional-review` - professional exception review queue
+- `GET /api/loan-requests/pre-review` - pre-review request draft
+- `POST /api/loan-requests/pre-review` - mocked pre-review request creation
 
-## Not Yet Included
+## Contract Map
 
-- smart contract calls
-- wallet connection
-- IPFS upload
-- production database
-- AI agent backend
-- stablecoin or financial features
+- `LoanRequestRegistry` - pre-review financing request entry point; records readiness score, evidence pack URI/hash, blocker code, and review status.
+- `TradeSigningRegistry` - signing gates for PO, invoice, QC, bill of lading, warehouse receipt, buyer acceptance, and multisig.
+- `LogisticsEvidenceRegistry` - logistics and quality evidence gates.
+- `FinancierPool` - financier liquidity route into the bank vault.
+- `BankVault` - supported assets, liquidity, credit lines, loan whitelist, disbursement, and repayment records.
+- `ReceivableLoan` - actual loan state machine; must not disburse unless all required gates pass.
+- `RestrictedReceivableToken` - controlled RWA or receivable token representation.
+- `MockStablecoin` - test stablecoin for local and CI flows.
 
-Those will be added after the proof-page user experience is validated.
+## Consulting Architecture Flow
 
-## Tech Stack
+ChainTrace should be explained from business value down to technology:
 
-- Next.js
-- React
-- TypeScript
-- Browser Web Crypto API
-- Plain CSS
+```text
+BLM including value chain
+  -> business architecture / business process
+  -> application architecture
+  -> data architecture
+  -> technical architecture
+```
+
+The system does not remove banks, law firms, or factors. It moves them from repetitive document checking to underwriting, compliance, legal structure, dispute handling, and material exception review.
 
 ## Run Locally
 
+Install dependencies:
+
 ```bash
 npm install
+```
+
+Start the app:
+
+```bash
 npm run dev
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:3000
 ```
 
-## Related Repository
+Build:
 
-Protocol repository:
-
-```text
-https://github.com/moseszhu999/chaintrace-protocol
+```bash
+npm run build
 ```
 
-## Principle
+Validate mocked API contracts:
 
-Not total transparency.  
-Selective proof.
+```bash
+npm run api:validate
+```
 
-Make honesty cheaper.  
-Make fraud more expensive.
+Compile and test contracts:
+
+```bash
+npm run contracts:compile
+npm run contracts:test
+```
+
+## Current Operating Contract
+
+The Vietnam coffee case must stay:
+
+- `Pre-review only`
+- `readinessScore = 62`
+- `loan gates = 6/12 passed`
+- `blockerCode = GATES_NOT_PASSED`
+- `disbursementAllowed = false`
+
+Any UI, API, README, script, or test change that turns this case into a disbursable or formally approved financing state is a product and compliance regression.
