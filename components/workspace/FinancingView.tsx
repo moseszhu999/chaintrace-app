@@ -1,9 +1,14 @@
 import Link from "next/link";
+import type { TradeDocument } from "@/lib/concrete-trade-fixture";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 import styles from "./WorkspaceViews.module.css";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
+}
+
+function isTradeDocument(doc: TradeDocument | undefined): doc is TradeDocument {
+  return Boolean(doc);
 }
 
 export function FinancingView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
@@ -17,7 +22,7 @@ export function FinancingView({ zh, workspace }: { zh: boolean; workspace: Works
   const requiredDocs = ["doc_po", "doc_invoice", "doc_quality", "doc_bl", "doc_warehouse", "doc_acceptance"];
   const docs = requiredDocs
     .map((id) => activeTrade.documents.find((doc) => doc.id === id))
-    .filter((doc): doc is NonNullable<typeof doc> => Boolean(doc));
+    .filter(isTradeDocument);
   const missingDocs = docs.filter((doc) => doc.status === "missing" || doc.status === "rejected");
   const uploadedButNotVerified = docs.filter((doc) => doc.status === "uploaded");
   const isRwaEligible = missingDocs.length === 0 && uploadedButNotVerified.length === 0;
