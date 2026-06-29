@@ -35,21 +35,34 @@ function validateAgentPipeline() {
     "machineDecision",
   ].forEach((key) => assertIncludes(runRoute, key, "agent pipeline response"));
 
-  assertIncludes(runRoute, "blockerCode: gateSummary.blockerCode", "agent pipeline gates");
-  assertIncludes(runRoute, "disbursementAllowed: gateSummary.disbursementAllowed", "agent pipeline decision");
+  assertIncludes(runRoute, "blockerCode: gateResult.summary.blockerCode", "agent pipeline gates");
+  assertIncludes(runRoute, "disbursementAllowed: readiness.disbursementAllowed", "agent pipeline decision");
 }
 
 function validateGateDecision() {
   const sharedFixture = read("lib/loan-gate-fixture.ts");
+  const gateEvaluator = read("lib/gate-evaluator.ts");
+  const readinessEvaluator = read("lib/readiness-evaluator.ts");
   const runRoute = read("app/api/agents/run/route.ts");
   const gatesRoute = read("app/api/agents/gates/route.ts");
 
   assert(!runRoute.includes("const gateChecklist = ["), "agent pipeline route must use shared gate fixture");
   assert(!gatesRoute.includes("const gateChecklist = ["), "agent gates route must use shared gate fixture");
-  assertIncludes(runRoute, "getLoanGateChecklist", "agent pipeline route");
-  assertIncludes(runRoute, "getLoanGateSummary", "agent pipeline route");
-  assertIncludes(gatesRoute, "getLoanGateChecklist", "agent gates route");
-  assertIncludes(gatesRoute, "getLoanGateSummary", "agent gates route");
+  assertIncludes(runRoute, "evaluateLoanGates", "agent pipeline route");
+  assertIncludes(runRoute, "evaluateReadiness", "agent pipeline route");
+  assertIncludes(gatesRoute, "evaluateLoanGates", "agent gates route");
+  assertIncludes(gatesRoute, "evaluateReadiness", "agent gates route");
+
+  assertIncludes(gateEvaluator, "export function evaluateLoanGates", "gate evaluator");
+  assertIncludes(gateEvaluator, "evidenceRecords", "gate evaluator");
+  assertIncludes(gateEvaluator, "getLoanGateChecklist", "gate evaluator");
+  assertIncludes(gateEvaluator, "passed: checklist.filter", "computed gate summary");
+  assertIncludes(gateEvaluator, "pending: checklist.filter", "computed gate summary");
+  assertIncludes(gateEvaluator, "blocked: checklist.filter", "computed gate summary");
+  assertIncludes(gateEvaluator, 'blockerCode: "GATES_NOT_PASSED"', "computed gate summary");
+  assertIncludes(gateEvaluator, "disbursementAllowed: false", "computed gate summary");
+  assertIncludes(readinessEvaluator, "export function evaluateReadiness", "readiness evaluator");
+  assertIncludes(readinessEvaluator, "gateSummary", "readiness evaluator");
 
   assert(countMatches(sharedFixture, /status: "passed"/g) === 6, "shared gate fixture must keep exactly 6 passed gates");
   assert(countMatches(sharedFixture, /status: "pending"/g) === 2, "shared gate fixture must keep exactly 2 pending gates");
