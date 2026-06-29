@@ -12,11 +12,11 @@ function id(value) {
   return ethers.id(value);
 }
 
-async function deployMockUSDC(owner) {
-  const MockUSDC = await ethers.getContractFactory("MockUSDC");
-  const token = await MockUSDC.deploy();
+async function deployMockStablecoin(owner) {
+  const MockStablecoin = await ethers.getContractFactory("MockStablecoin");
+  const token = await MockStablecoin.deploy();
   await token.waitForDeployment();
-  await token.mint(owner.address, ethers.parseUnits("1000000", 6));
+  await token.issue(owner.address, ethers.parseUnits("1000000", 6));
   return token;
 }
 
@@ -24,7 +24,7 @@ describe("ChainTrace contract suite", function () {
   async function fixture() {
     const [owner, riskOfficer, borrower, financier, buyer, exporter, logistics, warehouse, investor] = await ethers.getSigners();
 
-    const usdc = await deployMockUSDC(owner);
+    const stablecoin = await deployMockStablecoin(owner);
 
     const Registry = await ethers.getContractFactory("TradeSigningRegistry");
     const registry = await Registry.deploy();
@@ -34,10 +34,10 @@ describe("ChainTrace contract suite", function () {
     const bank = await BankVault.deploy(riskOfficer.address);
     await bank.waitForDeployment();
 
-    await bank.setSupportedAsset(await usdc.getAddress(), true);
-    await usdc.approve(await bank.getAddress(), ethers.parseUnits("100000", 6));
-    await bank.depositLiquidity(await usdc.getAddress(), ethers.parseUnits("100000", 6));
-    await bank.connect(riskOfficer).grantCreditLine(borrower.address, await usdc.getAddress(), ethers.parseUnits("50000", 6));
+    await bank.setSupportedAsset(await stablecoin.getAddress(), true);
+    await stablecoin.approve(await bank.getAddress(), ethers.parseUnits("100000", 6));
+    await bank.depositLiquidity(await stablecoin.getAddress(), ethers.parseUnits("100000", 6));
+    await bank.connect(riskOfficer).grantCreditLine(borrower.address, await stablecoin.getAddress(), ethers.parseUnits("50000", 6));
 
     const tradeId = id("trade_vn_coffee_sg_2026_0007");
     const poSlot = id("sign_po_buyer");
@@ -65,7 +65,7 @@ describe("ChainTrace contract suite", function () {
       await bank.getAddress(),
       await registry.getAddress(),
       tradeId,
-      await usdc.getAddress(),
+      await stablecoin.getAddress(),
       borrower.address,
       financier.address,
       ethers.parseUnits("36960", 6),
@@ -87,7 +87,7 @@ describe("ChainTrace contract suite", function () {
       logistics,
       warehouse,
       investor,
-      usdc,
+      stablecoin,
       registry,
       bank,
       loan,
@@ -107,7 +107,7 @@ describe("ChainTrace contract suite", function () {
   });
 
   it("disburses through BankVault after all signing gates pass", async function () {
-    const { borrower, financier, buyer, logistics, warehouse, usdc, registry, loan, slots } = await fixture();
+    const { borrower, financier, buyer, logistics, warehouse, stablecoin, registry, loan, slots } = await fixture();
 
     await registry.connect(logistics).signSlot(slots.blSlot, id("bl-final"), "ipfs://bl-final");
     await registry.connect(warehouse).signSlot(slots.warehouseSlot, id("warehouse-final"), "ipfs://warehouse-final");
@@ -119,11 +119,11 @@ describe("ChainTrace contract suite", function () {
     expect(allPassed).to.equal(true);
 
     await expect(loan.connect(financier).disburse()).to.emit(loan, "Disbursed");
-    expect(await usdc.balanceOf(borrower.address)).to.equal(ethers.parseUnits("29500", 6));
+    expect(await stablecoin.balanceOf(borrower.address)).to.equal(ethers.parseUnits("29500", 6));
   });
 
   it("records repayment and closes the loan", async function () {
-    const { borrower, financier, buyer, logistics, warehouse, usdc, registry, loan, slots } = await fixture();
+    const { borrower, financier, buyer, logistics, warehouse, stablecoin, registry, loan, slots } = await fixture();
 
     await registry.connect(logistics).signSlot(slots.blSlot, id("bl-final"), "ipfs://bl-final");
     await registry.connect(warehouse).signSlot(slots.warehouseSlot, id("warehouse-final"), "ipfs://warehouse-final");
@@ -131,8 +131,8 @@ describe("ChainTrace contract suite", function () {
     await loan.connect(financier).disburse();
 
     const repayment = ethers.parseUnits("30237.5", 6);
-    await usdc.mint(borrower.address, repayment);
-    await usdc.connect(borrower).approve(await loan.getAddress(), repayment);
+    await stablecoin.issue(borrower.address, repayment);
+    await stablecoin.connect(borrower).approve(await loan.getAddress(), repayment);
     await expect(loan.connect(borrower).repay(repayment)).to.emit(loan, "Repaid");
 
     expect(await loan.status()).to.equal(4n); // Repaid
