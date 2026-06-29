@@ -146,23 +146,29 @@ export function CustomerAssistantDemo({ zh }: { zh: boolean }) {
 
   function askAssistant(nextMode: AssistantMode) {
     setMode(nextMode);
-    setMessages((items) => [
-      ...items,
-      { role: "user", zh: `帮我处理：${modeContent[nextMode].titleZh}`, en: `Help me with: ${modeContent[nextMode].titleEn}` },
-      { role: "assistant", zh: modeContent[nextMode].recommendationZh, en: modeContent[nextMode].recommendationEn },
-    ].slice(-8));
+    setMessages((items) => {
+      const nextMessages: AssistantMessage[] = [
+        ...items,
+        { role: "user", zh: `帮我处理：${modeContent[nextMode].titleZh}`, en: `Help me with: ${modeContent[nextMode].titleEn}` },
+        { role: "assistant", zh: modeContent[nextMode].recommendationZh, en: modeContent[nextMode].recommendationEn },
+      ];
+      return nextMessages.slice(-8);
+    });
   }
 
   function addAction(actionZh: string, actionEn: string) {
-    setMessages((items) => [
-      ...items,
-      { role: "user", zh: `执行动作：${actionZh}`, en: `Run action: ${actionEn}` },
-      {
-        role: "assistant",
-        zh: `已生成草稿和任务记录：${actionZh}。关键商业动作仍需你确认后发送。`,
-        en: `Draft and task record generated: ${actionEn}. Key business actions still require your confirmation before sending.`,
-      },
-    ].slice(-8));
+    setMessages((items) => {
+      const nextMessages: AssistantMessage[] = [
+        ...items,
+        { role: "user", zh: `执行动作：${actionZh}`, en: `Run action: ${actionEn}` },
+        {
+          role: "assistant",
+          zh: `已生成草稿和任务记录：${actionZh}。关键商业动作仍需你确认后发送。`,
+          en: `Draft and task record generated: ${actionEn}. Key business actions still require your confirmation before sending.`,
+        },
+      ];
+      return nextMessages.slice(-8);
+    });
   }
 
   return (
