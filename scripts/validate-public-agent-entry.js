@@ -149,6 +149,24 @@ function main() {
   assertIncludes(receivableConverter, "not a legal opinion", "professional trust pack legal boundary");
   assertIncludes(receivableConverter, "not a credit approval", "professional trust pack credit boundary");
   assertIncludes(receivableConverter, "professional review required before any formal financing action", "professional trust pack review boundary");
+  assertIncludes(receivableConverter, "Professional Review Intake preview", "professional review intake preview");
+  assertIncludes(receivableConverter, "professionalReviewIntake", "professional review intake model");
+  assertIncludes(receivableConverter, "intakeVersion: \"professional-review-intake.v0.1\"", "professional review intake version");
+  assertIncludes(receivableConverter, "intakeStatus: \"draft_preview\"", "professional review intake draft status");
+  assertIncludes(receivableConverter, "source: \"public_converter\"", "professional review intake source");
+  assertIncludes(receivableConverter, "reviewQueues", "professional review intake queues");
+  assertIncludes(receivableConverter, "bankReviewRequired: true", "professional review intake bank queue");
+  assertIncludes(receivableConverter, "legalReviewRequired: true", "professional review intake legal queue");
+  assertIncludes(receivableConverter, "factorReviewRequired: true", "professional review intake factor queue");
+  assertIncludes(receivableConverter, "operatorDecisionRequired: true", "professional review intake operator decision");
+  assertIncludes(receivableConverter, "targetOperatorSurfaces", "professional review intake Operator OS link");
+  assertIncludes(receivableConverter, "PROFESSIONAL_REVIEW_INTAKE_ONLY", "professional review intake allowed action");
+  assertIncludes(receivableConverter, "intakeStatus=draft_preview", "professional review intake UI guardrail");
+  assertIncludes(receivableConverter, "allowedAction=", "professional review intake UI guardrail");
+  assertIncludes(receivableConverter, "has not been submitted", "professional review intake no submission boundary");
+  assertIncludes(receivableConverter, "No backend persistence", "professional review intake no persistence boundary");
+  assertIncludes(receivableConverter, "Open Operator OS after login", "professional review intake login CTA");
+  assertIncludes(receivableConverter, "Professional Review Intake JSON", "professional review intake copyable JSON");
   assertNotIncludes(receivableConverter, "signTypedData", "wallet typed data no signing");
   assertNotIncludes(receivableConverter, "eth_signTypedData_v4", "signature receipt no real signing");
   assertNotIncludes(receivableConverter, "sendTransaction", "registry handoff no transaction");
@@ -163,6 +181,9 @@ function main() {
   assertNotIncludes(receivableConverter, "disbursement approved", "professional trust pack no approval claim");
   assertNotIncludes(receivableConverter, "legal opinion issued", "professional trust pack no legal opinion claim");
   assertNotIncludes(receivableConverter, "credit approval granted", "professional trust pack no credit approval claim");
+  assertNotIncludes(receivableConverter, "reviewerAssigned", "professional review intake no reviewer mutation");
+  assertNotIncludes(receivableConverter, "sendEmail", "professional review intake no notification");
+  assertNotIncludes(receivableConverter, "notifyReviewer", "professional review intake no notification");
 
   assertIncludes(architectureFixture, "Frontend + wallet layer", "frontend/blockchain technical architecture");
   assertIncludes(architectureFixture, "Smart contract protocol layer", "frontend/blockchain technical architecture");
