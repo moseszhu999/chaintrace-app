@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { buildFinancingPack, type GeneratedFinancingPack } from "@/lib/financing-pack-builder";
 
 export const dynamic = "force-dynamic";
 
@@ -14,24 +13,24 @@ type PreReviewPayload = {
   asset?: string;
 };
 
-function buildLoanRequestDraft(payload: PreReviewPayload = {}) {
-  const memo = receivableReadinessReport.financierMemo;
+function buildLoanRequestDraft(financingPack: GeneratedFinancingPack, payload: PreReviewPayload = {}) {
+  const memo = financingPack.financierMemo;
 
   return {
-    tradeId: payload.tradeId ?? receivableReadinessReport.tradeId,
+    tradeId: payload.tradeId ?? financingPack.tradeId,
     borrowerWallet: payload.borrowerWallet ?? "0xBorrowerWalletMock",
     beneficiaryWallet: payload.beneficiaryWallet ?? "0xExporterBeneficiaryMock",
     asset: payload.asset ?? "USDC",
-    receivableAmount: "USD 36,960",
-    requestedAdvance: payload.requestedAdvance ?? "USDC 29,500",
-    readinessScore: receivableReadinessReport.score,
-    maxScore: receivableReadinessReport.maxScore,
-    evidencePackURI: payload.evidencePackURI ?? "ipfs://chaintrace/vn-coffee/financing-pack-v0.1.json",
-    evidencePackHash: payload.evidencePackHash ?? "0xmock_financing_pack_hash",
+    receivableAmount: financingPack.case.receivableAmount,
+    requestedAdvance: payload.requestedAdvance ?? financingPack.case.requestedAdvance,
+    readinessScore: financingPack.readiness.readinessScore,
+    maxScore: financingPack.readiness.maxScore,
+    evidencePackURI: payload.evidencePackURI ?? financingPack.evidencePackURI,
+    evidencePackHash: payload.evidencePackHash ?? financingPack.evidencePackHash,
     status: "PreReview",
-    blockerCode: "GATES_NOT_PASSED",
-    disbursementAllowed: false,
-    preReviewAllowed: true,
+    blockerCode: financingPack.readiness.blockerCode,
+    disbursementAllowed: financingPack.readiness.disbursementAllowed,
+    preReviewAllowed: financingPack.readiness.preReviewAllowed,
     riskFlags: memo.riskFlagsEn,
     approvalConditions: memo.approvalConditionsEn,
     contractTarget: "LoanRequestRegistry.submitPreReviewRequest",
@@ -39,34 +38,45 @@ function buildLoanRequestDraft(payload: PreReviewPayload = {}) {
 }
 
 export async function GET() {
-  const workspace = await getWorkspaceSnapshot();
+  const financingPack = await buildFinancingPack();
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     version: "chaintrace-loan-request-pre-review-v0.1",
     case: {
-      titleZh: workspace.activeTrade.titleZh,
-      titleEn: workspace.activeTrade.titleEn,
-      poNo: workspace.activeTrade.poNo,
-      invoiceNo: workspace.activeTrade.invoiceNo,
+      titleZh: financingPack.case.titleZh,
+      titleEn: financingPack.case.titleEn,
+      poNo: financingPack.case.poNo,
+      invoiceNo: financingPack.case.invoiceNo,
     },
-    loanRequestDraft: buildLoanRequestDraft(),
+    financingPack: {
+      evidencePackURI: financingPack.evidencePackURI,
+      evidencePackHash: financingPack.evidencePackHash,
+      evidencePackHashAlgorithm: financingPack.evidencePackHashAlgorithm,
+    },
+    loanRequestDraft: buildLoanRequestDraft(financingPack),
     nextContractStep: "Submit the request to LoanRequestRegistry; do not deploy or disburse a ReceivableLoan until review approval.",
   });
 }
 
 export async function POST(request: NextRequest) {
   const payload = (await request.json().catch(() => ({}))) as PreReviewPayload;
-  const draft = buildLoanRequestDraft(payload);
+  const financingPack = await buildFinancingPack();
+  const draft = buildLoanRequestDraft(financingPack, payload);
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     version: "chaintrace-loan-request-pre-review-v0.1",
     accepted: true,
+    financingPack: {
+      evidencePackURI: financingPack.evidencePackURI,
+      evidencePackHash: financingPack.evidencePackHash,
+      evidencePackHashAlgorithm: financingPack.evidencePackHashAlgorithm,
+    },
     loanRequestDraft: draft,
     guardrails: {
       formalDisbursementBlocked: true,
-      reason: "GATES_NOT_PASSED",
+      reason: draft.blockerCode,
       allowedAction: "PRE_REVIEW_ONLY",
     },
     nextContractStep: "Call LoanRequestRegistry.submitPreReviewRequest with this draft after wallet addresses and evidence pack hash are finalized.",
