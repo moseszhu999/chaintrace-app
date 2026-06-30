@@ -169,7 +169,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
 
           <div className="converter-actions">
             <a className="primary-button" href="/login">{t(zh, "签名并进入工作台", "Sign and enter workspace")}</a>
-            <a className="secondary-button" href="/business-contracts">{t(zh, "查看链上状态机", "View on-chain state machine")}</a>
+            <a className="secondary-button" href="/login">{t(zh, "登录查看链上状态机", "Login to view on-chain state machine")}</a>
           </div>
         </div>
 

@@ -37,6 +37,23 @@ function main() {
     ["public Agent page", agent],
     ["login page", login],
   ];
+  const publicRouteSources = [
+    ["homepage", home],
+    ["public Agent page", agent],
+    ["public header", publicHeader],
+    ["client receivable converter", receivableConverter],
+  ];
+  const workspaceRouteHrefs = [
+    'href="/business-ops"',
+    'href="/business-contracts"',
+    'href="/business-readiness"',
+    'href="/business-architecture"',
+    'href="/business-loan"',
+    'href="/business-logistics"',
+    'href="/business-signing"',
+    'href="/business-wallet"',
+    'href="/dashboard"',
+  ];
 
   for (const [label, source] of publicSources) {
     assertNotIncludes(source, "turns cross-border trade PDFs and logistics evidence into finance-ready receivables", label);
@@ -49,18 +66,16 @@ function main() {
     assertNotIncludes(source, "把越南咖啡出口新加坡这笔交易做成一个可演示的融资证据驾驶舱", label);
   }
 
+  for (const [label, source] of publicRouteSources) {
+    for (const href of workspaceRouteHrefs) {
+      assertNotIncludes(source, href, `${label} public route boundary`);
+    }
+  }
+
   assertIncludes(home, 'href="/agent"', "homepage Agent CTA");
   assertIncludes(home, 'href="/login"', "homepage login CTA");
-  assertNotIncludes(home, 'href="/business-ops"', "homepage pre-login routes");
-  assertNotIncludes(home, 'href="/dashboard"', "homepage pre-login routes");
-  assertNotIncludes(home, 'href="/business-readiness"', "homepage pre-login routes");
   assertIncludes(publicHeader, 'href: "/agent"', "public header Agent nav");
   assertIncludes(publicHeader, 'href: "/login"', "public header login nav");
-  assertNotIncludes(publicHeader, 'href: "/business-ops"', "public header pre-login nav");
-  assertNotIncludes(publicHeader, 'href: "/dashboard"', "public header pre-login nav");
-  assertNotIncludes(publicHeader, 'href: "/business-readiness"', "public header pre-login nav");
-  assertNotIncludes(publicHeader, 'href: "/business-architecture"', "public header pre-login nav");
-  assertNotIncludes(publicHeader, 'href: "/business-contracts"', "public header pre-login nav");
 
   assertIncludes(agent, "PublicHeader", "public Agent page");
   assertNotIncludes(agent, "WorkspaceFrame", "public Agent page");
@@ -74,9 +89,6 @@ function main() {
   assertIncludes(agent, "disbursementAllowed=false", "public Agent guardrail");
   assertIncludes(agent, 'href="/login"', "public Agent login CTA");
   assertIncludes(agent, 'href="/api/financing-pack"', "public Agent financing pack API CTA");
-  assertNotIncludes(agent, 'href="/business-ops"', "public Agent pre-login routes");
-  assertNotIncludes(agent, 'href="/dashboard"', "public Agent pre-login routes");
-  assertNotIncludes(agent, 'href="/business-readiness"', "public Agent pre-login routes");
 
   assertIncludes(login, 'href="/business-ops"', "login simulated workspace entry");
   assertIncludes(login, 'href="/dashboard"', "login simulated dashboard entry");
