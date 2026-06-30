@@ -26,6 +26,7 @@ function main() {
   const workflowClient = read("components/workspace/OperatorTaskWorkflowClient.tsx");
   const tasksView = read("components/workspace/TasksView.tsx");
   const operatorValidation = read("scripts/validate-operator-os.js");
+  const schema = read("docs/agent-workflow-schema.sql");
 
   for (const expected of [
     "AgentRunReceipt",
@@ -36,6 +37,15 @@ function main() {
     "transitionOperatorTask",
     "allowedHumanActions",
     "agentRunReceiptStore",
+    "getAgentWorkflowPersistenceMode",
+    "createWorkflowStore",
+    "createRuntimeWorkflowStore",
+    "createNeonWorkflowStore",
+    "@neondatabase/serverless",
+    "DATABASE_URL",
+    "neon_workflow_store",
+    "runtime_workflow_store",
+    "jsonb",
     "deterministic_no_llm_call",
     "agentDecisionAuthority: \"none\"",
     "humanReviewRequired: true",
@@ -61,7 +71,9 @@ function main() {
     "createAgentRunReceipt",
     "listAgentRunReceipts",
     "persistenceMode",
+    "getAgentWorkflowPersistenceMode",
     "runtime_workflow_store",
+    "neon_workflow_store",
   ]) {
     assertIncludes(agentRunsRoute, expected, "agent run receipt API");
   }
@@ -70,6 +82,8 @@ function main() {
     "GET",
     "listOperatorTasks",
     "AgentRunReceipt",
+    "persistenceMode",
+    "getAgentWorkflowPersistenceMode",
   ]) {
     assertIncludes(operatorTasksRoute, expected, "operator tasks API");
   }
@@ -79,8 +93,27 @@ function main() {
     "transitionOperatorTask",
     "allowedHumanActions",
     "humanActionRequired",
+    "persistenceMode",
+    "getAgentWorkflowPersistenceMode",
   ]) {
     assertIncludes(transitionRoute, expected, "operator task transition API");
+  }
+
+  for (const expected of [
+    "create table if not exists agent_run_receipts",
+    "create table if not exists operator_tasks",
+    "create table if not exists operator_task_transitions",
+    "receipt_payload jsonb not null",
+    "task_payload jsonb not null",
+    "transition_payload jsonb not null",
+    "agent_run_receipts_trade_created_idx",
+    "operator_tasks_receipt_idx",
+    "operator_task_transitions_task_idx",
+    "GATES_NOT_PASSED",
+    "disbursement_allowed boolean not null default false",
+    "agent_decision_authority text not null default 'none'",
+  ]) {
+    assertIncludes(schema, expected, "agent workflow durable schema");
   }
 
   for (const expected of [

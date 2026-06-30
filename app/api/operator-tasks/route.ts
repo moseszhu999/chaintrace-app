@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getLatestAgentRunReceipt, listOperatorTasks, type AgentRunReceipt } from "@/lib/agent-workflow-store";
+import { getAgentWorkflowPersistenceMode, getLatestAgentRunReceipt, listOperatorTasks, type AgentRunReceipt } from "@/lib/agent-workflow-store";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +9,7 @@ export async function GET() {
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     version: "chaintrace-operator-tasks-v0.1",
+    persistenceMode: getAgentWorkflowPersistenceMode(),
     latestAgentRunReceipt,
     tasks,
   });

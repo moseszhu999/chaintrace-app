@@ -1,10 +1,12 @@
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
+import { neon } from "@neondatabase/serverless";
 import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { evaluateReadiness } from "@/lib/readiness-evaluator";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
 import { getCurrentTradeCase, listEvidenceRecords, type EvidenceRecord } from "@/lib/repositories/chaintrace-repository";
 
-export const agentRunReceiptStore = "runtime_workflow_store";
+export const agentRunReceiptStore = "agent_workflow_store";
+export type AgentWorkflowPersistenceMode = "runtime_workflow_store" | "neon_workflow_store";
 
 export type HumanAction = "approve_draft" | "request_changes" | "keep_blocked" | "escalate_professional_review";
 export type OperatorTaskKind =
@@ -44,7 +46,7 @@ export type AgentRunReceipt = {
   tradeId: string;
   createdAt: string;
   source: "operator_started_agent_workflow";
-  persistenceMode: typeof agentRunReceiptStore;
+  persistenceMode: AgentWorkflowPersistenceMode;
   modelExecutionMode: "deterministic_no_llm_call";
   agentDecisionAuthority: "none";
   humanReviewRequired: true;
@@ -91,7 +93,6 @@ export type OperatorTask = {
 type WorkflowState = {
   receipts: AgentRunReceipt[];
   tasks: OperatorTask[];
-  sequence: number;
 };
 
 const globalWorkflowState = globalThis as typeof globalThis & {
@@ -110,11 +111,17 @@ function getState(): WorkflowState {
     globalWorkflowState.__chaintraceAgentWorkflowState = {
       receipts: [],
       tasks: [],
-      sequence: 0,
     };
   }
   return globalWorkflowState.__chaintraceAgentWorkflowState;
 }
+
+type WorkflowStore = {
+  createReceiptWithTasks(receipt: AgentRunReceipt, tasks: OperatorTask[]): Promise<void>;
+  listReceipts(): Promise<AgentRunReceipt[]>;
+  listTasks(receiptId?: string): Promise<OperatorTask[]>;
+  transitionTask(taskId: string, action: HumanAction): Promise<OperatorTask>;
+};
 
 function cloneReceipt(receipt: AgentRunReceipt): AgentRunReceipt {
   return {
@@ -245,8 +252,231 @@ function statusForAction(action: HumanAction): OperatorTaskStatus {
   return statusMap[action];
 }
 
+export function getAgentWorkflowPersistenceMode(): AgentWorkflowPersistenceMode {
+  return process.env.DATABASE_URL ? "neon_workflow_store" : "runtime_workflow_store";
+}
+
+function createRuntimeWorkflowStore(): WorkflowStore {
+  return {
+    async createReceiptWithTasks(receipt, tasks) {
+      const state = getState();
+      state.receipts = [receipt, ...state.receipts.filter((item) => item.id !== receipt.id)];
+      state.tasks = [...tasks, ...state.tasks.filter((task) => task.receiptId !== receipt.id)];
+    },
+    async listReceipts() {
+      return getState().receipts.map(cloneReceipt);
+    },
+    async listTasks(receiptId) {
+      const state = getState();
+      const targetReceiptId = receiptId ?? state.receipts[0]?.id;
+      if (!targetReceiptId) return [];
+      return state.tasks.filter((task) => task.receiptId === targetReceiptId).map(cloneTask);
+    },
+    async transitionTask(taskId, action) {
+      const state = getState();
+      const task = state.tasks.find((item) => item.id === taskId);
+      if (!task) {
+        throw new Error(`Operator task not found: ${taskId}`);
+      }
+      if (!task.allowedHumanActions.includes(action)) {
+        throw new Error(`Action ${action} is not allowed for task ${taskId}`);
+      }
+      const now = new Date().toISOString();
+      const taskStatus = statusForAction(action);
+      task.taskStatus = taskStatus;
+      task.updatedAt = now;
+      task.transitions = [
+        ...task.transitions,
+        {
+          action,
+          at: now,
+          resultStatus: taskStatus,
+        },
+      ];
+      return cloneTask(task);
+    },
+  };
+}
+
+function getDatabaseUrl() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL is not configured for the Neon workflow store.");
+  return url;
+}
+
+function createNeonWorkflowStore(): WorkflowStore {
+  const sql = neon(getDatabaseUrl());
+
+  return {
+    async createReceiptWithTasks(receipt, tasks) {
+      await sql`
+        insert into agent_run_receipts (
+          id,
+          trade_id,
+          receipt_status,
+          readiness_score,
+          gates_passed,
+          blocker_code,
+          disbursement_allowed,
+          agent_decision_authority,
+          created_at,
+          receipt_payload
+        ) values (
+          ${receipt.id},
+          ${receipt.tradeId},
+          ${receipt.receiptStatus},
+          ${receipt.readinessScore},
+          ${receipt.gatesPassed},
+          ${receipt.blockerCode},
+          ${receipt.disbursementAllowed},
+          ${receipt.agentDecisionAuthority},
+          ${receipt.createdAt},
+          ${JSON.stringify(receipt)}::jsonb
+        )
+        on conflict (id) do update set
+          receipt_status = excluded.receipt_status,
+          readiness_score = excluded.readiness_score,
+          gates_passed = excluded.gates_passed,
+          blocker_code = excluded.blocker_code,
+          disbursement_allowed = excluded.disbursement_allowed,
+          agent_decision_authority = excluded.agent_decision_authority,
+          receipt_payload = excluded.receipt_payload;
+      `;
+
+      for (const task of tasks) {
+        await sql`
+          insert into operator_tasks (
+            id,
+            receipt_id,
+            trade_id,
+            task_kind,
+            task_status,
+            owner_role,
+            blocker_code,
+            disbursement_allowed,
+            agent_decision_authority,
+            created_at,
+            updated_at,
+            task_payload
+          ) values (
+            ${task.id},
+            ${task.receiptId},
+            ${task.tradeId},
+            ${task.taskKind},
+            ${task.taskStatus},
+            ${task.ownerRole},
+            ${task.blockerCode},
+            ${task.disbursementAllowed},
+            ${task.agentDecisionAuthority},
+            ${task.createdAt},
+            ${task.updatedAt},
+            ${JSON.stringify(task)}::jsonb
+          )
+          on conflict (id) do update set
+            task_status = excluded.task_status,
+            updated_at = excluded.updated_at,
+            task_payload = excluded.task_payload;
+        `;
+      }
+    },
+    async listReceipts() {
+      const rows = await sql`
+        select receipt_payload
+        from agent_run_receipts
+        order by created_at desc
+        limit 50;
+      ` as Array<{ receipt_payload: AgentRunReceipt }>;
+      return rows.map((row) => cloneReceipt(row.receipt_payload));
+    },
+    async listTasks(receiptId) {
+      let targetReceiptId = receiptId;
+      if (!targetReceiptId) {
+        const latestRows = await sql`
+          select id
+          from agent_run_receipts
+          order by created_at desc
+          limit 1;
+        ` as Array<{ id: string }>;
+        targetReceiptId = latestRows[0]?.id;
+      }
+      if (!targetReceiptId) return [];
+      const rows = await sql`
+        select task_payload
+        from operator_tasks
+        where receipt_id = ${targetReceiptId}
+        order by created_at asc;
+      ` as Array<{ task_payload: OperatorTask }>;
+      return rows.map((row) => cloneTask(row.task_payload));
+    },
+    async transitionTask(taskId, action) {
+      const rows = await sql`
+        select task_payload
+        from operator_tasks
+        where id = ${taskId}
+        limit 1;
+      ` as Array<{ task_payload: OperatorTask }>;
+      const task = rows[0]?.task_payload;
+      if (!task) {
+        throw new Error(`Operator task not found: ${taskId}`);
+      }
+      if (!task.allowedHumanActions.includes(action)) {
+        throw new Error(`Action ${action} is not allowed for task ${taskId}`);
+      }
+
+      const now = new Date().toISOString();
+      const taskStatus = statusForAction(action);
+      const transition: OperatorTaskTransition = {
+        action,
+        at: now,
+        resultStatus: taskStatus,
+      };
+      const nextTask: OperatorTask = {
+        ...task,
+        taskStatus,
+        updatedAt: now,
+        transitions: [...task.transitions, transition],
+      };
+
+      await sql`
+        update operator_tasks
+        set task_status = ${taskStatus},
+            updated_at = ${now},
+            task_payload = ${JSON.stringify(nextTask)}::jsonb
+        where id = ${taskId};
+      `;
+      await sql`
+        insert into operator_task_transitions (
+          task_id,
+          receipt_id,
+          action,
+          result_status,
+          created_at,
+          transition_payload
+        ) values (
+          ${taskId},
+          ${nextTask.receiptId},
+          ${action},
+          ${taskStatus},
+          ${now},
+          ${JSON.stringify(transition)}::jsonb
+        );
+      `;
+
+      return cloneTask(nextTask);
+    },
+  };
+}
+
+export function createWorkflowStore(): WorkflowStore {
+  if (getAgentWorkflowPersistenceMode() === "neon_workflow_store") {
+    return createNeonWorkflowStore();
+  }
+  return createRuntimeWorkflowStore();
+}
+
 export async function createAgentRunReceipt(): Promise<{ receipt: AgentRunReceipt; tasks: OperatorTask[] }> {
-  const state = getState();
+  const workflowStore = createWorkflowStore();
+  const persistenceMode = getAgentWorkflowPersistenceMode();
   const trade = await getCurrentTradeCase();
   const evidenceRecords = await listEvidenceRecords(trade.id);
   const gateResult = evaluateLoanGates(evidenceRecords);
@@ -258,9 +488,8 @@ export async function createAgentRunReceipt(): Promise<{ receipt: AgentRunReceip
     gatesPassed: gateResult.summary.passed,
     blockerCode: gateResult.summary.blockerCode,
   }));
-  state.sequence += 1;
   const now = new Date().toISOString();
-  const receiptId = `agent-run-${receiptInputHash}-${String(state.sequence).padStart(3, "0")}`;
+  const receiptId = `agent-run-${receiptInputHash}-${randomUUID().slice(0, 8)}`;
 
   const receipt: AgentRunReceipt = {
     id: receiptId,
@@ -269,7 +498,7 @@ export async function createAgentRunReceipt(): Promise<{ receipt: AgentRunReceip
     tradeId: trade.id,
     createdAt: now,
     source: "operator_started_agent_workflow",
-    persistenceMode: agentRunReceiptStore,
+    persistenceMode,
     modelExecutionMode: "deterministic_no_llm_call",
     agentDecisionAuthority: "none",
     humanReviewRequired: true,
@@ -311,8 +540,7 @@ export async function createAgentRunReceipt(): Promise<{ receipt: AgentRunReceip
   const tasks = buildTasks(receipt);
   receipt.generatedTaskIds = tasks.map((task) => task.id);
 
-  state.receipts = [receipt, ...state.receipts];
-  state.tasks = [...tasks, ...state.tasks.filter((task) => task.receiptId !== receipt.id)];
+  await workflowStore.createReceiptWithTasks(receipt, tasks);
 
   return {
     receipt: cloneReceipt(receipt),
@@ -321,7 +549,7 @@ export async function createAgentRunReceipt(): Promise<{ receipt: AgentRunReceip
 }
 
 export async function listAgentRunReceipts(): Promise<AgentRunReceipt[]> {
-  return getState().receipts.map(cloneReceipt);
+  return createWorkflowStore().listReceipts();
 }
 
 export async function getLatestAgentRunReceipt(): Promise<AgentRunReceipt | null> {
@@ -330,32 +558,9 @@ export async function getLatestAgentRunReceipt(): Promise<AgentRunReceipt | null
 }
 
 export async function listOperatorTasks(receiptId?: string): Promise<OperatorTask[]> {
-  const state = getState();
-  const targetReceiptId = receiptId ?? state.receipts[0]?.id;
-  if (!targetReceiptId) return [];
-  return state.tasks.filter((task) => task.receiptId === targetReceiptId).map(cloneTask);
+  return createWorkflowStore().listTasks(receiptId);
 }
 
 export async function transitionOperatorTask(taskId: string, action: HumanAction): Promise<OperatorTask> {
-  const state = getState();
-  const task = state.tasks.find((item) => item.id === taskId);
-  if (!task) {
-    throw new Error(`Operator task not found: ${taskId}`);
-  }
-  if (!task.allowedHumanActions.includes(action)) {
-    throw new Error(`Action ${action} is not allowed for task ${taskId}`);
-  }
-  const now = new Date().toISOString();
-  const taskStatus = statusForAction(action);
-  task.taskStatus = taskStatus;
-  task.updatedAt = now;
-  task.transitions = [
-    ...task.transitions,
-    {
-      action,
-      at: now,
-      resultStatus: taskStatus,
-    },
-  ];
-  return cloneTask(task);
+  return createWorkflowStore().transitionTask(taskId, action);
 }
