@@ -125,6 +125,37 @@ type RegistryHandoffPreview = {
   professionalReviewRequired: true;
 };
 
+type PreReviewTrustPack = {
+  packVersion: "pre-review-trust-pack.v0.1";
+  professionalHandoffStatus: "preview_only";
+  professionalHandoffAudience: string[];
+  tradeId: ReceivableCandidate["tradeId"];
+  tradeValue: "USD 52,800";
+  blockedReceivable: ReceivableCandidate["receivableAmount"];
+  requestedAdvance: ReceivableCandidate["requestedAdvance"];
+  readinessScore: 62;
+  gatesPassed: "6/12";
+  documentHash: string;
+  agentExtractionReceiptId: string;
+  candidateHash: string;
+  typedDataSummary: {
+    primaryType: "ReceivableCandidate";
+    walletSignatureStatus: "not_requested";
+    verifyingContract: ReceivableCandidateTypedDataPreview["domain"]["verifyingContract"];
+  };
+  signatureStatus: "preview_only";
+  registryTarget: "LoanRequestRegistry.submitPreReviewRequest";
+  blockerCode: "GATES_NOT_PASSED";
+  disbursementAllowed: false;
+  humanReviewRequired: true;
+  professionalReviewRequired: true;
+  rawPdfPolicy: "raw PDF stays browser-local / off-chain";
+  missingEvidence: string[];
+  recommendedNextActions: string[];
+  handoffPath: string[];
+  boundaryNotes: string[];
+};
+
 const documentTypes: Array<{ value: EvidenceDocumentType } & LocaleAwareText> = [
   { value: "invoice", zh: "商业发票", en: "Commercial invoice" },
   { value: "purchase_order", zh: "采购订单 / 销售合同", en: "Purchase order / sales contract" },
@@ -175,6 +206,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [agentCopyState, setAgentCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [handoffCopyState, setHandoffCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [trustPackCopyState, setTrustPackCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   const candidate: ReceivableCandidate = useMemo(() => ({
     tradeId: "VN-COFFEE-SG-2026-0007",
@@ -359,6 +391,56 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
     registryHandoffPreview,
   }, null, 2), [registryHandoffPreview, signatureReceiptPreview]);
 
+  const preReviewTrustPack: PreReviewTrustPack = useMemo(() => ({
+    packVersion: "pre-review-trust-pack.v0.1",
+    professionalHandoffStatus: "preview_only",
+    professionalHandoffAudience: ["bank pre-review desk", "law firm", "factor", "trade finance operator"],
+    tradeId: candidate.tradeId,
+    tradeValue: "USD 52,800",
+    blockedReceivable: candidate.receivableAmount,
+    requestedAdvance: candidate.requestedAdvance,
+    readinessScore: 62,
+    gatesPassed: "6/12",
+    documentHash: candidate.fileHash,
+    agentExtractionReceiptId: `agentExtractionReceipt:${shortHash(candidate.fileHash)}:${shortHash(candidateHash)}`,
+    candidateHash,
+    typedDataSummary: {
+      primaryType: typedDataPreview.primaryType,
+      walletSignatureStatus: typedDataPreview.walletSignatureStatus,
+      verifyingContract: typedDataPreview.domain.verifyingContract,
+    },
+    signatureStatus: signatureReceiptPreview.signatureStatus,
+    registryTarget: registryHandoffPreview.registryTarget,
+    blockerCode: candidate.blockerCode,
+    disbursementAllowed: candidate.disbursementAllowed,
+    humanReviewRequired: true,
+    professionalReviewRequired: true,
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+    missingEvidence: agentExtractionReceipt.missingEvidenceSuggestions,
+    recommendedNextActions: [
+      ...agentExtractionReceipt.draftNextActions,
+      "professional review required before any formal financing action",
+    ],
+    handoffPath: [
+      "PDF stays browser-local",
+      "browser-local SHA-256 hash",
+      "AI extraction preview",
+      "gate reasoning + missing evidence",
+      "ReceivableCandidate + EIP-712 typed data",
+      "signature receipt preview",
+      "LoanRequestRegistry handoff preview",
+      "Pre-review Trust Pack for professional handoff",
+    ],
+    boundaryNotes: [
+      "This preview pack is not a legal opinion and not a credit approval.",
+      "It does not replace underwriting, compliance, KYC, legal structure, or dispute assessment.",
+      "Pre-review only / GATES_NOT_PASSED / disbursementAllowed=false.",
+      "No PDF upload, no real LLM call, no real wallet signature, no transaction, no RPC, no secrets, and no private key handling.",
+    ],
+  }), [agentExtractionReceipt.draftNextActions, agentExtractionReceipt.missingEvidenceSuggestions, candidate, candidateHash, registryHandoffPreview.registryTarget, signatureReceiptPreview.signatureStatus, typedDataPreview.domain.verifyingContract, typedDataPreview.primaryType, typedDataPreview.walletSignatureStatus]);
+
+  const trustPackJson = useMemo(() => JSON.stringify(preReviewTrustPack, null, 2), [preReviewTrustPack]);
+
   async function refreshCandidateHash(nextCandidate: ReceivableCandidate) {
     const normalized = JSON.stringify(nextCandidate, Object.keys(nextCandidate).sort());
     setCandidateHash(await sha256Text(normalized));
@@ -426,6 +508,15 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
       setHandoffCopyState("copied");
     } catch {
       setHandoffCopyState("failed");
+    }
+  }
+
+  async function handleCopyTrustPack() {
+    try {
+      await navigator.clipboard.writeText(trustPackJson);
+      setTrustPackCopyState("copied");
+    } catch {
+      setTrustPackCopyState("failed");
     }
   }
 
@@ -761,6 +852,92 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           </button>
         </div>
         <pre className="candidate-json typed-data-json" aria-label="Signature receipt and registry handoff preview JSON">{handoffJson}</pre>
+      </section>
+
+      <section className="trust-pack-preview" id="pre-review-trust-pack-preview">
+        <div className="typed-data-header">
+          <div>
+            <span>{t(zh, "Pre-review Trust Pack preview", "Pre-review Trust Pack preview")}</span>
+            <h3>{t(zh, "把 AI 证据推理和 crypto proof handoff 打包给专业机构。", "Package AI evidence reasoning and crypto proof handoff for professional review.")}</h3>
+            <p>
+              {t(
+                zh,
+                "Trust Pack 是一个可复制的预审交接包，帮助银行、律师、保理方和贸易操作员快速看到 hash、抽取字段、gate 缺口、typed data、签名回执和 registry handoff。它不是正式批准、不是法律意见、不是信用审批。",
+                "The Trust Pack is a copyable pre-review handoff package for banks, law firms, factors, and trade operators to inspect hashes, extracted fields, gate gaps, typed data, signature receipt, and registry handoff. It is not a formal approval, not a legal opinion, and not a credit approval.",
+              )}
+            </p>
+          </div>
+          <div className="typed-data-status trust-pack-status">
+            <strong>professionalHandoffStatus={preReviewTrustPack.professionalHandoffStatus}</strong>
+            <span>Pre-review only · {preReviewTrustPack.blockerCode} · disbursementAllowed=false</span>
+            <span>professional review required before any formal financing action</span>
+          </div>
+        </div>
+
+        <div className="trust-pack-card">
+          <div>
+            <span>{t(zh, "Professional handoff", "Professional handoff")}</span>
+            <strong>{preReviewTrustPack.tradeId}</strong>
+            <p>{t(zh, "PDF 原文留在浏览器本地，交接包只携带哈希、预览对象和待审缺口。", "The raw PDF stays browser-local; the handoff pack carries only hashes, preview objects, and review gaps.")}</p>
+          </div>
+          <dl>
+            <div><dt>tradeValue</dt><dd>{preReviewTrustPack.tradeValue}</dd></div>
+            <div><dt>blockedReceivable</dt><dd>{preReviewTrustPack.blockedReceivable}</dd></div>
+            <div><dt>requestedAdvance</dt><dd>{preReviewTrustPack.requestedAdvance}</dd></div>
+            <div><dt>readinessScore</dt><dd>{preReviewTrustPack.readinessScore}/100</dd></div>
+            <div><dt>gatesPassed</dt><dd>{preReviewTrustPack.gatesPassed}</dd></div>
+            <div><dt>packVersion</dt><dd>{preReviewTrustPack.packVersion}</dd></div>
+          </dl>
+        </div>
+
+        <div className="trust-pack-flow" aria-label="Pre-review trust pack handoff path">
+          {preReviewTrustPack.handoffPath.map((step, index) => (
+            <article key={step}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{step}</strong>
+            </article>
+          ))}
+        </div>
+
+        <div className="trust-pack-panels">
+          <article>
+            <span>{t(zh, "AI / crypto summary", "AI / crypto summary")}</span>
+            <dl>
+              <div><dt>documentHash</dt><dd title={preReviewTrustPack.documentHash}>{shortHash(preReviewTrustPack.documentHash)}</dd></div>
+              <div><dt>agentExtractionReceiptId</dt><dd>{preReviewTrustPack.agentExtractionReceiptId}</dd></div>
+              <div><dt>candidateHash</dt><dd title={preReviewTrustPack.candidateHash}>{shortHash(preReviewTrustPack.candidateHash)}</dd></div>
+              <div><dt>typedDataSummary</dt><dd>{preReviewTrustPack.typedDataSummary.primaryType} · {preReviewTrustPack.typedDataSummary.walletSignatureStatus}</dd></div>
+              <div><dt>signatureStatus</dt><dd>{preReviewTrustPack.signatureStatus}</dd></div>
+              <div><dt>registryTarget</dt><dd>{preReviewTrustPack.registryTarget}</dd></div>
+            </dl>
+          </article>
+          <article>
+            <span>{t(zh, "Professional review queue", "Professional review queue")}</span>
+            <ul>
+              {preReviewTrustPack.missingEvidence.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+          <article>
+            <span>{t(zh, "Recommended next actions", "Recommended next actions")}</span>
+            <ul>
+              {preReviewTrustPack.recommendedNextActions.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+          <article>
+            <span>{t(zh, "Decision boundary", "Decision boundary")}</span>
+            <ul>
+              {preReviewTrustPack.boundaryNotes.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+        </div>
+
+        <div className="typed-data-json-header">
+          <strong>{t(zh, "Trust Pack JSON", "Trust Pack JSON")}</strong>
+          <button type="button" className="secondary-button button-reset" onClick={handleCopyTrustPack}>
+            {trustPackCopyState === "copied" ? t(zh, "已复制", "Copied") : trustPackCopyState === "failed" ? t(zh, "复制失败", "Copy failed") : t(zh, "复制 JSON", "Copy JSON")}
+          </button>
+        </div>
+        <pre className="candidate-json typed-data-json" aria-label="Pre-review Trust Pack preview JSON">{trustPackJson}</pre>
       </section>
 
       <pre className="candidate-json" aria-label="ReceivableCandidate JSON">{JSON.stringify(candidate, null, 2)}</pre>

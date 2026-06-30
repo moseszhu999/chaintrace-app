@@ -136,6 +136,19 @@ function main() {
   assertIncludes(receivableConverter, "LoanRequestRegistry handoff preview", "registry handoff preview");
   assertIncludes(receivableConverter, "allowedAction: \"PRE_REVIEW_ONLY\"", "registry handoff guardrail");
   assertIncludes(receivableConverter, "contracts block formal disbursement while gates fail", "registry handoff guardrail");
+  assertIncludes(receivableConverter, "Pre-review Trust Pack preview", "professional trust pack preview");
+  assertIncludes(receivableConverter, "preReviewTrustPack", "professional trust pack model");
+  assertIncludes(receivableConverter, "packVersion: \"pre-review-trust-pack.v0.1\"", "professional trust pack version");
+  assertIncludes(receivableConverter, "professionalHandoffStatus: \"preview_only\"", "professional trust pack preview-only status");
+  assertIncludes(receivableConverter, "professionalHandoffAudience", "professional trust pack audience");
+  assertIncludes(receivableConverter, "typedDataSummary", "professional trust pack typed data summary");
+  assertIncludes(receivableConverter, "readinessScore: 62", "professional trust pack readiness");
+  assertIncludes(receivableConverter, "gatesPassed: \"6/12\"", "professional trust pack gates");
+  assertIncludes(receivableConverter, "missingEvidence", "professional trust pack missing evidence");
+  assertIncludes(receivableConverter, "recommendedNextActions", "professional trust pack next actions");
+  assertIncludes(receivableConverter, "not a legal opinion", "professional trust pack legal boundary");
+  assertIncludes(receivableConverter, "not a credit approval", "professional trust pack credit boundary");
+  assertIncludes(receivableConverter, "professional review required before any formal financing action", "professional trust pack review boundary");
   assertNotIncludes(receivableConverter, "signTypedData", "wallet typed data no signing");
   assertNotIncludes(receivableConverter, "eth_signTypedData_v4", "signature receipt no real signing");
   assertNotIncludes(receivableConverter, "sendTransaction", "registry handoff no transaction");
@@ -145,6 +158,11 @@ function main() {
   assertNotIncludes(receivableConverter, "process.env", "wallet typed data no secrets");
   assertNotIncludes(receivableConverter, "OPENAI_API_KEY", "AI-native preview no API key");
   assertNotIncludes(receivableConverter, "ANTHROPIC_API_KEY", "AI-native preview no API key");
+  assertNotIncludes(receivableConverter, "loan approved", "professional trust pack no approval claim");
+  assertNotIncludes(receivableConverter, "financing approved", "professional trust pack no approval claim");
+  assertNotIncludes(receivableConverter, "disbursement approved", "professional trust pack no approval claim");
+  assertNotIncludes(receivableConverter, "legal opinion issued", "professional trust pack no legal opinion claim");
+  assertNotIncludes(receivableConverter, "credit approval granted", "professional trust pack no credit approval claim");
 
   assertIncludes(architectureFixture, "Frontend + wallet layer", "frontend/blockchain technical architecture");
   assertIncludes(architectureFixture, "Smart contract protocol layer", "frontend/blockchain technical architecture");
