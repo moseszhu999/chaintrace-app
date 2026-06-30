@@ -232,6 +232,26 @@ const operatorDecisionChecklist = {
   ],
 };
 
+const operatorDecisionReceiptPreview = {
+  receiptVersion: "operator-decision-receipt.v0.1",
+  sourceIntakeStatus: operatorIntakeMirror.intakeStatus,
+  decisionStatus: operatorDecisionChecklist.decisionStatus,
+  selectedDecision: null,
+  allowedAction: "OPERATOR_DECISION_RECEIPT_PREVIEW_ONLY",
+  humanReviewRequired: true,
+  professionalReviewRequired: true,
+  agentDecisionAuthority: "none",
+  availableDecisionOptions: operatorDecisionChecklist.items.map((item) => item.titleEn),
+  recommendedPreviewPath: [
+    "request missing evidence",
+    "keep case blocked",
+    "escalate to professional review only after human confirmation",
+  ],
+  escalationHandoffTarget: "Professional escalation handoff preview",
+  missingEvidence: ["B/L", "warehouse receipt", "arrival QC", "buyer acceptance"],
+  auditBoundary: "not submitted, not persisted, not assigned, not notified",
+};
+
 export function DashboardView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
   const { activeTrade, businessContext, businessModules, businessStages, evidenceSlots, operatingSummary, proofPack } = workspace;
   const verified = getVerifiedEvidenceCount(evidenceSlots);
@@ -267,6 +287,15 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
     { label: "humanReviewRequired", value: "true" },
     { label: "professionalReviewRequired", value: "true" },
     { label: "agentDecisionAuthority", value: operatorIntakeMirror.agentDecisionAuthority },
+    { label: "Blocker", value: blockerCode },
+    { label: "Disbursement", value: disbursementAllowedText },
+  ];
+  const receiptFacts = [
+    { label: "receiptVersion", value: operatorDecisionReceiptPreview.receiptVersion },
+    { label: "sourceIntakeStatus", value: operatorDecisionReceiptPreview.sourceIntakeStatus },
+    { label: "decisionStatus", value: operatorDecisionReceiptPreview.decisionStatus },
+    { label: "selectedDecision", value: "null" },
+    { label: "allowedAction", value: operatorDecisionReceiptPreview.allowedAction },
     { label: "Blocker", value: blockerCode },
     { label: "Disbursement", value: disbursementAllowedText },
   ];
@@ -429,6 +458,53 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
           <span>{t(zh, "Decision boundary", "Decision boundary")}</span>
           <strong>allowedAction={operatorDecisionChecklist.allowedAction}</strong>
           <p>Pre-review only · {blockerCode} · {disbursementAllowedText} · humanReviewRequired=true · professionalReviewRequired=true · agentDecisionAuthority=none</p>
+        </div>
+      </section>
+
+      <section className={styles.osSection}>
+        <div className="section-heading">
+          <span>{t(zh, "Operator decision receipt preview", "Operator decision receipt preview")}</span>
+          <h2>{t(zh, "先预览人工批示会留下的 receipt，不真正执行。", "Preview the receipt a human decision would leave without executing it.")}</h2>
+          <p>
+            {t(
+              zh,
+              "selectedDecision=null，decisionStatus=not_started。这里把 intake mirror、checklist、缺失证据和专业升级交接串成审计模板；not submitted, not persisted, not assigned, not notified。",
+              "selectedDecision=null, decisionStatus=not_started. This connects the intake mirror, checklist, missing evidence, and professional escalation handoff into an audit template; not submitted, not persisted, not assigned, not notified.",
+            )}
+          </p>
+        </div>
+        <div className={styles.statusStrip}>
+          {receiptFacts.map((fact) => (
+            <div key={fact.label} className={fact.value === blockerCode || fact.value === disbursementAllowedText ? styles.statusFactBlocked : styles.statusFact}>
+              <span>{fact.label}</span>
+              <strong>{fact.value}</strong>
+            </div>
+          ))}
+        </div>
+        <div className={styles.queueTable}>
+          <article className={styles.queueRow}>
+            <span>{t(zh, "Available decision options", "Available decision options")}</span>
+            <strong>{operatorDecisionReceiptPreview.availableDecisionOptions.join(" / ")}</strong>
+            <p>allowedAction={operatorDecisionReceiptPreview.allowedAction}</p>
+            <em>decisionStatus=not_started · selectedDecision=null · agentDecisionAuthority=none</em>
+          </article>
+          <article className={styles.queueRow}>
+            <span>{t(zh, "Recommended preview path", "Recommended preview path")}</span>
+            <strong>{operatorDecisionReceiptPreview.recommendedPreviewPath.join(" → ")}</strong>
+            <p>{operatorDecisionReceiptPreview.missingEvidence.join(" / ")}</p>
+            <em>Pre-review only · {blockerCode} · {disbursementAllowedText}</em>
+          </article>
+          <article className={styles.queueRow}>
+            <span>{t(zh, "Professional escalation handoff preview", "Professional escalation handoff preview")}</span>
+            <strong>{operatorDecisionReceiptPreview.escalationHandoffTarget}</strong>
+            <p>humanReviewRequired=true · professionalReviewRequired=true</p>
+            <em>{operatorDecisionReceiptPreview.auditBoundary}</em>
+          </article>
+        </div>
+        <div className={styles.contractBlockBox}>
+          <span>{t(zh, "Receipt boundary", "Receipt boundary")}</span>
+          <strong>allowedAction={operatorDecisionReceiptPreview.allowedAction}</strong>
+          <p>Pre-review only · {blockerCode} · {disbursementAllowedText} · no approval · no assignment · no notification · no transaction</p>
         </div>
       </section>
 
