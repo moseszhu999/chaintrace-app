@@ -1,8 +1,8 @@
 # ChainTrace
 
-ChainTrace turns cross-border trade PDFs and logistics evidence into finance-ready receivables for Agent pre-check and professional review.
+ChainTrace turns cross-border trade PDFs into browser-hashed, wallet-signed, on-chain receivable financing candidates.
 
-It is an AI-agent-driven cross-border trade-finance evidence operating system. The product organizes purchase orders, invoices, bills of lading, permits, warehouse receipts, quality reports, signatures, and payment conditions into a financing evidence pack that banks, factors, law firms, and risk teams can review faster.
+It is a frontend + blockchain trade-finance protocol demo. The browser hashes purchase orders, invoices, bills of lading, permits, warehouse receipts, quality reports, signatures, and payment conditions locally, then wallet signatures bind those facts into contract registries and a pre-review LoanRequestRegistry draft. It does not promise financing eligibility; incomplete gates remain blocked until evidence and professional approval are complete.
 
 ## Current Demo Case
 
@@ -27,7 +27,7 @@ Use this wording:
 - Pre-review only
 - formal disbursement blocked
 - evidence operating system
-- financing-ready receivable package
+- browser-hashed receivable financing candidate
 - Agent pre-check + professional exception review
 - gate-based execution
 
@@ -36,17 +36,15 @@ Avoid language that implies an approved loan, guaranteed financing, or automatic
 ## Product Flow
 
 ```text
-Upload evidence
+Select trade PDF in browser
         ↓
-AI Agent classifies documents and extracts metadata
+Browser calculates SHA-256 and creates ReceivableCandidate JSON/hash
         ↓
-Agent checks evidence, gate status, gaps, and risk memo
+Wallet signatures attest responsible facts to TradeSigningRegistry / LogisticsEvidenceRegistry
         ↓
-Financing Pack API returns a financier-facing evidence pack
+LoanRequestRegistry records a pre-review request and evidence-pack hash
         ↓
-Pre-review loan request API creates a LoanRequestRegistry draft
-        ↓
-Professional review decides blocked / approved / rejected
+Professional review decides blocked / approved / rejected from the same gate state
         ↓
 ReceivableLoan conversion is possible only after approval and complete gates
 ```
@@ -59,7 +57,9 @@ ReceivableLoan conversion is possible only after approval and complete gates
 - `/business-professional-review` - bank, law-firm, and exception review queue
 - `/business-contracts` - smart contract console and LoanRequestRegistry lifecycle
 
-## Key API Routes
+## Demo Mock API Routes
+
+These routes are kept for the Vercel demo and regression validation. They are not the recommended production core architecture; the product direction is frontend-local proof creation plus smart-contract state.
 
 - `GET /api/agents/run` - aggregate Agent pipeline output
 - `GET /api/agents/evidence` - evidence metadata and open/verified counts
@@ -96,6 +96,15 @@ BLM including value chain
 ```
 
 The system does not remove banks, law firms, or factors. It moves them from repetitive document checking to underwriting, compliance, legal structure, dispute handling, and material exception review.
+
+## Architecture Direction
+
+The recommended core architecture is frontend + blockchain:
+
+- Frontend: local PDF hashing, ReceivableCandidate JSON/hash, wallet signature, contract read/write.
+- Blockchain: `TradeSigningRegistry`, `LogisticsEvidenceRegistry`, `LoanRequestRegistry`, `ReceivableLoan`, and `RestrictedReceivableToken`.
+- Read model: frontend reads contract state and events through wallet/RPC providers.
+- Demo mocks: existing API routes remain fixtures only, not a production backend requirement.
 
 ## Run Locally
 

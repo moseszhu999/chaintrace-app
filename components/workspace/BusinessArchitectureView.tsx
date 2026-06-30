@@ -155,7 +155,7 @@ export function BusinessArchitectureView({ zh, workspace }: { zh: boolean; works
       <div className="panel">
         <div className="section-heading">
           <span>{t(zh, "5. 技术架构", "5. Technical architecture")}</span>
-          <h2>{t(zh, "技术架构最后落地：前端、API、Agent 服务、合约、数据库、对象存储和 CI/CD。", "Technical architecture comes last: frontend, API, agent services, contracts, database, object storage, and CI/CD.")}</h2>
+          <h2>{t(zh, "技术架构最后落地：前端本地处理、钱包签名、链上合约、RPC 读链和静态部署。", "Technical architecture comes last: browser-local processing, wallet signatures, on-chain contracts, RPC reads, and static deployment.")}</h2>
         </div>
         <LayerGrid zh={zh} layers={technicalArchitecture} />
       </div>
@@ -168,8 +168,8 @@ export function BusinessArchitectureView({ zh, workspace }: { zh: boolean; works
         <div className={styles.list}>{architectureRoadmap.map((item) => <RoadmapCard zh={zh} item={item} key={item.phase} />)}</div>
         <div className={styles.rowActions} style={{ marginTop: 18 }}>
           <Link className="primary-button" href="/business-readiness">{t(zh, "查看融资评分", "View readiness score")}</Link>
-          <Link className="secondary-button" href="/api/financing-pack" target="_blank">{t(zh, "打开融资包 API", "Open financing-pack API")}</Link>
           <Link className="secondary-button" href="/business-contracts">{t(zh, "查看合约控制台", "View contract console")}</Link>
+          <Link className="secondary-button" href="/api/financing-pack" target="_blank">{t(zh, "打开 demo mock JSON", "Open demo mock JSON")}</Link>
         </div>
       </div>
     </section>

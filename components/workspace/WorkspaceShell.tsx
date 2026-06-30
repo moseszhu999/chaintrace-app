@@ -39,19 +39,19 @@ export function WorkspaceShell({
   return (
     <main className="page-shell">
       <section className="panel workspace-panel">
-        <div className="workspace-layout" style={{ gridTemplateColumns: "260px minmax(0, 1fr)" }}>
-          <aside className="workspace-sidebar" style={{ borderRight: "1px solid var(--border)", borderBottom: 0 }}>
+        <div className="workspace-layout">
+          <aside className="workspace-sidebar">
             <Link href="/" className="workspace-brand">
               <span className="workspace-brand-mark">CT</span>
               ChainTrace
             </Link>
-            <nav className="workspace-nav" aria-label="Workspace navigation" style={{ gridTemplateColumns: "1fr", gap: 14 }}>
+            <nav className="workspace-nav" aria-label="Workspace navigation">
               {workspaceNavGroups.map((group) => (
-                <div key={group.id} style={{ display: "grid", gap: 7 }}>
-                  <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 950, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0 8px" }}>
+                <div key={group.id} className="workspace-nav-group">
+                  <span className="workspace-nav-heading">
                     {zh ? group.zh : group.en}
                   </span>
-                  <div style={{ display: "grid", gap: 6 }}>
+                  <div className="workspace-nav-items">
                     {group.items.map((item) => (
                       <Link key={item.key} href={item.href} className={`${active === item.key ? "primary-button" : "secondary-button"} workspace-nav-link`}>
                         {zh ? item.zh : item.en}

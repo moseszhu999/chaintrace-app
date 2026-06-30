@@ -7,12 +7,14 @@ export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
     { href: "/#product", label: zh ? "产品" : "Product", primary: false },
     { href: "/agent", label: zh ? "Agent 体验" : "Agent in action", primary: true },
-    { href: "/business-readiness", label: zh ? "融资评分" : "Readiness", primary: false },
+    { href: "/#workflow", label: zh ? "流程" : "Workflow", primary: false },
+    { href: "/#security", label: zh ? "边界" : "Guardrails", primary: false },
     { href: "/login", label: zh ? "登录" : "Login", primary: false },
   ];
 
   return (
     <header
+      className="public-header"
       style={{
         width: "min(1180px, calc(100% - 40px))",
         margin: "18px auto 0",
@@ -33,13 +35,14 @@ export function PublicHeader({ zh }: { zh: boolean }) {
       }}
     >
       <Link
+        className="public-brand"
         href="/"
         style={{
           display: "inline-flex",
           alignItems: "center",
           gap: 10,
           fontWeight: 950,
-          letterSpacing: "-0.03em",
+          letterSpacing: 0,
           fontSize: 18,
         }}
       >
@@ -61,6 +64,7 @@ export function PublicHeader({ zh }: { zh: boolean }) {
       </Link>
 
       <nav
+        className="public-nav"
         aria-label="Public navigation"
         style={{
           display: "flex",
