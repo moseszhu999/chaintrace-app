@@ -123,7 +123,27 @@ function main() {
     assertIncludes(dashboard, expected, "dashboard intake queue mirror");
   }
 
-  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, and responsibility boundaries.");
+  for (const expected of [
+    "operatorDecisionReceiptPreview",
+    "Operator decision receipt preview",
+    "receiptVersion",
+    "operator-decision-receipt.v0.1",
+    "sourceIntakeStatus",
+    "selectedDecision",
+    "selectedDecision=null",
+    "allowedAction",
+    "OPERATOR_DECISION_RECEIPT_PREVIEW_ONLY",
+    "availableDecisionOptions",
+    "recommendedPreviewPath",
+    "escalationHandoffTarget",
+    "Professional escalation handoff preview",
+    "not submitted, not persisted, not assigned, not notified",
+    "decisionStatus=not_started",
+  ]) {
+    assertIncludes(dashboard, expected, "dashboard operator decision receipt preview");
+  }
+
+  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, and responsibility boundaries.");
 }
 
 main();
