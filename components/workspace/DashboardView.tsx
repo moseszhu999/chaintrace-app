@@ -193,6 +193,45 @@ const operatorIntakeMirror = {
   ],
 };
 
+const operatorDecisionChecklist = {
+  decisionStatus: "not_started",
+  allowedAction: "OPERATOR_DECISION_PREVIEW_ONLY",
+  items: [
+    {
+      titleZh: "接收入队预审",
+      titleEn: "accept intake for review",
+      statusZh: "未开始",
+      statusEn: "not_started",
+      nextZh: "只能由人工 Operator 决定是否从 draft_preview 接收入队。",
+      nextEn: "Only a human operator can decide whether to accept the draft_preview into review.",
+    },
+    {
+      titleZh: "要求补充缺失证据",
+      titleEn: "request missing evidence",
+      statusZh: "需要处理",
+      statusEn: "required",
+      nextZh: "补 B/L、仓库回执、到港 QC 和买家验收。",
+      nextEn: "Request B/L, warehouse receipt, arrival QC, and buyer acceptance.",
+    },
+    {
+      titleZh: "升级专业审查",
+      titleEn: "escalate to professional review",
+      statusZh: "仅预览",
+      statusEn: "preview_only",
+      nextZh: "专业审查前仍不形成法律意见或信用审批。",
+      nextEn: "Professional review still does not create a legal opinion or credit approval here.",
+    },
+    {
+      titleZh: "保持阻断状态",
+      titleEn: "keep case blocked",
+      statusZh: "默认",
+      statusEn: "default",
+      nextZh: "gate 未通过时保持 GATES_NOT_PASSED 和 disbursementAllowed=false。",
+      nextEn: "Keep GATES_NOT_PASSED and disbursementAllowed=false while gates fail.",
+    },
+  ],
+};
+
 export function DashboardView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
   const { activeTrade, businessContext, businessModules, businessStages, evidenceSlots, operatingSummary, proofPack } = workspace;
   const verified = getVerifiedEvidenceCount(evidenceSlots);
@@ -219,6 +258,15 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
     { label: "allowedAction", value: operatorIntakeMirror.allowedAction },
     { label: "Readiness", value: readyScore },
     { label: "Gates", value: gateStatus },
+    { label: "Blocker", value: blockerCode },
+    { label: "Disbursement", value: disbursementAllowedText },
+  ];
+  const decisionFacts = [
+    { label: "decisionStatus", value: operatorDecisionChecklist.decisionStatus },
+    { label: "allowedAction", value: operatorDecisionChecklist.allowedAction },
+    { label: "humanReviewRequired", value: "true" },
+    { label: "professionalReviewRequired", value: "true" },
+    { label: "agentDecisionAuthority", value: operatorIntakeMirror.agentDecisionAuthority },
     { label: "Blocker", value: blockerCode },
     { label: "Disbursement", value: disbursementAllowedText },
   ];
@@ -344,6 +392,43 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
           <span>{t(zh, "Read-only boundary", "Read-only boundary")}</span>
           <strong>agentDecisionAuthority=none · humanReviewRequired=true · professionalReviewRequired=true</strong>
           <p>Pre-review only · {blockerCode} · {disbursementAllowedText} · allowedAction={operatorIntakeMirror.allowedAction}</p>
+        </div>
+      </section>
+
+      <section className={styles.osSection}>
+        <div className="section-heading">
+          <span>{t(zh, "Operator decision checklist", "Operator decision checklist")}</span>
+          <h2>{t(zh, "人工只看预览清单，系统不替人做决定。", "The human sees a preview checklist; the system does not decide for them.")}</h2>
+          <p>
+            {t(
+              zh,
+              "decisionStatus=not_started。这里只展示下一步人工判断项，不提交、不保存、不分配、不通知、不签名、不发交易、不批准。",
+              "decisionStatus=not_started. This only displays the human decision items; it does not submit, persist, assign, notify, sign, transact, or approve.",
+            )}
+          </p>
+        </div>
+        <div className={styles.statusStrip}>
+          {decisionFacts.map((fact) => (
+            <div key={fact.label} className={fact.value === blockerCode || fact.value === disbursementAllowedText ? styles.statusFactBlocked : styles.statusFact}>
+              <span>{fact.label}</span>
+              <strong>{fact.value}</strong>
+            </div>
+          ))}
+        </div>
+        <div className={styles.queueTable}>
+          {operatorDecisionChecklist.items.map((item) => (
+            <article className={styles.queueRow} key={item.titleEn}>
+              <span>{t(zh, item.statusZh, item.statusEn)}</span>
+              <strong>{t(zh, item.titleZh, item.titleEn)}</strong>
+              <p>{t(zh, "只读 checklist preview", "Read-only checklist preview")}</p>
+              <em>{t(zh, item.nextZh, item.nextEn)}</em>
+            </article>
+          ))}
+        </div>
+        <div className={styles.contractBlockBox}>
+          <span>{t(zh, "Decision boundary", "Decision boundary")}</span>
+          <strong>allowedAction={operatorDecisionChecklist.allowedAction}</strong>
+          <p>Pre-review only · {blockerCode} · {disbursementAllowedText} · humanReviewRequired=true · professionalReviewRequired=true · agentDecisionAuthority=none</p>
         </div>
       </section>
 
