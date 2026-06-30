@@ -147,30 +147,21 @@ function main() {
   }
 
   for (const expected of [
-    "missingEvidenceRequestDraftPreview",
-    "Missing evidence request draft preview",
-    "requestStatus",
-    "draft_preview",
-    "approvalStatus",
-    "not_requested",
-    "sendStatus",
-    "not_sent",
-    "allowedAction",
-    "MISSING_EVIDENCE_REQUEST_DRAFT_PREVIEW_ONLY",
-    "sourceDecisionReceipt",
-    "operator-decision-receipt.v0.1",
-    "warehouse receipt",
-    "arrival QC",
-    "buyer acceptance",
-    "humanReviewRequired=true",
-    "professionalReviewRequired=true",
+    "OperatorTaskWorkflowClient",
+    "AgentRunReceipt workflow",
+    "Run agent workflow",
+    "/api/agent-runs",
+    "/api/operator-tasks",
+    "humanActionRequired=true",
     "agentDecisionAuthority=none",
-    "messages are not sent",
+    "modelExecutionMode=deterministic_no_llm_call",
+    "GATES_NOT_PASSED",
+    "disbursementAllowed=false",
   ]) {
-    assertIncludes(tasksView, expected, "tasks missing evidence request draft preview");
+    assertIncludes(tasksView + read("components/workspace/OperatorTaskWorkflowClient.tsx"), expected, "tasks real agent workflow");
   }
 
-  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, task request drafts, and responsibility boundaries.");
+  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, real agent workflow tasks, and responsibility boundaries.");
 }
 
 main();
