@@ -104,6 +104,20 @@ function main() {
   assertIncludes(receivableConverter, "LoanRequestRegistry.submitPreReviewRequest", "on-chain pre-review request intent");
   assertIncludes(receivableConverter, "RestrictedReceivableToken", "controlled receivable token intent");
   assertNotIncludes(receivableConverter, 'fetch("/api', "client converter core architecture");
+  assertIncludes(receivableConverter, "AI-native", "AI-native evidence extraction preview");
+  assertIncludes(receivableConverter, "agentExtractionReceipt", "AI-native extraction receipt model");
+  assertIncludes(receivableConverter, "agentRunStatus: \"preview_only\"", "AI-native preview status");
+  assertIncludes(receivableConverter, "modelExecutionMode: \"demo_fixture_no_llm_call\"", "AI-native no real LLM guardrail");
+  assertIncludes(receivableConverter, "agentDecisionAuthority: \"none\"", "AI-native no autonomous approval guardrail");
+  assertIncludes(receivableConverter, "humanReviewRequired: true", "AI-native human review guardrail");
+  assertIncludes(receivableConverter, "professionalReviewRequired: true", "AI-native professional review guardrail");
+  assertIncludes(receivableConverter, "extractedFields", "AI-native extracted fields");
+  assertIncludes(receivableConverter, "gateReasoningTrace", "AI-native gate reasoning trace");
+  assertIncludes(receivableConverter, "missingEvidenceSuggestions", "AI-native missing evidence suggestions");
+  assertIncludes(receivableConverter, "draftNextActions", "AI-native draft next actions");
+  assertIncludes(receivableConverter, "rawPdfPolicy: \"raw PDF stays browser-local / off-chain\"", "AI-native raw PDF boundary");
+  assertIncludes(receivableConverter, "agentDecisionAuthority=none", "AI-native UI guardrail");
+  assertIncludes(receivableConverter, "humanReviewRequired=true", "AI-native UI guardrail");
   assertIncludes(receivableConverter, "EIP-712 typed data preview", "wallet typed data preview");
   assertIncludes(receivableConverter, "typedDataPreview", "wallet typed data preview model");
   assertIncludes(receivableConverter, "primaryType: \"ReceivableCandidate\"", "wallet typed data preview primary type");
@@ -129,6 +143,8 @@ function main() {
   assertNotIncludes(receivableConverter, "window.ethereum", "wallet typed data no wallet popup");
   assertNotIncludes(receivableConverter, "privateKey", "wallet typed data no key handling");
   assertNotIncludes(receivableConverter, "process.env", "wallet typed data no secrets");
+  assertNotIncludes(receivableConverter, "OPENAI_API_KEY", "AI-native preview no API key");
+  assertNotIncludes(receivableConverter, "ANTHROPIC_API_KEY", "AI-native preview no API key");
 
   assertIncludes(architectureFixture, "Frontend + wallet layer", "frontend/blockchain technical architecture");
   assertIncludes(architectureFixture, "Smart contract protocol layer", "frontend/blockchain technical architecture");

@@ -71,6 +71,42 @@ type SignatureReceiptPreview = {
   professionalReviewRequired: true;
 };
 
+type AgentExtractedField = {
+  label: string;
+  value: string;
+  confidence: "high" | "medium" | "blocked";
+  source: string;
+};
+
+type GateReasoningTraceItem = {
+  gate: string;
+  status: "passed" | "pending" | "blocked";
+  reason: string;
+  nextAction: string;
+};
+
+type AgentExtractionReceipt = {
+  agentRunStatus: "preview_only";
+  modelExecutionMode: "demo_fixture_no_llm_call";
+  agentDecisionAuthority: "none";
+  humanReviewRequired: true;
+  professionalReviewRequired: true;
+  tradeId: ReceivableCandidate["tradeId"];
+  documentHash: string;
+  candidateHash: string;
+  fileName: string;
+  documentType: EvidenceDocumentType;
+  extractedFields: AgentExtractedField[];
+  gateReasoningTrace: GateReasoningTraceItem[];
+  missingEvidenceSuggestions: string[];
+  draftNextActions: string[];
+  blockerCode: "GATES_NOT_PASSED";
+  disbursementAllowed: false;
+  walletSignatureStatus: "not_requested";
+  signatureStatus: "preview_only";
+  rawPdfPolicy: "raw PDF stays browser-local / off-chain";
+};
+
 type RegistryHandoffPreview = {
   registryTarget: "LoanRequestRegistry.submitPreReviewRequest";
   method: "submitPreReviewRequest";
@@ -137,6 +173,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
   const [isHashing, setIsHashing] = useState(false);
   const [error, setError] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [agentCopyState, setAgentCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [handoffCopyState, setHandoffCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   const candidate: ReceivableCandidate = useMemo(() => ({
@@ -201,6 +238,90 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
   }), [candidate, candidateHash]);
 
   const typedDataJson = useMemo(() => JSON.stringify(typedDataPreview, null, 2), [typedDataPreview]);
+
+  const agentExtractionReceipt: AgentExtractionReceipt = useMemo(() => ({
+    agentRunStatus: "preview_only",
+    modelExecutionMode: "demo_fixture_no_llm_call",
+    agentDecisionAuthority: "none",
+    humanReviewRequired: true,
+    professionalReviewRequired: true,
+    tradeId: candidate.tradeId,
+    documentHash: candidate.fileHash,
+    candidateHash,
+    fileName: candidate.fileName,
+    documentType: candidate.documentType,
+    extractedFields: [
+      {
+        label: "buyer",
+        value: "Singapore importer / buyer acceptance pending",
+        confidence: "medium",
+        source: "invoice header + buyer acceptance placeholder",
+      },
+      {
+        label: "tradeRoute",
+        value: "Vietnam -> Singapore",
+        confidence: "high",
+        source: "case metadata and logistics evidence labels",
+      },
+      {
+        label: "receivableAmount",
+        value: candidate.receivableAmount,
+        confidence: "high",
+        source: "ReceivableCandidate amount field",
+      },
+      {
+        label: "requestedAdvance",
+        value: candidate.requestedAdvance,
+        confidence: "medium",
+        source: "operator request draft",
+      },
+      {
+        label: "blockedReceivable",
+        value: "USD 36,960",
+        confidence: "blocked",
+        source: "gate evaluation requires missing evidence",
+      },
+    ],
+    gateReasoningTrace: [
+      {
+        gate: "commercial authenticity",
+        status: "pending",
+        reason: "Invoice and PO metadata align, but buyer acceptance still needs operator verification.",
+        nextAction: "Ask operator to confirm buyer contact and commercial claim.",
+      },
+      {
+        gate: "logistics evidence",
+        status: "blocked",
+        reason: "Bill of lading, warehouse receipt, and QC evidence are not all present in the browser-local candidate.",
+        nextAction: "Request B/L, warehouse receipt, and QC report before pre-review submission.",
+      },
+      {
+        gate: "contract disbursement gate",
+        status: "blocked",
+        reason: "GATES_NOT_PASSED keeps LoanRequestRegistry in pre-review-only mode.",
+        nextAction: "Do not convert to restricted receivable token until approval and gates complete.",
+      },
+    ],
+    missingEvidenceSuggestions: [
+      "Upload bill of lading hash proof",
+      "Attach warehouse receipt and QC report",
+      "Confirm buyer acceptance or dispute status",
+      "Escalate material exceptions to professional review",
+    ],
+    draftNextActions: [
+      "Draft a buyer acceptance confirmation request",
+      "Prepare a financier memo with extracted fields and blocker rationale",
+      "Route missing-document tasks to the operator evidence inbox",
+      "Keep wallet signing at preview-only until human approval",
+    ],
+    blockerCode: "GATES_NOT_PASSED",
+    disbursementAllowed: false,
+    walletSignatureStatus: "not_requested",
+    signatureStatus: "preview_only",
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+  }), [candidate, candidateHash]);
+
+  const agentJson = useMemo(() => JSON.stringify(agentExtractionReceipt, null, 2), [agentExtractionReceipt]);
 
   const signatureReceiptPreview: SignatureReceiptPreview = useMemo(() => ({
     signatureStatus: "preview_only",
@@ -290,6 +411,15 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
     }
   }
 
+  async function handleCopyAgentJson() {
+    try {
+      await navigator.clipboard.writeText(agentJson);
+      setAgentCopyState("copied");
+    } catch {
+      setAgentCopyState("failed");
+    }
+  }
+
   async function handleCopyHandoff() {
     try {
       await navigator.clipboard.writeText(handoffJson);
@@ -331,7 +461,8 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           {error && <div className="error">{error}</div>}
 
           <div className="converter-actions">
-            <a className="primary-button" href="#typed-data-preview">{t(zh, "预览签名载荷", "Preview signing payload")}</a>
+            <a className="primary-button" href="#ai-native-preview">{t(zh, "预览 AI 证据推理", "Preview AI evidence reasoning")}</a>
+            <a className="secondary-button" href="#typed-data-preview">{t(zh, "预览签名载荷", "Preview signing payload")}</a>
             <a className="secondary-button" href="/login">{t(zh, "登录查看链上状态机", "Login to view on-chain state machine")}</a>
           </div>
         </div>
@@ -365,6 +496,112 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           </article>
         ))}
       </div>
+
+      <section className="ai-native-preview" id="ai-native-preview">
+        <div className="typed-data-header">
+          <div>
+            <span>{t(zh, "AI-native evidence extraction preview", "AI-native evidence extraction preview")}</span>
+            <h3>{t(zh, "Agent 只做抽取、推理和催办草稿，不做批准。", "The agent only extracts, reasons, and drafts follow-ups; it does not approve.")}</h3>
+            <p>
+              {t(
+                zh,
+                "这里是确定性的 demo fixture，不调用真实 LLM、不上传 PDF、不使用 API key。它把浏览器本地 documentHash 变成 agentExtractionReceipt，再交给人工、专业审查和合约 gate。",
+                "This is a deterministic demo fixture with no real LLM call, no PDF upload, and no API key. It turns the browser-local documentHash into an agentExtractionReceipt before human, professional, and contract gates take over.",
+              )}
+            </p>
+          </div>
+          <div className="typed-data-status ai-boundary-status">
+            <strong>agentDecisionAuthority=none</strong>
+            <span>humanReviewRequired=true · professionalReviewRequired=true</span>
+            <span>Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false</span>
+          </div>
+        </div>
+
+        <div className="ai-flow" aria-label="AI-native evidence to registry handoff flow">
+          <article>
+            <span>01</span>
+            <strong>documentHash</strong>
+            <p title={agentExtractionReceipt.documentHash}>{shortHash(agentExtractionReceipt.documentHash)}</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>AI extraction</strong>
+            <p>{agentExtractionReceipt.agentRunStatus}</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>gate reasoning</strong>
+            <p>{agentExtractionReceipt.blockerCode}</p>
+          </article>
+          <article>
+            <span>04</span>
+            <strong>candidateHash</strong>
+            <p title={agentExtractionReceipt.candidateHash}>{shortHash(agentExtractionReceipt.candidateHash)}</p>
+          </article>
+          <article>
+            <span>05</span>
+            <strong>typedData</strong>
+            <p>{typedDataPreview.primaryType}</p>
+          </article>
+          <article>
+            <span>06</span>
+            <strong>registry handoff</strong>
+            <p>{registryHandoffPreview.allowedAction}</p>
+          </article>
+        </div>
+
+        <div className="ai-panels">
+          <article>
+            <span>{t(zh, "Extracted fields", "Extracted fields")}</span>
+            <dl>
+              {agentExtractionReceipt.extractedFields.map((field) => (
+                <div key={field.label}>
+                  <dt>{field.label}</dt>
+                  <dd>
+                    <strong>{field.value}</strong>
+                    <small>{field.confidence} · {field.source}</small>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+          <article>
+            <span>{t(zh, "Gate reasoning trace", "Gate reasoning trace")}</span>
+            <dl>
+              {agentExtractionReceipt.gateReasoningTrace.map((item) => (
+                <div key={item.gate}>
+                  <dt>{item.gate}</dt>
+                  <dd>
+                    <strong>{item.status}</strong>
+                    <small>{item.reason}</small>
+                    <small>{item.nextAction}</small>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+          <article>
+            <span>{t(zh, "Missing evidence suggestions", "Missing evidence suggestions")}</span>
+            <ul>
+              {agentExtractionReceipt.missingEvidenceSuggestions.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+          <article>
+            <span>{t(zh, "Draft next actions", "Draft next actions")}</span>
+            <ul>
+              {agentExtractionReceipt.draftNextActions.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+        </div>
+
+        <div className="typed-data-json-header">
+          <strong>{t(zh, "Agent extraction receipt JSON", "Agent extraction receipt JSON")}</strong>
+          <button type="button" className="secondary-button button-reset" onClick={handleCopyAgentJson}>
+            {agentCopyState === "copied" ? t(zh, "已复制", "Copied") : agentCopyState === "failed" ? t(zh, "复制失败", "Copy failed") : t(zh, "复制 JSON", "Copy JSON")}
+          </button>
+        </div>
+        <pre className="candidate-json typed-data-json" aria-label="AI-native agent extraction receipt JSON">{agentJson}</pre>
+      </section>
 
       <section className="typed-data-preview" id="typed-data-preview">
         <div className="typed-data-header">
