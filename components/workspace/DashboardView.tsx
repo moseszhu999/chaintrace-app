@@ -142,6 +142,57 @@ const responsibilitySplit = [
   },
 ];
 
+const operatorIntakeMirror = {
+  source: "public_converter",
+  intakeStatus: "draft_preview",
+  allowedAction: "PROFESSIONAL_REVIEW_INTAKE_ONLY",
+  humanReviewRequired: true,
+  professionalReviewRequired: true,
+  agentDecisionAuthority: "none",
+  queues: [
+    {
+      ownerZh: "银行预审",
+      ownerEn: "Bank pre-review",
+      titleZh: "垫款请求与 KYC 检查",
+      titleEn: "Advance request and KYC check",
+      statusZh: "只读镜像，等待人工决定是否接收入队",
+      statusEn: "Read-only mirror; waiting for a human intake decision",
+      nextZh: "核对 USDC 29,500 与 62/100 readiness。",
+      nextEn: "Check USDC 29,500 against 62/100 readiness.",
+    },
+    {
+      ownerZh: "法律例外",
+      ownerEn: "Legal exception",
+      titleZh: "买家验收与争议状态",
+      titleEn: "Buyer acceptance and dispute status",
+      statusZh: "需要补买家验收，不能形成法律意见。",
+      statusEn: "Buyer acceptance is missing; no legal opinion is issued.",
+      nextZh: "确认合同可执行性、验收和争议。",
+      nextEn: "Check enforceability, acceptance, and dispute status.",
+    },
+    {
+      ownerZh: "保理运营",
+      ownerEn: "Factor operations",
+      titleZh: "物流与仓库证据缺口",
+      titleEn: "Logistics and warehouse evidence gaps",
+      statusZh: "仓库、到港 QC、买家验收仍缺。",
+      statusEn: "Warehouse, arrival QC, and buyer acceptance remain missing.",
+      nextZh: "催办 B/L、仓库回执和 QC 报告。",
+      nextEn: "Chase B/L, warehouse receipt, and QC report.",
+    },
+    {
+      ownerZh: "Operator evidence desk",
+      ownerEn: "Operator evidence desk",
+      titleZh: "是否从公开预览转入工作台",
+      titleEn: "Whether to move public preview into workspace",
+      statusZh: "未提交、未保存、未分配 reviewer。",
+      statusEn: "Not submitted, not persisted, and no reviewer assigned.",
+      nextZh: "人工决定是否开始正式 intake。",
+      nextEn: "Human decides whether to start formal intake.",
+    },
+  ],
+};
+
 export function DashboardView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
   const { activeTrade, businessContext, businessModules, businessStages, evidenceSlots, operatingSummary, proofPack } = workspace;
   const verified = getVerifiedEvidenceCount(evidenceSlots);
@@ -161,6 +212,15 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
     { labelZh: "Gates", labelEn: "Gates", value: gateStatus },
     { labelZh: "Blocker", labelEn: "Blocker", value: blockerCode },
     { labelZh: "放款", labelEn: "Disbursement", value: disbursementAllowedText },
+  ];
+  const intakeFacts = [
+    { label: "source", value: operatorIntakeMirror.source },
+    { label: "intakeStatus", value: operatorIntakeMirror.intakeStatus },
+    { label: "allowedAction", value: operatorIntakeMirror.allowedAction },
+    { label: "Readiness", value: readyScore },
+    { label: "Gates", value: gateStatus },
+    { label: "Blocker", value: blockerCode },
+    { label: "Disbursement", value: disbursementAllowedText },
   ];
 
   return (
@@ -247,6 +307,43 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
               <Link className="secondary-button" href="/business-professional-review">{t(zh, "升级专业审查", "Escalate review")}</Link>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section className={styles.osSection}>
+        <div className="section-heading">
+          <span>{t(zh, "Intake queue mirror", "Intake queue mirror")}</span>
+          <h2>{t(zh, "公开页的 professionalReviewIntake 在这里变成只读队列镜像。", "The public professionalReviewIntake becomes a read-only queue mirror here.")}</h2>
+          <p>
+            {t(
+              zh,
+              "这是 draft_preview 的镜像：未提交、未保存、未分配 reviewer。Operator 仍需人工决定是否开始正式 intake。",
+              "This mirrors draft_preview only: not submitted, not persisted, and no reviewer assigned. A human operator still decides whether to start formal intake.",
+            )}
+          </p>
+        </div>
+        <div className={styles.statusStrip}>
+          {intakeFacts.map((fact) => (
+            <div key={fact.label} className={fact.value === blockerCode || fact.value === disbursementAllowedText ? styles.statusFactBlocked : styles.statusFact}>
+              <span>{fact.label}</span>
+              <strong>{fact.value}</strong>
+            </div>
+          ))}
+        </div>
+        <div className={styles.queueTable}>
+          {operatorIntakeMirror.queues.map((queue) => (
+            <article className={styles.queueRow} key={queue.titleEn}>
+              <span>{t(zh, queue.ownerZh, queue.ownerEn)}</span>
+              <strong>{t(zh, queue.titleZh, queue.titleEn)}</strong>
+              <p>{t(zh, queue.statusZh, queue.statusEn)}</p>
+              <em>{t(zh, queue.nextZh, queue.nextEn)}</em>
+            </article>
+          ))}
+        </div>
+        <div className={styles.agentPreparedBox}>
+          <span>{t(zh, "Read-only boundary", "Read-only boundary")}</span>
+          <strong>agentDecisionAuthority=none · humanReviewRequired=true · professionalReviewRequired=true</strong>
+          <p>Pre-review only · {blockerCode} · {disbursementAllowedText} · allowedAction={operatorIntakeMirror.allowedAction}</p>
         </div>
       </section>
 
