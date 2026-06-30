@@ -19,6 +19,8 @@ function assertIncludes(source, expected, label) {
 
 function main() {
   const dashboard = read("components/workspace/DashboardView.tsx");
+  const tasksView = read("components/workspace/TasksView.tsx");
+  const tasksRoute = read("app/tasks/page.tsx");
   const styles = read("components/workspace/WorkspaceViews.module.css");
   const dashboardRoute = read("app/dashboard/page.tsx");
   const workspaceNav = read("lib/workspace-navigation.ts");
@@ -30,6 +32,7 @@ function main() {
   ].join("\n");
 
   assertIncludes(dashboardRoute, "DashboardView", "dashboard route");
+  assertIncludes(tasksRoute, "TasksView", "task center route");
   assertIncludes(workspaceNav, 'href: "/dashboard"', "workspace navigation dashboard entry");
   assertIncludes(dashboard, "activeTrade.totalAmount", "dashboard first-screen trade value binding");
   assertIncludes(dashboard, "receivableLoanContract.receivableAmount", "dashboard first-screen blocked receivable binding");
@@ -143,7 +146,31 @@ function main() {
     assertIncludes(dashboard, expected, "dashboard operator decision receipt preview");
   }
 
-  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, and responsibility boundaries.");
+  for (const expected of [
+    "missingEvidenceRequestDraftPreview",
+    "Missing evidence request draft preview",
+    "requestStatus",
+    "draft_preview",
+    "approvalStatus",
+    "not_requested",
+    "sendStatus",
+    "not_sent",
+    "allowedAction",
+    "MISSING_EVIDENCE_REQUEST_DRAFT_PREVIEW_ONLY",
+    "sourceDecisionReceipt",
+    "operator-decision-receipt.v0.1",
+    "warehouse receipt",
+    "arrival QC",
+    "buyer acceptance",
+    "humanReviewRequired=true",
+    "professionalReviewRequired=true",
+    "agentDecisionAuthority=none",
+    "messages are not sent",
+  ]) {
+    assertIncludes(tasksView, expected, "tasks missing evidence request draft preview");
+  }
+
+  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, task request drafts, and responsibility boundaries.");
 }
 
 main();
