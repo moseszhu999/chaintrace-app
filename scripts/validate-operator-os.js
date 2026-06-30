@@ -103,7 +103,27 @@ function main() {
     assertIncludes(dashboard, expected, "dashboard responsibility split");
   }
 
-  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, and responsibility boundaries.");
+  for (const expected of [
+    "operatorIntakeMirror",
+    "Intake queue mirror",
+    "source",
+    "public_converter",
+    "intakeStatus",
+    "draft_preview",
+    "allowedAction",
+    "PROFESSIONAL_REVIEW_INTAKE_ONLY",
+    "Bank pre-review",
+    "Legal exception",
+    "Factor operations",
+    "Operator evidence desk",
+    "humanReviewRequired=true",
+    "professionalReviewRequired=true",
+    "agentDecisionAuthority=none",
+  ]) {
+    assertIncludes(dashboard, expected, "dashboard intake queue mirror");
+  }
+
+  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, and responsibility boundaries.");
 }
 
 main();
