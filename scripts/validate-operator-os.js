@@ -19,6 +19,7 @@ function assertIncludes(source, expected, label) {
 
 function main() {
   const dashboard = read("components/workspace/DashboardView.tsx");
+  const styles = read("components/workspace/WorkspaceViews.module.css");
   const dashboardRoute = read("app/dashboard/page.tsx");
   const workspaceNav = read("lib/workspace-navigation.ts");
   const factSources = [
@@ -47,6 +48,28 @@ function main() {
     "disbursementAllowed=false",
   ]) {
     assertIncludes(factSources, expected, "dashboard first-screen operating facts");
+  }
+
+  for (const expected of [
+    "statusStrip",
+    "commandGrid",
+    "workflowConsole",
+    "decisionRail",
+    "queueTable",
+    "responsibilityMatrix",
+  ]) {
+    assertIncludes(dashboard, expected, "dashboard command-console structure");
+    assertIncludes(styles, expected, "dashboard command-console styles");
+  }
+
+  for (const expected of [
+    "Next human decision",
+    "Agent prepared",
+    "Approve chasing",
+    "View readiness",
+    "Escalate review",
+  ]) {
+    assertIncludes(dashboard, expected, "dashboard decision rail");
   }
 
   for (const expected of [
@@ -80,7 +103,7 @@ function main() {
     assertIncludes(dashboard, expected, "dashboard responsibility split");
   }
 
-  console.log("Operator OS validation passed: dashboard exposes metrics, queues, workflow, and responsibility boundaries.");
+  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, and responsibility boundaries.");
 }
 
 main();
