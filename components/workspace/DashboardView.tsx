@@ -12,6 +12,16 @@ function t(zh: boolean, cn: string, en: string) {
 const blockerCode = "GATES_NOT_PASSED";
 const disbursementAllowedText = "disbursementAllowed=false";
 
+const statusSteps = [
+  { titleZh: "证据接入", titleEn: "Evidence intake", stateZh: "已开始", stateEn: "Started", tone: "done" },
+  { titleZh: "本地 hash / 候选", titleEn: "Local hash / candidate", stateZh: "已生成", stateEn: "Generated", tone: "done" },
+  { titleZh: "Agent 抽取", titleEn: "Agent extraction", stateZh: "已准备", stateEn: "Prepared", tone: "done" },
+  { titleZh: "Gate 评估", titleEn: "Gate evaluation", stateZh: "6/12", stateEn: "6/12", tone: "active" },
+  { titleZh: "人工批示", titleEn: "Human approval", stateZh: "需要处理", stateEn: "Required", tone: "warning" },
+  { titleZh: "专业审查", titleEn: "Professional review", stateZh: "待提交", stateEn: "Pending", tone: "warning" },
+  { titleZh: "合约执行", titleEn: "Contract execution", stateZh: "阻断", stateEn: "Blocked", tone: "blocked" },
+];
+
 const operatingQueues = [
   {
     titleZh: "证据收件箱",
@@ -20,6 +30,8 @@ const operatingQueues = [
     statusEn: "6 verified, 6 pending or blocked",
     ownerZh: "Operator + Agent",
     ownerEn: "Operator + Agent",
+    nextZh: "补仓库回执、到港 QC、买家验收。",
+    nextEn: "Complete warehouse receipt, arrival QC, and buyer acceptance.",
     href: "/evidence",
   },
   {
@@ -29,6 +41,8 @@ const operatingQueues = [
     statusEn: "Amount, PO, invoice, container, and VGM organized",
     ownerZh: "Agent",
     ownerEn: "Agent",
+    nextZh: "等待人类确认商业真实性。",
+    nextEn: "Waiting for human commercial verification.",
     href: "/business-ops",
   },
   {
@@ -38,6 +52,8 @@ const operatingQueues = [
     statusEn: "2 pending, 4 blocked",
     ownerZh: "Agent + Contract",
     ownerEn: "Agent + Contract",
+    nextZh: "检查 final B/L、进口许可和质检争议。",
+    nextEn: "Check final B/L, import permit, and QC dispute.",
     href: "/business-loan",
   },
   {
@@ -47,6 +63,8 @@ const operatingQueues = [
     statusEn: "Warehouse, arrival QC, and buyer acceptance still missing",
     ownerZh: "Operator",
     ownerEn: "Operator",
+    nextZh: "向仓库、买家和 QC 方催办。",
+    nextEn: "Chase warehouse, buyer, and QC counterparties.",
     href: "/tasks",
   },
   {
@@ -56,6 +74,8 @@ const operatingQueues = [
     statusEn: "Outbound chasing, pre-review submit, wallet signature",
     ownerZh: "Human",
     ownerEn: "Human",
+    nextZh: "批准 Agent 起草的催办和预审提交。",
+    nextEn: "Approve Agent-drafted chasing and pre-review submission.",
     href: "/assistant",
   },
   {
@@ -65,6 +85,8 @@ const operatingQueues = [
     statusEn: "Underwriting, KYC, dispute, and legal structure",
     ownerZh: "Professional",
     ownerEn: "Professional",
+    nextZh: "进入专业审查前不能转换。",
+    nextEn: "No conversion before professional review.",
     href: "/business-professional-review",
   },
   {
@@ -74,21 +96,23 @@ const operatingQueues = [
     statusEn: "LoanRequestRegistry is pre-review only; disbursement and conversion locked",
     ownerZh: "Contract",
     ownerEn: "Contract",
+    nextZh: "等待全部 gate 和专业 approval。",
+    nextEn: "Wait for complete gates and professional approval.",
     href: "/business-contracts",
   },
 ];
 
 const workflowMap = [
-  { titleZh: "PDF / 证据接入", titleEn: "PDF / evidence intake", ownerZh: "Human", ownerEn: "Human" },
-  { titleZh: "浏览器本地 hash / 候选创建", titleEn: "browser-local hash / candidate creation", ownerZh: "Frontend", ownerEn: "Frontend" },
-  { titleZh: "Agent 分类", titleEn: "Agent classification", ownerZh: "Agent", ownerEn: "Agent" },
-  { titleZh: "Gate 评估", titleEn: "gate evaluation", ownerZh: "Agent", ownerEn: "Agent" },
-  { titleZh: "缺口追踪", titleEn: "gap chasing", ownerZh: "Operator", ownerEn: "Operator" },
-  { titleZh: "融资包", titleEn: "financing pack", ownerZh: "Agent", ownerEn: "Agent" },
-  { titleZh: "人工 / 专业审查", titleEn: "human / professional review", ownerZh: "Human + Professional", ownerEn: "Human + Professional" },
-  { titleZh: "LoanRequestRegistry 预审", titleEn: "LoanRequestRegistry pre-review", ownerZh: "Contract", ownerEn: "Contract" },
-  { titleZh: "合约 gate 检查", titleEn: "contract gate check", ownerZh: "Contract", ownerEn: "Contract" },
-  { titleZh: "受限应收 token / 贷款转换仅在 approval 后", titleEn: "restricted receivable token / loan conversion only after approval", ownerZh: "Contract + Professional", ownerEn: "Contract + Professional" },
+  { titleZh: "PDF / 证据接入", titleEn: "PDF / evidence intake", ownerZh: "Human", ownerEn: "Human", stateZh: "done", stateEn: "done" },
+  { titleZh: "浏览器本地 hash / 候选创建", titleEn: "browser-local hash / candidate creation", ownerZh: "Frontend", ownerEn: "Frontend", stateZh: "done", stateEn: "done" },
+  { titleZh: "Agent 分类", titleEn: "Agent classification", ownerZh: "Agent", ownerEn: "Agent", stateZh: "done", stateEn: "done" },
+  { titleZh: "Gate 评估", titleEn: "gate evaluation", ownerZh: "Agent", ownerEn: "Agent", stateZh: "active", stateEn: "active" },
+  { titleZh: "缺口追踪", titleEn: "gap chasing", ownerZh: "Operator", ownerEn: "Operator", stateZh: "human approval required", stateEn: "human approval required" },
+  { titleZh: "融资包", titleEn: "financing pack", ownerZh: "Agent", ownerEn: "Agent", stateZh: "prepared", stateEn: "prepared" },
+  { titleZh: "人工 / 专业审查", titleEn: "human / professional review", ownerZh: "Human + Professional", ownerEn: "Human + Professional", stateZh: "required", stateEn: "required" },
+  { titleZh: "LoanRequestRegistry 预审", titleEn: "LoanRequestRegistry pre-review", ownerZh: "Contract", ownerEn: "Contract", stateZh: "pre-review only", stateEn: "pre-review only" },
+  { titleZh: "合约 gate 检查", titleEn: "contract gate check", ownerZh: "Contract", ownerEn: "Contract", stateZh: "blocked", stateEn: "blocked" },
+  { titleZh: "受限应收 token / 贷款转换仅在 approval 后", titleEn: "restricted receivable token / loan conversion only after approval", ownerZh: "Contract + Professional", ownerEn: "Contract + Professional", stateZh: "locked", stateEn: "locked" },
 ];
 
 const responsibilitySplit = [
@@ -129,96 +153,116 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
   const passedGates = loanGates.filter((gate) => gate.status === "passed").length;
   const gateStatus = `${passedGates}/${loanGates.length}`;
   const readinessStatus = t(zh, receivableReadinessReport.statusZh, receivableReadinessReport.statusEn);
+  const statusFacts = [
+    { labelZh: "贸易金额", labelEn: "Trade value", value: activeTrade.totalAmount },
+    { labelZh: "阻断应收", labelEn: "Blocked receivable", value: receivableLoanContract.receivableAmount },
+    { labelZh: "申请垫款", labelEn: "Requested advance", value: receivableLoanContract.advanceAmount },
+    { labelZh: "Readiness", labelEn: "Readiness", value: readyScore },
+    { labelZh: "Gates", labelEn: "Gates", value: gateStatus },
+    { labelZh: "Blocker", labelEn: "Blocker", value: blockerCode },
+    { labelZh: "放款", labelEn: "Disbursement", value: disbursementAllowedText },
+  ];
 
   return (
     <>
-      <section className={styles.osHero}>
+      <section className={styles.commandShell}>
         <div className="section-heading">
           <span>Operator OS</span>
-          <h2>{t(zh, "进入后第一眼看到当前 trade、阻断状态和下一步责任人。", "The first screen shows the current trade, blocker state, and the responsible next owner.")}</h2>
+          <h2>{t(zh, "先看阻断、责任人和下一步批示。", "Start with blocker, owner, and the next human decision.")}</h2>
           <p>
             {t(
               zh,
-              "这不是产品介绍页，而是操作系统首页：把交易金额、融资候选、gate、队列、流程和职责边界放在同一个决策面板里。",
-              "This is not product copy. It is an operating homepage that puts trade value, financing candidate, gates, queues, workflow, and responsibility boundaries on one decision surface.",
+              "这不是卡片墙，而是交易操作台：顶部给状态，中间给流程，右侧给人类批示。队列和模块只放在下方辅助。",
+              "This is not a wall of cards. It is a trade operations console: status on top, workflow in the center, and human decision rail on the right. Queues and modules support the lower section.",
             )}
           </p>
         </div>
-        <div className={styles.osHeroGrid}>
-          <article className={styles.tradeSnapshot}>
-            <div className={styles.rowHeader}>
-              <div className={styles.rowMain}>
-                <h3 className={styles.rowTitle}>{t(zh, "当前 trade", "Current trade")}</h3>
-                <p className={styles.rowMeta}>{t(zh, activeTrade.titleZh, activeTrade.titleEn)}</p>
-              </div>
-              <span className={`${styles.statusChip} ${styles.statusHigh}`}>{blockerCode}</span>
+
+        <div className={styles.statusStrip}>
+          {statusFacts.map((fact) => (
+            <div key={fact.labelEn} className={fact.value === blockerCode || fact.value === disbursementAllowedText ? styles.statusFactBlocked : styles.statusFact}>
+              <span>{t(zh, fact.labelZh, fact.labelEn)}</span>
+              <strong>{fact.value}</strong>
             </div>
-            <dl className={styles.metricGrid}>
+          ))}
+        </div>
+
+        <div className={styles.commandGrid}>
+          <main className={styles.workflowConsole}>
+            <div className={styles.consoleHeader}>
               <div>
-                <dt>{t(zh, "贸易金额", "Trade value")}</dt>
-                <dd>{activeTrade.totalAmount}</dd>
+                <span className={styles.panelKicker}>{t(zh, "当前 trade", "Current trade")}</span>
+                <h3>{t(zh, activeTrade.titleZh, activeTrade.titleEn)}</h3>
+                <p>{t(zh, operatingSummary.activeDealZh, operatingSummary.activeDealEn)}</p>
               </div>
-              <div>
-                <dt>{t(zh, "阻断应收账款", "Blocked receivable")}</dt>
-                <dd>{receivableLoanContract.receivableAmount}</dd>
-              </div>
-              <div>
-                <dt>{t(zh, "申请垫款", "Requested advance")}</dt>
-                <dd>{receivableLoanContract.advanceAmount}</dd>
-              </div>
-              <div>
-                <dt>{t(zh, "Readiness", "Readiness")}</dt>
-                <dd>{readyScore}</dd>
-              </div>
-              <div>
-                <dt>{t(zh, "Gates", "Gates")}</dt>
-                <dd>{gateStatus}</dd>
-              </div>
-              <div>
-                <dt>{t(zh, "放款", "Disbursement")}</dt>
-                <dd>{disbursementAllowedText}</dd>
-              </div>
-            </dl>
-          </article>
-          <article className={styles.blockerPanel}>
+              <span className={`${styles.statusChip} ${styles.statusHigh}`}>Pre-review only</span>
+            </div>
+
+            <div className={styles.workflowLane}>
+              {statusSteps.map((step, index) => (
+                <article className={`${styles.workflowStep} ${styles[`step${step.tone}`]}`} key={step.titleEn}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{t(zh, step.titleZh, step.titleEn)}</strong>
+                  <em>{t(zh, step.stateZh, step.stateEn)}</em>
+                </article>
+              ))}
+            </div>
+
+            <div className={styles.workflowMapList}>
+              {workflowMap.map((step, index) => (
+                <article className={styles.workflowMapRow} key={step.titleEn}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <div>
+                    <strong>{t(zh, step.titleZh, step.titleEn)}</strong>
+                    <p>{t(zh, step.ownerZh, step.ownerEn)} · {t(zh, step.stateZh, step.stateEn)}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </main>
+
+          <aside className={styles.decisionRail}>
             <span className={styles.panelKicker}>{readinessStatus}</span>
-            <strong>Pre-review only · {blockerCode}</strong>
-            <p>{t(zh, receivableReadinessReport.recommendationZh, receivableReadinessReport.recommendationEn)}</p>
-            <div className={styles.blockerActions}>
-              <Link className="primary-button" href="/business-readiness">{t(zh, "打开 readiness", "Open readiness")}</Link>
-              <Link className="secondary-button" href="/business-contracts">{t(zh, "看合约阻断", "View contract blocks")}</Link>
+            <h3>{t(zh, "下一步人类批示", "Next human decision")}</h3>
+            <p className={styles.decisionLead}>
+              {t(
+                zh,
+                "Agent 已经整理证据缺口和融资包草稿；人类需要决定是否催办到港 QC / 仓库 / 买家验收，并是否提交 pre-review。",
+                "The Agent prepared evidence gaps and a financing-pack draft; a human must decide whether to chase arrival QC / warehouse / buyer acceptance and whether to submit pre-review.",
+              )}
+            </p>
+            <div className={styles.agentPreparedBox}>
+              <span>{t(zh, "Agent prepared", "Agent prepared")}</span>
+              <strong>{proofPack.title}</strong>
+              <p>{proofPack.status} · {verified}/{evidenceSlots.length} {t(zh, "项文件已验证", "documents verified")} · {missing} {t(zh, "缺口", "gaps")}</p>
             </div>
-          </article>
+            <div className={styles.contractBlockBox}>
+              <span>{t(zh, "合约阻断", "Contract block")}</span>
+              <strong>{blockerCode}</strong>
+              <p>{disbursementAllowedText}</p>
+            </div>
+            <div className={styles.decisionActions}>
+              <Link className="primary-button" href="/tasks">{t(zh, "批准催办", "Approve chasing")}</Link>
+              <Link className="secondary-button" href="/business-readiness">{t(zh, "查看 readiness", "View readiness")}</Link>
+              <Link className="secondary-button" href="/business-professional-review">{t(zh, "升级专业审查", "Escalate review")}</Link>
+            </div>
+          </aside>
         </div>
       </section>
 
       <section className={styles.osSection}>
         <div className="section-heading">
           <span>{t(zh, "Operational queues", "Operational queues")}</span>
-          <h2>{t(zh, "运营队列按责任分工排队，而不是把所有事情扔给一个 Agent。", "Operational queues are split by responsibility instead of throwing everything into one agent.")}</h2>
+          <h2>{t(zh, "队列用表格排优先级，不再铺成一墙卡片。", "Queues are prioritized as rows, not spread into a wall of cards.")}</h2>
         </div>
-        <div className={styles.queueGrid}>
+        <div className={styles.queueTable}>
           {operatingQueues.map((queue) => (
-            <Link href={queue.href} className={styles.queueCard} key={queue.titleEn}>
+            <Link href={queue.href} className={styles.queueRow} key={queue.titleEn}>
               <span>{t(zh, queue.ownerZh, queue.ownerEn)}</span>
               <strong>{t(zh, queue.titleZh, queue.titleEn)}</strong>
               <p>{t(zh, queue.statusZh, queue.statusEn)}</p>
+              <em>{t(zh, queue.nextZh, queue.nextEn)}</em>
             </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.osSection}>
-        <div className="section-heading">
-          <span>{t(zh, "Workflow map", "Workflow map")}</span>
-          <h2>{t(zh, "从 PDF 接入到受限转换，所有步骤都必须经过 gate。", "From PDF intake to restricted conversion, every step runs through gates.")}</h2>
-        </div>
-        <div className={styles.workflowRail}>
-          {workflowMap.map((step, index) => (
-            <article className={styles.workflowNode} key={step.titleEn}>
-              <span>{String(index + 1).padStart(2, "0")} · {t(zh, step.ownerZh, step.ownerEn)}</span>
-              <strong>{t(zh, step.titleZh, step.titleEn)}</strong>
-            </article>
           ))}
         </div>
       </section>
@@ -228,9 +272,9 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
           <span>{t(zh, "Responsibility split", "Responsibility split")}</span>
           <h2>{t(zh, "Agent、人、专业机构和合约各做各的事。", "Agent, human, professional institution, and contract each do their own job.")}</h2>
         </div>
-        <div className={styles.responsibilityGrid}>
+        <div className={styles.responsibilityMatrix}>
           {responsibilitySplit.map((column) => (
-            <article className={styles.responsibilityCard} key={column.titleEn}>
+            <article className={styles.responsibilityColumn} key={column.titleEn}>
               <strong>{t(zh, column.titleZh, column.titleEn)}</strong>
               <ul>
                 {(zh ? column.itemsZh : column.itemsEn).map((item) => (
@@ -248,12 +292,11 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
           <h2>{t(zh, operatingSummary.headlineZh, operatingSummary.headlineEn)}</h2>
           <p>{t(zh, operatingSummary.promiseZh, operatingSummary.promiseEn)}</p>
         </div>
-        <div className="pack-step-grid">
+        <div className={styles.moduleLinkGrid}>
           {businessModules.map((module) => (
-            <Link href={module.entryHref} className="pack-step-card" key={module.id}>
+            <Link href={module.entryHref} className={styles.moduleLink} key={module.id}>
               <span>{t(zh, module.titleZh, module.titleEn)}</span>
               <strong>{t(zh, module.statusZh, module.statusEn)}</strong>
-              <p>{t(zh, module.descriptionZh, module.descriptionEn)}</p>
             </Link>
           ))}
         </div>
@@ -267,36 +310,12 @@ export function DashboardView({ zh, workspace }: { zh: boolean; workspace: Works
               <div className={styles.rowHeader}>
                 <div className={styles.rowMain}>
                   <h3 className={styles.rowTitle}>{businessContext.name}</h3>
-                  <p className={styles.rowMeta}>{t(zh, operatingSummary.activeDealZh, operatingSummary.activeDealEn)}</p>
+                  <p className={styles.rowMeta}>{workingStages}/{businessStages.length} {t(zh, "个环节正在推进；当前卡点：", "stages need attention; blockers: ")}{blockerText}</p>
                 </div>
                 <span className={`${styles.statusChip} ${blockedStages > 0 ? styles.statusHigh : styles.statusLow}`}>{blockedStages > 0 ? t(zh, "有卡点", "Blocked") : t(zh, "正常", "Normal")}</span>
               </div>
-            </article>
-            <article className={styles.listRow}>
-              <div className={styles.rowHeader}>
-                <div className={styles.rowMain}>
-                  <h3 className={styles.rowTitle}>{t(zh, "交易 Agent 总览", "Trade agent overview")}</h3>
-                  <p className={styles.rowMeta}>{workingStages}/{businessStages.length} {t(zh, "个环节正在推进；当前卡点：", "stages need attention; blockers: ")}{blockerText}</p>
-                </div>
-                <Link className="primary-button" href="/business-ops">{t(zh, "打开 Agent", "Open agent")}</Link>
-              </div>
-            </article>
-          </div>
-        </div>
-        <div className={styles.osSection}>
-          <div className="section-heading"><span>{t(zh, "证明只是能力之一", "Proof is one capability")}</span><h2>{t(zh, "用事实链服务收款、融资、验收和纠纷，而不是只做溯源页面。", "Use the fact trail for collection, financing, acceptance, and disputes — not just traceability pages.")}</h2></div>
-          <div className={styles.list}>
-            <article className={styles.listRow}>
-              <div className={styles.rowHeader}>
-                <div className={styles.rowMain}>
-                  <h3 className={styles.rowTitle}>{proofPack.title}</h3>
-                  <p className={styles.rowMeta}>{proofPack.status} · Ready {readyScore} · {verified}/{evidenceSlots.length} {t(zh, "项文件已验证", "documents verified")}</p>
-                </div>
-                <span className={`${styles.statusChip} ${missing > 0 ? styles.statusMissing : styles.statusVerified}`}>{missing} {t(zh, "缺口", "gaps")}</span>
-              </div>
               <div className={styles.rowActions}>
-                <Link className="secondary-button" href="/evidence">{t(zh, "补文件", "Complete docs")}</Link>
-                <Link className="secondary-button" href="/tasks">{t(zh, "看任务", "View tasks")}</Link>
+                <Link className="primary-button" href="/business-ops">{t(zh, "打开 Agent", "Open agent")}</Link>
                 <Link className="secondary-button" href="/assistant">{t(zh, "问 Agent", "Ask agent")}</Link>
               </div>
             </article>
