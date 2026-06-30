@@ -67,21 +67,21 @@ export default async function AgentPage() {
               <h1>
                 {t(
                   zh,
-                  "看 AI Agent 如何把一笔卡住的咖啡贸易变成融资预审包。",
-                  "See how an AI agent turns a blocked coffee trade into a pre-review financing pack.",
+                  "看 AI Agent 如何解释一笔咖啡贸易为什么只能预审。",
+                  "See how an AI agent explains why a coffee trade is pre-review only.",
                 )}
               </h1>
               <p>
                 {t(
                   zh,
-                  "ChainTrace 先让访客理解一笔真实跨境贸易为什么被卡住，再把他们带入操作员工作台。公开层讲清楚 Agent 的价值；复杂菜单留给登录后的证据操作系统。",
-                  "ChainTrace first helps visitors understand why a real cross-border trade is blocked, then moves them into the operator workspace. The public layer explains the Agent value; the complex menu belongs in the post-login evidence OS.",
+                  "公开层只展示当前原型真实做到的事：读取结构化证据状态、指出缺口、准备预审材料，并明确告诉资金方正式放款仍被阻断。",
+                  "The public layer shows what the current prototype actually does: read structured evidence status, surface gaps, prepare pre-review materials, and tell financiers that formal disbursement is still blocked.",
                 )}
               </p>
               <div className="hero-actions">
-                <Link href="/business-ops" className="primary-button">{t(zh, "进入工作台", "Enter workspace")}</Link>
-                <Link href="/business-readiness" className="secondary-button">{t(zh, "查看融资评分", "View readiness score")}</Link>
+                <Link href="/login" className="primary-button">{t(zh, "登录进入工作台", "Login to workspace")}</Link>
                 <Link href="/api/financing-pack" className="secondary-button">{t(zh, "打开融资包 API", "Open financing pack API")}</Link>
+                <Link href="/" className="secondary-button">{t(zh, "返回首页", "Back to homepage")}</Link>
               </div>
               <div className="hero-badges">
                 <span className="badge-chip">Pre-review only</span>
@@ -198,12 +198,12 @@ export default async function AgentPage() {
           <p className="proof-note">
             {t(
               zh,
-              "下一步进入 /business-ops。那里才显示完整左侧栏、证据管理、融资评分、专业审查、合约控制台、wallet 和 approvals。",
-              "Next step: enter /business-ops. That is where the full sidebar, evidence management, readiness, professional review, contract console, wallet, and approvals belong.",
+              "下一步从 /login 进入工作台。那里才显示完整左侧栏、证据管理、融资评分、专业审查、合约控制台、wallet 和 approvals。",
+              "Next step: enter the workspace from /login. That is where the full sidebar, evidence management, readiness, professional review, contract console, wallet, and approvals belong.",
             )}
           </p>
           <div className="hero-actions agent-entry-final-actions">
-            <Link href="/business-ops" className="primary-button">{t(zh, "进入工作台", "Enter workspace")}</Link>
+            <Link href="/login" className="primary-button">{t(zh, "登录进入工作台", "Login to workspace")}</Link>
             <Link href="/" className="secondary-button">{t(zh, "返回首页", "Back to homepage")}</Link>
           </div>
         </section>
