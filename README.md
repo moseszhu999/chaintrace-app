@@ -138,6 +138,10 @@ Validate mocked API contracts:
 npm run api:validate
 ```
 
+Try the mock POST APIs:
+
+[docs/api-examples.md](docs/api-examples.md)
+
 Compile and test contracts:
 
 ```bash
