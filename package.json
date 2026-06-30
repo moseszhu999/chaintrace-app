@@ -10,6 +10,7 @@
     "lint": "next lint",
     "api:validate": "node scripts/validate-api-contracts.js",
     "ux:validate": "node scripts/validate-public-agent-entry.js",
+    "ops:validate": "node scripts/validate-operator-os.js",
     "contracts:compile": "hardhat compile",
     "contracts:test": "hardhat test",
     "contracts:deploy:dev": "hardhat run scripts/deploy-dev.js --network hardhat",

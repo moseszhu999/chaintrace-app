@@ -92,6 +92,326 @@
   line-height: 1.6;
 }
 
+.commandShell,
+.osSection {
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.commandShell {
+  display: grid;
+  gap: 20px;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.osSection {
+  margin-top: 18px;
+  padding: 24px;
+}
+
+.statusStrip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 250, 240, 0.76);
+  padding: 10px;
+}
+
+.statusFact,
+.statusFactBlocked {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.statusFactBlocked {
+  border: 1px solid rgba(161, 29, 29, 0.2);
+  background: #fff0ef;
+}
+
+.statusFact span,
+.statusFactBlocked span,
+.panelKicker,
+.queueRow span,
+.workflowStep span,
+.workflowMapRow span,
+.moduleLink span {
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.statusFact strong,
+.statusFactBlocked strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 17px;
+  line-height: 1.1;
+}
+
+.commandGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.55fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.workflowConsole,
+.decisionRail {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 250, 240, 0.76);
+}
+
+.workflowConsole {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.consoleHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.consoleHeader h3,
+.decisionRail h3 {
+  margin: 8px 0 6px;
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.consoleHeader p,
+.decisionLead,
+.agentPreparedBox p,
+.contractBlockBox p,
+.queueRow p,
+.queueRow em,
+.workflowMapRow p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.workflowLane {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  position: relative;
+}
+
+.workflowStep {
+  display: grid;
+  gap: 8px;
+  min-height: 118px;
+  padding: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.workflowStep strong {
+  font-size: 15px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.workflowStep em {
+  align-self: end;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.stepdone {
+  border-color: rgba(29, 107, 59, 0.22);
+  background: rgba(29, 107, 59, 0.07);
+}
+
+.stepactive {
+  border-color: rgba(17, 24, 39, 0.22);
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.stepwarning {
+  border-color: rgba(176, 122, 42, 0.24);
+  background: rgba(255, 239, 214, 0.72);
+}
+
+.stepblocked {
+  border-color: rgba(161, 29, 29, 0.24);
+  background: #fff0ef;
+}
+
+.workflowMapList {
+  display: grid;
+  gap: 8px;
+}
+
+.workflowMapRow {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.8);
+}
+
+.workflowMapRow > span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.08);
+  color: var(--foreground);
+}
+
+.workflowMapRow strong {
+  display: block;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+.decisionRail {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
+  border-color: rgba(161, 29, 29, 0.18);
+  background: rgba(255, 240, 239, 0.68);
+}
+
+.agentPreparedBox,
+.contractBlockBox {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.84);
+}
+
+.agentPreparedBox span,
+.contractBlockBox span {
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contractBlockBox {
+  border-color: rgba(161, 29, 29, 0.22);
+}
+
+.contractBlockBox strong {
+  overflow-wrap: anywhere;
+  color: var(--error);
+}
+
+.decisionActions {
+  display: grid;
+  gap: 10px;
+}
+
+.queueTable {
+  display: grid;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.queueRow {
+  display: grid;
+  grid-template-columns: 150px minmax(180px, 0.8fr) minmax(220px, 1fr) minmax(220px, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  background: rgba(255, 250, 240, 0.62);
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.queueRow:last-child {
+  border-bottom: 0;
+}
+
+.queueRow:hover {
+  background: rgba(29, 107, 59, 0.06);
+}
+
+.queueRow strong {
+  overflow-wrap: anywhere;
+}
+
+.queueRow em {
+  font-style: normal;
+}
+
+.responsibilityMatrix {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.responsibilityColumn {
+  padding: 16px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 250, 240, 0.72);
+}
+
+.responsibilityColumn strong,
+.moduleLink strong {
+  overflow-wrap: anywhere;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.responsibilityColumn ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.responsibilityColumn li {
+  overflow-wrap: anywhere;
+}
+
+.moduleLinkGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.moduleLink {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 250, 240, 0.66);
+}
+
 @media (max-width: 720px) {
   .rowHeader {
     display: grid;
@@ -99,5 +419,45 @@
 
   .statusChip {
     width: max-content;
+  }
+}
+
+@media (max-width: 1180px) {
+  .statusStrip,
+  .workflowLane {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .commandGrid,
+  .queueRow {
+    grid-template-columns: 1fr;
+  }
+
+  .responsibilityMatrix,
+  .moduleLinkGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .commandShell,
+  .osSection {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .statusStrip,
+  .workflowLane,
+  .responsibilityMatrix,
+  .moduleLinkGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .consoleHeader {
+    display: grid;
+  }
+
+  .decisionActions a {
+    width: 100%;
   }
 }
