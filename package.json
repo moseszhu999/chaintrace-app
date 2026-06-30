@@ -10,6 +10,7 @@
     "lint": "next lint",
     "api:validate": "node scripts/validate-api-contracts.js",
     "ux:validate": "node scripts/validate-public-agent-entry.js",
+    "agent:validate": "node scripts/validate-agent-workflow.js",
     "ops:validate": "node scripts/validate-operator-os.js",
     "contracts:compile": "hardhat compile",
     "contracts:test": "hardhat test",

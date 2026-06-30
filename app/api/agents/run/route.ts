@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { agentApiEndpoints } from "@/lib/agent-api-fixture";
+import { listAgentRunReceipts, listOperatorTasks } from "@/lib/agent-workflow-store";
 import { agentRuns } from "@/lib/agent-workbench-fixture";
 import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { professionalReviewItems } from "@/lib/professional-review-fixture";
@@ -17,6 +18,9 @@ export async function GET() {
   const gateChecklist = gateResult.checklist.map(({ id, status, evidenceId }) => ({ id, status, evidenceId }));
   const readiness = evaluateReadiness(trade, gateResult.summary);
   const memo = receivableReadinessReport.financierMemo;
+  const receipts = await listAgentRunReceipts();
+  const operatorTasks = await listOperatorTasks();
+  const latestAgentRunReceipt = receipts[0] ?? null;
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
@@ -77,6 +81,11 @@ export async function GET() {
       preReviewAllowed: readiness.preReviewAllowed,
       disbursementAllowed: readiness.disbursementAllowed,
       blockerCode: readiness.blockerCode,
+    },
+    workflowState: {
+      latestAgentRunReceipt,
+      operatorTasks,
+      createReceiptEndpoint: "POST /api/agent-runs",
     },
   });
 }
