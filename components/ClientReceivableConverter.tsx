@@ -58,6 +58,37 @@ type ReceivableCandidateTypedDataPreview = {
   rawPdfPolicy: "raw PDF stays browser-local / off-chain";
 };
 
+type SignatureReceiptPreview = {
+  signatureStatus: "preview_only";
+  walletSignatureStatus: "not_requested";
+  signerWallet: "0x0000000000000000000000000000000000000000_mock";
+  typedDataDigest: string;
+  candidateHash: string;
+  documentHash: string;
+  signedAt: null;
+  registryTarget: "LoanRequestRegistry.submitPreReviewRequest";
+  allowedAction: "PRE_REVIEW_ONLY";
+  professionalReviewRequired: true;
+};
+
+type RegistryHandoffPreview = {
+  registryTarget: "LoanRequestRegistry.submitPreReviewRequest";
+  method: "submitPreReviewRequest";
+  tradeId: ReceivableCandidate["tradeId"];
+  evidencePackURI: string;
+  evidencePackHash: string;
+  documentHash: string;
+  candidateHash: string;
+  typedDataPrimaryType: "ReceivableCandidate";
+  signatureStatus: "preview_only";
+  blockerCode: "GATES_NOT_PASSED";
+  disbursementAllowed: false;
+  allowedAction: "PRE_REVIEW_ONLY";
+  contractGuardrail: "contracts block formal disbursement while gates fail";
+  rawPdfPolicy: "raw PDF stays browser-local / off-chain";
+  professionalReviewRequired: true;
+};
+
 const documentTypes: Array<{ value: EvidenceDocumentType } & LocaleAwareText> = [
   { value: "invoice", zh: "商业发票", en: "Commercial invoice" },
   { value: "purchase_order", zh: "采购订单 / 销售合同", en: "Purchase order / sales contract" },
@@ -106,6 +137,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
   const [isHashing, setIsHashing] = useState(false);
   const [error, setError] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [handoffCopyState, setHandoffCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   const candidate: ReceivableCandidate = useMemo(() => ({
     tradeId: "VN-COFFEE-SG-2026-0007",
@@ -170,6 +202,42 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
 
   const typedDataJson = useMemo(() => JSON.stringify(typedDataPreview, null, 2), [typedDataPreview]);
 
+  const signatureReceiptPreview: SignatureReceiptPreview = useMemo(() => ({
+    signatureStatus: "preview_only",
+    walletSignatureStatus: "not_requested",
+    signerWallet: "0x0000000000000000000000000000000000000000_mock",
+    typedDataDigest: candidateHash,
+    candidateHash,
+    documentHash: typedDataPreview.message.documentHash,
+    signedAt: null,
+    registryTarget: "LoanRequestRegistry.submitPreReviewRequest",
+    allowedAction: "PRE_REVIEW_ONLY",
+    professionalReviewRequired: true,
+  }), [candidateHash, typedDataPreview.message.documentHash]);
+
+  const registryHandoffPreview: RegistryHandoffPreview = useMemo(() => ({
+    registryTarget: "LoanRequestRegistry.submitPreReviewRequest",
+    method: "submitPreReviewRequest",
+    tradeId: candidate.tradeId,
+    evidencePackURI: `chaintrace://browser-local-preview/${candidate.tradeId}`,
+    evidencePackHash: candidateHash,
+    documentHash: candidate.fileHash,
+    candidateHash,
+    typedDataPrimaryType: typedDataPreview.primaryType,
+    signatureStatus: signatureReceiptPreview.signatureStatus,
+    blockerCode: candidate.blockerCode,
+    disbursementAllowed: candidate.disbursementAllowed,
+    allowedAction: "PRE_REVIEW_ONLY",
+    contractGuardrail: "contracts block formal disbursement while gates fail",
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+    professionalReviewRequired: true,
+  }), [candidate, candidateHash, signatureReceiptPreview.signatureStatus, typedDataPreview.primaryType]);
+
+  const handoffJson = useMemo(() => JSON.stringify({
+    signatureReceiptPreview,
+    registryHandoffPreview,
+  }, null, 2), [registryHandoffPreview, signatureReceiptPreview]);
+
   async function refreshCandidateHash(nextCandidate: ReceivableCandidate) {
     const normalized = JSON.stringify(nextCandidate, Object.keys(nextCandidate).sort());
     setCandidateHash(await sha256Text(normalized));
@@ -219,6 +287,15 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
       setCopyState("copied");
     } catch {
       setCopyState("failed");
+    }
+  }
+
+  async function handleCopyHandoff() {
+    try {
+      await navigator.clipboard.writeText(handoffJson);
+      setHandoffCopyState("copied");
+    } catch {
+      setHandoffCopyState("failed");
     }
   }
 
@@ -368,6 +445,85 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           </button>
         </div>
         <pre className="candidate-json typed-data-json" aria-label="EIP-712 typed data preview JSON">{typedDataJson}</pre>
+      </section>
+
+      <section className="handoff-preview" id="registry-handoff-preview">
+        <div className="typed-data-header">
+          <div>
+            <span>{t(zh, "Signature receipt preview", "Signature receipt preview")}</span>
+            <h3>{t(zh, "签名后的回执和 registry handoff 仍然只是预览。", "The post-signature receipt and registry handoff remain preview-only.")}</h3>
+            <p>
+              {t(
+                zh,
+                "这里展示钱包确认之后会交给 LoanRequestRegistry 的对象形状，但不会请求真实签名、不会写链、不会连接 RPC，也不会声称贷款已批准。",
+                "This shows the object shape that would be handed to LoanRequestRegistry after wallet review, but it does not request a real signature, write chain state, connect RPC, or claim approval.",
+              )}
+            </p>
+          </div>
+          <div className="typed-data-status">
+            <strong>signatureStatus=preview_only</strong>
+            <span>Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false</span>
+          </div>
+        </div>
+
+        <div className="handoff-flow" aria-label="Signature receipt registry handoff flow">
+          <article>
+            <span>01</span>
+            <strong>documentHash</strong>
+            <p title={registryHandoffPreview.documentHash}>{shortHash(registryHandoffPreview.documentHash)}</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>candidateHash</strong>
+            <p title={registryHandoffPreview.candidateHash}>{shortHash(registryHandoffPreview.candidateHash)}</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>typedData</strong>
+            <p>{typedDataPreview.primaryType}</p>
+          </article>
+          <article>
+            <span>04</span>
+            <strong>signature receipt</strong>
+            <p>{signatureReceiptPreview.signatureStatus}</p>
+          </article>
+          <article>
+            <span>05</span>
+            <strong>registry handoff</strong>
+            <p>{registryHandoffPreview.registryTarget}</p>
+          </article>
+        </div>
+
+        <div className="handoff-panels">
+          <article>
+            <span>{t(zh, "Mock receipt", "Mock receipt")}</span>
+            <dl>
+              <div><dt>signatureStatus</dt><dd>{signatureReceiptPreview.signatureStatus}</dd></div>
+              <div><dt>walletSignatureStatus</dt><dd>{signatureReceiptPreview.walletSignatureStatus}</dd></div>
+              <div><dt>signerWallet</dt><dd>{signatureReceiptPreview.signerWallet}</dd></div>
+              <div><dt>typedDataDigest</dt><dd>{shortHash(signatureReceiptPreview.typedDataDigest)}</dd></div>
+              <div><dt>signedAt</dt><dd>{String(signatureReceiptPreview.signedAt)}</dd></div>
+            </dl>
+          </article>
+          <article>
+            <span>{t(zh, "LoanRequestRegistry handoff preview", "LoanRequestRegistry handoff preview")}</span>
+            <dl>
+              <div><dt>registryTarget</dt><dd>{registryHandoffPreview.registryTarget}</dd></div>
+              <div><dt>evidencePackURI</dt><dd>{registryHandoffPreview.evidencePackURI}</dd></div>
+              <div><dt>evidencePackHash</dt><dd>{shortHash(registryHandoffPreview.evidencePackHash)}</dd></div>
+              <div><dt>allowedAction</dt><dd>{registryHandoffPreview.allowedAction}</dd></div>
+              <div><dt>contractGuardrail</dt><dd>{registryHandoffPreview.contractGuardrail}</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <div className="typed-data-json-header">
+          <strong>{t(zh, "回执 / handoff JSON", "Receipt / handoff JSON")}</strong>
+          <button type="button" className="secondary-button button-reset" onClick={handleCopyHandoff}>
+            {handoffCopyState === "copied" ? t(zh, "已复制", "Copied") : handoffCopyState === "failed" ? t(zh, "复制失败", "Copy failed") : t(zh, "复制 JSON", "Copy JSON")}
+          </button>
+        </div>
+        <pre className="candidate-json typed-data-json" aria-label="Signature receipt and registry handoff preview JSON">{handoffJson}</pre>
       </section>
 
       <pre className="candidate-json" aria-label="ReceivableCandidate JSON">{JSON.stringify(candidate, null, 2)}</pre>
