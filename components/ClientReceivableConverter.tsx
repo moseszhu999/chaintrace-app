@@ -156,6 +156,41 @@ type PreReviewTrustPack = {
   boundaryNotes: string[];
 };
 
+type ProfessionalReviewQueue = {
+  queue: string;
+  required: true;
+  reason: string;
+};
+
+type ProfessionalReviewIntake = {
+  intakeVersion: "professional-review-intake.v0.1";
+  intakeStatus: "draft_preview";
+  source: "public_converter";
+  tradeId: ReceivableCandidate["tradeId"];
+  candidateHash: string;
+  trustPackReference: string;
+  readinessScore: 62;
+  gatesPassed: "6/12";
+  blockerCode: "GATES_NOT_PASSED";
+  disbursementAllowed: false;
+  reviewQueues: ProfessionalReviewQueue[];
+  bankReviewRequired: true;
+  legalReviewRequired: true;
+  factorReviewRequired: true;
+  operatorDecisionRequired: true;
+  missingEvidence: string[];
+  recommendedNextActions: string[];
+  targetOperatorSurfaces: string[];
+  allowedAction: "PROFESSIONAL_REVIEW_INTAKE_ONLY";
+  humanReviewRequired: true;
+  professionalReviewRequired: true;
+  agentDecisionAuthority: "none";
+  walletSignatureStatus: "not_requested";
+  signatureStatus: "preview_only";
+  rawPdfPolicy: "raw PDF stays browser-local / off-chain";
+  intakeBoundaryNotes: string[];
+};
+
 const documentTypes: Array<{ value: EvidenceDocumentType } & LocaleAwareText> = [
   { value: "invoice", zh: "商业发票", en: "Commercial invoice" },
   { value: "purchase_order", zh: "采购订单 / 销售合同", en: "Purchase order / sales contract" },
@@ -207,6 +242,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
   const [agentCopyState, setAgentCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [handoffCopyState, setHandoffCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [trustPackCopyState, setTrustPackCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [intakeCopyState, setIntakeCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   const candidate: ReceivableCandidate = useMemo(() => ({
     tradeId: "VN-COFFEE-SG-2026-0007",
@@ -441,6 +477,67 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
 
   const trustPackJson = useMemo(() => JSON.stringify(preReviewTrustPack, null, 2), [preReviewTrustPack]);
 
+  const professionalReviewIntake: ProfessionalReviewIntake = useMemo(() => ({
+    intakeVersion: "professional-review-intake.v0.1",
+    intakeStatus: "draft_preview",
+    source: "public_converter",
+    tradeId: preReviewTrustPack.tradeId,
+    candidateHash: preReviewTrustPack.candidateHash,
+    trustPackReference: `preReviewTrustPack:${shortHash(preReviewTrustPack.documentHash)}:${shortHash(preReviewTrustPack.candidateHash)}`,
+    readinessScore: preReviewTrustPack.readinessScore,
+    gatesPassed: preReviewTrustPack.gatesPassed,
+    blockerCode: preReviewTrustPack.blockerCode,
+    disbursementAllowed: preReviewTrustPack.disbursementAllowed,
+    reviewQueues: [
+      {
+        queue: "bank pre-review desk",
+        required: true,
+        reason: "Validate advance request, credit appetite, KYC status, and receivable-finance policy before any formal action.",
+      },
+      {
+        queue: "legal exception review",
+        required: true,
+        reason: "Check contract enforceability, buyer acceptance, dispute status, and whether the trust pack supports a professional memo.",
+      },
+      {
+        queue: "factor operations review",
+        required: true,
+        reason: "Confirm logistics evidence, warehouse/QC gaps, assignment mechanics, and operational follow-up tasks.",
+      },
+      {
+        queue: "operator evidence desk",
+        required: true,
+        reason: "Collect missing documents and decide whether the case can move from public preview into Operator OS intake.",
+      },
+    ],
+    bankReviewRequired: true,
+    legalReviewRequired: true,
+    factorReviewRequired: true,
+    operatorDecisionRequired: true,
+    missingEvidence: preReviewTrustPack.missingEvidence,
+    recommendedNextActions: [
+      ...preReviewTrustPack.recommendedNextActions,
+      "Open Operator OS after login only if a human chooses to start professional intake.",
+      "Keep this intake as draft_preview until data is submitted by an authenticated operator.",
+    ],
+    targetOperatorSurfaces: ["/dashboard", "/business-professional-review"],
+    allowedAction: "PROFESSIONAL_REVIEW_INTAKE_ONLY",
+    humanReviewRequired: true,
+    professionalReviewRequired: true,
+    agentDecisionAuthority: "none",
+    walletSignatureStatus: "not_requested",
+    signatureStatus: "preview_only",
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+    intakeBoundaryNotes: [
+      "This professionalReviewIntake is a draft preview and has not been submitted.",
+      "No backend persistence, reviewer assignment, email, notification, PDF upload, real LLM call, wallet signing, transaction, RPC, secret, or private key handling occurs here.",
+      "It is not a legal opinion, not a credit approval, and not a regulated lending action.",
+      "Allowed action is PROFESSIONAL_REVIEW_INTAKE_ONLY while GATES_NOT_PASSED and disbursementAllowed=false.",
+    ],
+  }), [preReviewTrustPack]);
+
+  const intakeJson = useMemo(() => JSON.stringify(professionalReviewIntake, null, 2), [professionalReviewIntake]);
+
   async function refreshCandidateHash(nextCandidate: ReceivableCandidate) {
     const normalized = JSON.stringify(nextCandidate, Object.keys(nextCandidate).sort());
     setCandidateHash(await sha256Text(normalized));
@@ -520,6 +617,15 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
     }
   }
 
+  async function handleCopyIntake() {
+    try {
+      await navigator.clipboard.writeText(intakeJson);
+      setIntakeCopyState("copied");
+    } catch {
+      setIntakeCopyState("failed");
+    }
+  }
+
   return (
     <section className="panel receivable-converter" id="pdf-to-receivable">
       <div className="converter-grid">
@@ -554,6 +660,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           <div className="converter-actions">
             <a className="primary-button" href="#ai-native-preview">{t(zh, "预览 AI 证据推理", "Preview AI evidence reasoning")}</a>
             <a className="secondary-button" href="#typed-data-preview">{t(zh, "预览签名载荷", "Preview signing payload")}</a>
+            <a className="secondary-button" href="#professional-review-intake-preview">{t(zh, "预览专业审核入口", "Preview professional intake")}</a>
             <a className="secondary-button" href="/login">{t(zh, "登录查看链上状态机", "Login to view on-chain state machine")}</a>
           </div>
         </div>
@@ -938,6 +1045,109 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           </button>
         </div>
         <pre className="candidate-json typed-data-json" aria-label="Pre-review Trust Pack preview JSON">{trustPackJson}</pre>
+      </section>
+
+      <section className="trust-pack-preview" id="professional-review-intake-preview">
+        <div className="typed-data-header">
+          <div>
+            <span>{t(zh, "Professional Review Intake preview", "Professional Review Intake preview")}</span>
+            <h3>{t(zh, "把 Trust Pack 转成 Operator OS 的专业预审入口草稿。", "Turn the Trust Pack into a draft professional intake for Operator OS.")}</h3>
+            <p>
+              {t(
+                zh,
+                "这里仅展示从公开页进入专业审核队列时的 intake 对象形状。它不会提交、不会保存、不会通知 reviewer，也不会触发任何放款、法律意见或信用审批。",
+                "This only shows the intake object shape for moving from the public page into professional review queues. It does not submit, persist, notify reviewers, trigger financing, issue a legal opinion, or grant credit approval.",
+              )}
+            </p>
+          </div>
+          <div className="typed-data-status trust-pack-status">
+            <strong>intakeStatus={professionalReviewIntake.intakeStatus}</strong>
+            <span>allowedAction={professionalReviewIntake.allowedAction}</span>
+            <span>Pre-review only · {professionalReviewIntake.blockerCode} · disbursementAllowed=false</span>
+          </div>
+        </div>
+
+        <div className="trust-pack-card">
+          <div>
+            <span>{t(zh, "Operator OS handoff preview", "Operator OS handoff preview")}</span>
+            <strong>{professionalReviewIntake.tradeId}</strong>
+            <p>{t(zh, "登录后才可能由人工操作员把草稿带入 Operator OS；当前页面只显示预览对象，不做提交。", "Only a human operator after login could move this draft into Operator OS; this public page only displays the preview object and does not submit it.")}</p>
+          </div>
+          <dl>
+            <div><dt>source</dt><dd>{professionalReviewIntake.source}</dd></div>
+            <div><dt>intakeVersion</dt><dd>{professionalReviewIntake.intakeVersion}</dd></div>
+            <div><dt>readinessScore</dt><dd>{professionalReviewIntake.readinessScore}/100</dd></div>
+            <div><dt>gatesPassed</dt><dd>{professionalReviewIntake.gatesPassed}</dd></div>
+            <div><dt>trustPackReference</dt><dd>{professionalReviewIntake.trustPackReference}</dd></div>
+            <div><dt>targetOperatorSurfaces</dt><dd>{professionalReviewIntake.targetOperatorSurfaces.join(" + ")}</dd></div>
+          </dl>
+        </div>
+
+        <div className="trust-pack-flow" aria-label="Professional review intake handoff path">
+          {[
+            "Pre-review Trust Pack",
+            "Professional Review Intake draft_preview",
+            "Bank / legal / factor / operator queues",
+            "Operator OS queue handoff preview",
+            "Human decision before any formal action",
+          ].map((step, index) => (
+            <article key={step}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{step}</strong>
+            </article>
+          ))}
+        </div>
+
+        <div className="trust-pack-panels">
+          <article>
+            <span>{t(zh, "Review queues", "Review queues")}</span>
+            <dl>
+              {professionalReviewIntake.reviewQueues.map((queue) => (
+                <div key={queue.queue}>
+                  <dt>{queue.queue}</dt>
+                  <dd>
+                    <strong>required={String(queue.required)}</strong>
+                    <small>{queue.reason}</small>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+          <article>
+            <span>{t(zh, "Intake requirements", "Intake requirements")}</span>
+            <dl>
+              <div><dt>bankReviewRequired</dt><dd>{String(professionalReviewIntake.bankReviewRequired)}</dd></div>
+              <div><dt>legalReviewRequired</dt><dd>{String(professionalReviewIntake.legalReviewRequired)}</dd></div>
+              <div><dt>factorReviewRequired</dt><dd>{String(professionalReviewIntake.factorReviewRequired)}</dd></div>
+              <div><dt>operatorDecisionRequired</dt><dd>{String(professionalReviewIntake.operatorDecisionRequired)}</dd></div>
+            </dl>
+          </article>
+          <article>
+            <span>{t(zh, "Missing evidence", "Missing evidence")}</span>
+            <ul>
+              {professionalReviewIntake.missingEvidence.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+          <article>
+            <span>{t(zh, "Intake boundary", "Intake boundary")}</span>
+            <ul>
+              {professionalReviewIntake.intakeBoundaryNotes.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </article>
+        </div>
+
+        <div className="converter-actions">
+          <a className="primary-button" href="/login">{t(zh, "登录后打开 Operator OS", "Open Operator OS after login")}</a>
+          <a className="secondary-button" href="#pre-review-trust-pack-preview">{t(zh, "返回 Trust Pack", "Back to Trust Pack")}</a>
+        </div>
+
+        <div className="typed-data-json-header">
+          <strong>{t(zh, "Professional Review Intake JSON", "Professional Review Intake JSON")}</strong>
+          <button type="button" className="secondary-button button-reset" onClick={handleCopyIntake}>
+            {intakeCopyState === "copied" ? t(zh, "已复制", "Copied") : intakeCopyState === "failed" ? t(zh, "复制失败", "Copy failed") : t(zh, "复制 JSON", "Copy JSON")}
+          </button>
+        </div>
+        <pre className="candidate-json typed-data-json" aria-label="Professional Review Intake preview JSON">{intakeJson}</pre>
       </section>
 
       <pre className="candidate-json" aria-label="ReceivableCandidate JSON">{JSON.stringify(candidate, null, 2)}</pre>
