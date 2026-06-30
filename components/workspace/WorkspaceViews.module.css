@@ -92,6 +92,177 @@
   line-height: 1.6;
 }
 
+.osHero,
+.osSection {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.osHero {
+  display: grid;
+  gap: 20px;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.osSection {
+  margin-top: 18px;
+  padding: 24px;
+}
+
+.osHeroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.tradeSnapshot,
+.blockerPanel,
+.queueCard,
+.workflowNode,
+.responsibilityCard {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 250, 240, 0.78);
+}
+
+.tradeSnapshot,
+.blockerPanel {
+  padding: 18px;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+}
+
+.metricGrid div {
+  display: grid;
+  gap: 8px;
+  min-height: 104px;
+  padding: 14px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.metricGrid dt,
+.panelKicker,
+.queueCard span,
+.workflowNode span {
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricGrid dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.blockerPanel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border-color: rgba(161, 29, 29, 0.18);
+  background: rgba(255, 240, 239, 0.72);
+}
+
+.blockerPanel strong {
+  overflow-wrap: anywhere;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.blockerPanel p,
+.queueCard p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.blockerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.queueGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.queueCard {
+  display: grid;
+  gap: 8px;
+  min-height: 146px;
+  padding: 16px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.queueCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(29, 107, 59, 0.08);
+}
+
+.queueCard strong,
+.workflowNode strong,
+.responsibilityCard strong {
+  overflow-wrap: anywhere;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.workflowRail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.workflowNode {
+  display: grid;
+  gap: 10px;
+  min-height: 118px;
+  padding: 15px;
+  background: #fff;
+}
+
+.responsibilityGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.responsibilityCard {
+  padding: 16px;
+}
+
+.responsibilityCard ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.responsibilityCard li {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 720px) {
   .rowHeader {
     display: grid;
@@ -99,5 +270,45 @@
 
   .statusChip {
     width: max-content;
+  }
+}
+
+@media (max-width: 1180px) {
+  .queueGrid,
+  .responsibilityGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workflowRail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .osHeroGrid,
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .osHero,
+  .osSection {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .queueGrid,
+  .workflowRail,
+  .responsibilityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .blockerActions {
+    display: grid;
+  }
+
+  .blockerActions a {
+    width: 100%;
   }
 }
