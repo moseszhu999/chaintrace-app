@@ -76,13 +76,18 @@ function validatePreReviewDraft() {
   const preReviewRoute = read("app/api/loan-requests/pre-review/route.ts");
   const readinessFixture = read("lib/receivable-readiness-fixture.ts");
 
+  assertIncludes(preReviewRoute, "buildFinancingPack", "loan pre-review draft");
+  assertIncludes(preReviewRoute, "financingPack.evidencePackHash", "loan pre-review draft");
+  assertIncludes(preReviewRoute, "buildLoanRequestDraft(financingPack", "loan pre-review draft");
+  assert(!preReviewRoute.includes("receivableReadinessReport"), "loan pre-review draft must not read static readiness fixture directly");
+  assert(!preReviewRoute.includes("getWorkspaceSnapshot"), "loan pre-review draft must use generated financing pack case state");
   assertIncludes(readinessFixture, "score: 62", "readiness fixture");
   assertIncludes(readinessFixture, "maxScore: 100", "readiness fixture");
   assertIncludes(readinessFixture, 'statusEn: "Pre-review only"', "readiness fixture");
   assertIncludes(preReviewRoute, 'status: "PreReview"', "loan pre-review draft");
-  assertIncludes(preReviewRoute, 'blockerCode: "GATES_NOT_PASSED"', "loan pre-review draft");
-  assertIncludes(preReviewRoute, "disbursementAllowed: false", "loan pre-review draft");
-  assertIncludes(preReviewRoute, "preReviewAllowed: true", "loan pre-review draft");
+  assertIncludes(preReviewRoute, "blockerCode: financingPack.readiness.blockerCode", "loan pre-review draft");
+  assertIncludes(preReviewRoute, "disbursementAllowed: financingPack.readiness.disbursementAllowed", "loan pre-review draft");
+  assertIncludes(preReviewRoute, "preReviewAllowed: financingPack.readiness.preReviewAllowed", "loan pre-review draft");
   assertIncludes(preReviewRoute, "LoanRequestRegistry.submitPreReviewRequest", "loan pre-review draft");
 }
 
@@ -131,12 +136,36 @@ function validateEvidenceUploadPersistence() {
   assertIncludes(uploadRoute, 'blockerCode: "GATES_NOT_PASSED"', "evidence upload guardrail");
 }
 
+function validateFinancingPackGeneration() {
+  const builder = read("lib/financing-pack-builder.ts");
+  const financingPackRoute = read("app/api/financing-pack/route.ts");
+
+  assertIncludes(builder, "export async function buildFinancingPack", "financing pack builder");
+  assertIncludes(builder, "getCurrentTradeCase", "financing pack builder");
+  assertIncludes(builder, "listEvidenceRecords", "financing pack builder");
+  assertIncludes(builder, "evaluateLoanGates", "financing pack builder");
+  assertIncludes(builder, "evaluateReadiness", "financing pack builder");
+  assertIncludes(builder, "createHash", "financing pack builder");
+  assertIncludes(builder, "evidencePackHash", "financing pack builder");
+  assertIncludes(builder, "LoanRequestRegistry.submitPreReviewRequest", "financing pack builder");
+  assertIncludes(builder, "raw commercial documents stay off-chain", "financing pack storage boundary");
+  assertIncludes(builder, "disbursementAllowed: readiness.disbursementAllowed", "financing pack guardrail");
+  assertIncludes(builder, "preReviewAllowed: readiness.preReviewAllowed", "financing pack guardrail");
+
+  assertIncludes(financingPackRoute, "buildFinancingPack", "financing pack route");
+  assertIncludes(financingPackRoute, "evidencePackHash", "financing pack route");
+  assertIncludes(financingPackRoute, "contractAnchor", "financing pack route");
+  assertIncludes(financingPackRoute, "blockerCode: financingPack.readiness.blockerCode", "financing pack route");
+  assertIncludes(financingPackRoute, "disbursementAllowed: financingPack.readiness.disbursementAllowed", "financing pack route");
+}
+
 function main() {
   validateAgentPipeline();
   validateGateDecision();
   validatePreReviewDraft();
   validateRepositoryLayer();
   validateEvidenceUploadPersistence();
+  validateFinancingPackGeneration();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
 
