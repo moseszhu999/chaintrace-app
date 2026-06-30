@@ -104,6 +104,19 @@ function main() {
   assertIncludes(receivableConverter, "LoanRequestRegistry.submitPreReviewRequest", "on-chain pre-review request intent");
   assertIncludes(receivableConverter, "RestrictedReceivableToken", "controlled receivable token intent");
   assertNotIncludes(receivableConverter, 'fetch("/api', "client converter core architecture");
+  assertIncludes(receivableConverter, "EIP-712 typed data preview", "wallet typed data preview");
+  assertIncludes(receivableConverter, "typedDataPreview", "wallet typed data preview model");
+  assertIncludes(receivableConverter, "primaryType: \"ReceivableCandidate\"", "wallet typed data preview primary type");
+  assertIncludes(receivableConverter, "documentHash", "wallet typed data preview document hash");
+  assertIncludes(receivableConverter, "candidateHash", "wallet typed data preview candidate hash");
+  assertIncludes(receivableConverter, "verifyingContract", "wallet typed data preview domain");
+  assertIncludes(receivableConverter, "walletSignatureStatus=not_requested", "wallet typed data guardrail");
+  assertIncludes(receivableConverter, "professionalReviewRequired", "wallet typed data guardrail");
+  assertIncludes(receivableConverter, "raw PDF stays browser-local / off-chain", "wallet typed data guardrail");
+  assertNotIncludes(receivableConverter, "signTypedData", "wallet typed data no signing");
+  assertNotIncludes(receivableConverter, "window.ethereum", "wallet typed data no wallet popup");
+  assertNotIncludes(receivableConverter, "privateKey", "wallet typed data no key handling");
+  assertNotIncludes(receivableConverter, "process.env", "wallet typed data no secrets");
 
   assertIncludes(architectureFixture, "Frontend + wallet layer", "frontend/blockchain technical architecture");
   assertIncludes(architectureFixture, "Smart contract protocol layer", "frontend/blockchain technical architecture");

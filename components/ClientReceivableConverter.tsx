@@ -25,6 +25,39 @@ type ReceivableCandidate = {
   contractIntent: string[];
 };
 
+type Eip712Field = {
+  name: string;
+  type: string;
+};
+
+type ReceivableCandidateTypedDataPreview = {
+  domain: {
+    name: "ChainTrace";
+    version: "0.1";
+    chainId: 0;
+    verifyingContract: "0x0000000000000000000000000000000000000000";
+  };
+  primaryType: "ReceivableCandidate";
+  types: {
+    EIP712Domain: Eip712Field[];
+    ReceivableCandidate: Eip712Field[];
+  };
+  message: {
+    tradeId: ReceivableCandidate["tradeId"];
+    documentHash: string;
+    candidateHash: string;
+    receivableAmount: ReceivableCandidate["receivableAmount"];
+    requestedAdvance: ReceivableCandidate["requestedAdvance"];
+    blockerCode: ReceivableCandidate["blockerCode"];
+    disbursementAllowed: ReceivableCandidate["disbursementAllowed"];
+  };
+  walletSignatureStatus: "not_requested";
+  contractTarget: "LoanRequestRegistry.submitPreReviewRequest";
+  registryPath: "LoanRequestRegistry.submitPreReviewRequest(evidencePackURI,evidencePackHash,readinessScore,blockerCode)";
+  professionalReviewRequired: true;
+  rawPdfPolicy: "raw PDF stays browser-local / off-chain";
+};
+
 const documentTypes: Array<{ value: EvidenceDocumentType } & LocaleAwareText> = [
   { value: "invoice", zh: "商业发票", en: "Commercial invoice" },
   { value: "purchase_order", zh: "采购订单 / 销售合同", en: "Purchase order / sales contract" },
@@ -72,6 +105,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
   const [candidateHash, setCandidateHash] = useState("0x91f3d4a6b2c88e24f3dd2a71bc4ec46ea7fbd61a9ac1bd522c36f9f7d2ed1a04");
   const [isHashing, setIsHashing] = useState(false);
   const [error, setError] = useState("");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   const candidate: ReceivableCandidate = useMemo(() => ({
     tradeId: "VN-COFFEE-SG-2026-0007",
@@ -92,6 +126,49 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
       "RestrictedReceivableToken.lockedUntilAllGatesPass",
     ],
   }), [documentType, fileHash, fileName]);
+
+  const typedDataPreview: ReceivableCandidateTypedDataPreview = useMemo(() => ({
+    domain: {
+      name: "ChainTrace",
+      version: "0.1",
+      chainId: 0,
+      verifyingContract: "0x0000000000000000000000000000000000000000",
+    },
+    primaryType: "ReceivableCandidate",
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      ReceivableCandidate: [
+        { name: "tradeId", type: "string" },
+        { name: "documentHash", type: "bytes32" },
+        { name: "candidateHash", type: "bytes32" },
+        { name: "receivableAmount", type: "string" },
+        { name: "requestedAdvance", type: "string" },
+        { name: "blockerCode", type: "string" },
+        { name: "disbursementAllowed", type: "bool" },
+      ],
+    },
+    message: {
+      tradeId: candidate.tradeId,
+      documentHash: candidate.fileHash,
+      candidateHash,
+      receivableAmount: candidate.receivableAmount,
+      requestedAdvance: candidate.requestedAdvance,
+      blockerCode: candidate.blockerCode,
+      disbursementAllowed: candidate.disbursementAllowed,
+    },
+    walletSignatureStatus: "not_requested",
+    contractTarget: "LoanRequestRegistry.submitPreReviewRequest",
+    registryPath: "LoanRequestRegistry.submitPreReviewRequest(evidencePackURI,evidencePackHash,readinessScore,blockerCode)",
+    professionalReviewRequired: true,
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+  }), [candidate, candidateHash]);
+
+  const typedDataJson = useMemo(() => JSON.stringify(typedDataPreview, null, 2), [typedDataPreview]);
 
   async function refreshCandidateHash(nextCandidate: ReceivableCandidate) {
     const normalized = JSON.stringify(nextCandidate, Object.keys(nextCandidate).sort());
@@ -136,6 +213,15 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
     await refreshCandidateHash(nextCandidate);
   }
 
+  async function handleCopyTypedData() {
+    try {
+      await navigator.clipboard.writeText(typedDataJson);
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
+  }
+
   return (
     <section className="panel receivable-converter" id="pdf-to-receivable">
       <div className="converter-grid">
@@ -168,7 +254,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           {error && <div className="error">{error}</div>}
 
           <div className="converter-actions">
-            <a className="primary-button" href="/login">{t(zh, "签名并进入工作台", "Sign and enter workspace")}</a>
+            <a className="primary-button" href="#typed-data-preview">{t(zh, "预览签名载荷", "Preview signing payload")}</a>
             <a className="secondary-button" href="/login">{t(zh, "登录查看链上状态机", "Login to view on-chain state machine")}</a>
           </div>
         </div>
@@ -202,6 +288,87 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
           </article>
         ))}
       </div>
+
+      <section className="typed-data-preview" id="typed-data-preview">
+        <div className="typed-data-header">
+          <div>
+            <span>{t(zh, "EIP-712 typed data preview", "EIP-712 typed data preview")}</span>
+            <h3>{t(zh, "钱包会看到的结构化签名载荷。", "The structured signing payload a wallet would display.")}</h3>
+            <p>
+              {t(
+                zh,
+                "这里仅展示 typed data preview，不请求真实签名、不发交易、不连接 RPC。PDF 原文仍然留在浏览器/用户侧，专业审查仍然必需。",
+                "This only shows a typed data preview. It does not request a real signature, send a transaction, or connect RPC. The raw PDF stays browser-local / off-chain, and professional review remains required.",
+              )}
+            </p>
+          </div>
+          <div className="typed-data-status">
+            <strong>walletSignatureStatus=not_requested</strong>
+            <span>Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false</span>
+          </div>
+        </div>
+
+        <div className="typed-data-link-grid">
+          <article>
+            <span>{t(zh, "Document hash input", "Document hash input")}</span>
+            <strong title={typedDataPreview.message.documentHash}>{shortHash(typedDataPreview.message.documentHash)}</strong>
+            <p>{t(zh, "来自浏览器本地 SHA-256。", "Created by browser-local SHA-256.")}</p>
+          </article>
+          <article>
+            <span>{t(zh, "Candidate hash input", "Candidate hash input")}</span>
+            <strong title={typedDataPreview.message.candidateHash}>{shortHash(typedDataPreview.message.candidateHash)}</strong>
+            <p>{t(zh, "绑定 ReceivableCandidate JSON。", "Binds the ReceivableCandidate JSON.")}</p>
+          </article>
+          <article>
+            <span>{t(zh, "Contract target", "Contract target")}</span>
+            <strong>{typedDataPreview.contractTarget}</strong>
+            <p>{typedDataPreview.registryPath}</p>
+          </article>
+          <article>
+            <span>{t(zh, "Review boundary", "Review boundary")}</span>
+            <strong>professionalReviewRequired={String(typedDataPreview.professionalReviewRequired)}</strong>
+            <p>{typedDataPreview.rawPdfPolicy}</p>
+          </article>
+        </div>
+
+        <div className="typed-data-panels">
+          <article>
+            <span>Domain</span>
+            <dl>
+              <div><dt>name</dt><dd>{typedDataPreview.domain.name}</dd></div>
+              <div><dt>version</dt><dd>{typedDataPreview.domain.version}</dd></div>
+              <div><dt>chainId</dt><dd>{typedDataPreview.domain.chainId}</dd></div>
+              <div><dt>verifyingContract</dt><dd>{typedDataPreview.domain.verifyingContract}</dd></div>
+            </dl>
+          </article>
+          <article>
+            <span>Types</span>
+            <dl>
+              {typedDataPreview.types.ReceivableCandidate.map((field) => (
+                <div key={field.name}><dt>{field.name}</dt><dd>{field.type}</dd></div>
+              ))}
+            </dl>
+          </article>
+          <article>
+            <span>Message</span>
+            <dl>
+              <div><dt>tradeId</dt><dd>{typedDataPreview.message.tradeId}</dd></div>
+              <div><dt>documentHash</dt><dd>{shortHash(typedDataPreview.message.documentHash)}</dd></div>
+              <div><dt>candidateHash</dt><dd>{shortHash(typedDataPreview.message.candidateHash)}</dd></div>
+              <div><dt>blockerCode</dt><dd>{typedDataPreview.message.blockerCode}</dd></div>
+              <div><dt>disbursementAllowed</dt><dd>{String(typedDataPreview.message.disbursementAllowed)}</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <div className="typed-data-json-header">
+          <strong>{t(zh, "开发者 JSON", "Developer JSON")}</strong>
+          <button type="button" className="secondary-button button-reset" onClick={handleCopyTypedData}>
+            {copyState === "copied" ? t(zh, "已复制", "Copied") : copyState === "failed" ? t(zh, "复制失败", "Copy failed") : t(zh, "复制 JSON", "Copy JSON")}
+          </button>
+        </div>
+        <pre className="candidate-json typed-data-json" aria-label="EIP-712 typed data preview JSON">{typedDataJson}</pre>
+      </section>
 
       <pre className="candidate-json" aria-label="ReceivableCandidate JSON">{JSON.stringify(candidate, null, 2)}</pre>
     </section>
