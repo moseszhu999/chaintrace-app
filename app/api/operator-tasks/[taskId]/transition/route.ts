@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { allowedHumanActions, transitionOperatorTask, type HumanAction } from "@/lib/agent-workflow-store";
+import { allowedHumanActions, getAgentWorkflowPersistenceMode, transitionOperatorTask, type HumanAction } from "@/lib/agent-workflow-store";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ ta
   if (!action || !allowedHumanActions.includes(action)) {
     return NextResponse.json({
       error: "Unsupported human operator action.",
+      persistenceMode: getAgentWorkflowPersistenceMode(),
       humanActionRequired: true,
       allowedHumanActions,
     }, { status: 400 });
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ ta
     return NextResponse.json({
       generatedAt: new Date().toISOString(),
       accepted: true,
+      persistenceMode: getAgentWorkflowPersistenceMode(),
       humanActionRequired: true,
       allowedHumanActions: task.allowedHumanActions,
       task,
@@ -32,6 +34,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ ta
   } catch (error) {
     return NextResponse.json({
       error: error instanceof Error ? error.message : "Failed to transition operator task.",
+      persistenceMode: getAgentWorkflowPersistenceMode(),
       humanActionRequired: true,
       allowedHumanActions,
     }, { status: 400 });

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { agentApiEndpoints } from "@/lib/agent-api-fixture";
-import { listAgentRunReceipts, listOperatorTasks } from "@/lib/agent-workflow-store";
+import { getAgentWorkflowPersistenceMode, listAgentRunReceipts, listOperatorTasks } from "@/lib/agent-workflow-store";
 import { agentRuns } from "@/lib/agent-workbench-fixture";
 import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { professionalReviewItems } from "@/lib/professional-review-fixture";
@@ -8,7 +8,7 @@ import { evaluateReadiness } from "@/lib/readiness-evaluator";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
 import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const trade = await getCurrentTradeCase();
@@ -83,6 +83,7 @@ export async function GET() {
       blockerCode: readiness.blockerCode,
     },
     workflowState: {
+      persistenceMode: getAgentWorkflowPersistenceMode(),
       latestAgentRunReceipt,
       operatorTasks,
       createReceiptEndpoint: "POST /api/agent-runs",
