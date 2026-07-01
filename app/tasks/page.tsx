@@ -1,13 +1,9 @@
-import { TasksView } from "@/components/workspace/TasksView";
-import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
-import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
+import { redirect } from "next/navigation";
+import { safeGetCurrentTradeCase } from "@/lib/repositories/safe-chaintrace-repository";
+
+export const dynamic = "force-dynamic";
 
 export default async function TaskCenterPage() {
-  const { zh, workspace, role } = await getWorkspaceRouteContext();
-
-  return (
-    <WorkspaceFrame zh={zh} active="tasks" workspace={workspace} role={role} action={{ href: "/assistant", labelZh: "打开助手", labelEn: "Open assistant" }}>
-      <TasksView zh={zh} workspace={workspace} role={role} />
-    </WorkspaceFrame>
-  );
+  const trade = await safeGetCurrentTradeCase();
+  redirect(`/cases/${trade.id}/tasks`);
 }
