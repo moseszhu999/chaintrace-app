@@ -9,8 +9,8 @@ It replaces earlier demo/story-first assumptions.
 ```text
 Small Entry, Big Product.
 Function Architecture → Frontend Menu
-Data Architecture → Database Schema
-Proof Architecture → Smart Contracts
+Local Data Architecture → Browser-local Private Workspace
+Proof Architecture → Hashes, Signatures, Chain Commitments
 ```
 
 ## Product entry
@@ -22,7 +22,8 @@ AI Trade Evidence Passport
 The first real user path is:
 
 ```text
-Organization
+Local Organization Profile
+→ Organization Profile Hash
 → Trade Case
 → Evidence Upload
 → SHA-256
@@ -31,7 +32,16 @@ Organization
 → Evidence Passport
 → Trust Page
 → Counterparty Confirmation
-→ Audit Trail
+→ Optional Chain Commitment
+```
+
+## Trust model
+
+Do not trust a ChainTrace server database as the source of truth.
+
+```text
+Private details stay local.
+Public trust comes from hashes, signatures, confirmations, audit hash chains, and chain commitments.
 ```
 
 ## L1 function architecture
@@ -51,7 +61,7 @@ Organization
 
 ## L1 data architecture
 
-1. Organization Domain
+1. Local Organization Profile Domain
 2. Trade Case Domain
 3. Evidence Domain
 4. AI Review Domain
@@ -66,10 +76,10 @@ Organization
 
 ```text
 1. Organization Network
-   1.1 My Organization
-   1.2 Members
-   1.3 Roles
-   1.4 External Invites
+   1.1 Local Organization Profile
+   1.2 Organization Proof
+   1.3 Signer / Wallet
+   1.4 Optional Chain Commit
 
 2. Trade Cases
    2.1 Case List
@@ -133,8 +143,8 @@ Organization
     11.4 Compliance Logs
 
 12. Platform Admin
-    12.1 Organizations
-    12.2 Cases
+    12.1 Proof Config
+    12.2 Contract Config
     12.3 Evidence Types
     12.4 Stage / Scenario Config
 ```
@@ -143,14 +153,14 @@ Organization
 
 Do not put full business data on-chain.
 
-Off-chain stores:
+Local-only private workspace stores:
 
-- raw PDFs
 - full organization profiles
-- full trade case data
-- AI extraction bodies
+- raw PDFs before explicit sharing
+- full trade case drafts
+- AI extraction bodies before publishing
 - private commercial terms
-- full audit bodies
+- private audit bodies
 
 On-chain stores:
 
@@ -180,19 +190,19 @@ Contract layer:
 
 Must build first:
 
-1. Real Auth
-2. Real Organization
-3. Real Organization Member / Role
-4. Real Trade Case
+1. Browser-local Organization Profile
+2. Organization Profile Hash
+3. Wallet / Signer-ready Organization Proof
+4. Local Trade Case Workspace
 5. Real Evidence Upload
 6. Real SHA-256
-7. Real AI Extraction
-8. Real Consistency Check
-9. Real Evidence Passport
-10. Real Trust Page
-11. Real Counterparty Invite
-12. Real Confirmation / Rejection
-13. Real Audit Timeline
+7. Local Evidence Proof Bundle
+8. AI Extraction from local uploaded file where possible
+9. Evidence Passport generated from proof bundle
+10. Trust Page generated from proof-safe data
+11. Counterparty Confirmation / Rejection
+12. Audit Hash Chain
+13. Optional Chain Commitment
 
 Reserved but structurally present:
 
@@ -207,22 +217,23 @@ Reserved but structurally present:
 - fake dashboard
 - mock-only data
 - role-cookie demo
-- button without persistence
+- button without local persistence or proof output
 - landing-page-first development
-- financing claim without evidence layer
+- financing claim without evidence proof path
 - raw PDF public exposure by default
+- server database treated as trust source
 
 ## Definition of done
 
 A feature is not done unless:
 
-- data persists after refresh
-- users belong to real organizations
-- organization permissions are enforced
+- private data remains local unless explicitly shared
+- organization profile hash is generated from canonical local details
 - every evidence file has a real SHA-256 hash
-- AI extraction is based on a real uploaded file
-- passport is generated from real case data
+- proof bundle is reproducible
+- signatures are supported or structurally reserved
+- passport is generated from proof-safe data
 - trust page opens by share link
 - invite link allows confirmation or rejection
-- audit timeline records every important action
+- audit timeline records a hash chain
 - no unsupported legal / credit / disbursement claim is made
