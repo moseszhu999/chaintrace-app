@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 type CreateTradeCasePayload = {
   userEmail?: string;
   userName?: string;
+  sellerOrgId?: string;
   caseName?: string;
   buyerName?: string;
   buyerOrgId?: string;
@@ -39,15 +40,15 @@ export async function POST(request: Request) {
     const payload = (await request.json().catch(() => ({}))) as CreateTradeCasePayload;
     const identity = resolveRequestIdentity(request, payload as Record<string, unknown>);
     const current = await listV2TradeCasesForCurrentOrganization(identity.email, identity.name);
-    const organization = current.context.organization;
+    const sellerOrgId = current.context.organization?.id || clean(payload.sellerOrgId);
 
-    if (!organization) return apiError("ORGANIZATION_REQUIRED", "Create an organization before creating a trade case.", { status: 400 });
+    if (!sellerOrgId) return apiError("ORGANIZATION_REQUIRED", "Create an organization before creating a trade case.", { status: 400 });
     if (!clean(payload.caseName)) return apiError("INVALID_TRADE_CASE", "caseName is required.", { status: 400 });
 
     const workspace = await createV2TradeCase({
       userEmail: identity.email,
       userName: identity.name,
-      sellerOrgId: organization.id,
+      sellerOrgId,
       caseName: clean(payload.caseName),
       buyerName: clean(payload.buyerName) || undefined,
       buyerOrgId: clean(payload.buyerOrgId) || undefined,
