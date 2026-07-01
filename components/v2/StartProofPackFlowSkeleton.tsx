@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { StartOrganizationProofMiniForm } from "@/components/v2/StartOrganizationProofMiniForm";
 
 type StartProofPackFlowSkeletonProps = {
   zh: boolean;
@@ -139,10 +140,10 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
         <div className="section-heading compact-heading">
           <span>{t(zh, "Small Entry", "Small Entry")}</span>
           <h2>{t(zh, "一键生成可验证贸易证据护照", "Generate a verifiable Trade Evidence Passport")}</h2>
-          <p>{t(zh, "这个页面先作为总入口骨架：把现有 5 个工作台串成一条新用户路径。后续再把表单、上传、签名动作逐步内嵌。", "This page is the entry skeleton: it connects the existing five workspaces into one new-user path. Forms, upload, and signature actions will be embedded step by step later.")}</p>
+          <p>{t(zh, "这个页面先作为总入口：先内嵌 Step 1 组织 Proof，后面逐步内嵌 Case、Evidence、Proof Pack。", "This page is the entry: Step 1 Organization Proof is embedded first; Case, Evidence, and Proof Pack will be embedded gradually.")}</p>
         </div>
         <div className="hero-actions">
-          <Link className="primary-button" href="/organization-network">{t(zh, "开始创建组织 Proof", "Start Organization Proof")}</Link>
+          <Link className="primary-button" href="/organization-network">{t(zh, "完整组织工作台", "Full Organization Workspace")}</Link>
           <Link className="secondary-button" href="/verify/local">{t(zh, "我已有 Proof Pack，去验证", "I have a Proof Pack, verify it")}</Link>
         </div>
       </section>
@@ -169,6 +170,8 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
           <small>{t(zh, "Trade Evidence Passport", "Trade Evidence Passport")}</small>
         </article>
       </div>
+
+      <StartOrganizationProofMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
