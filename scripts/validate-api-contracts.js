@@ -362,6 +362,72 @@ function validateRoleBasedApiGuards() {
   assertIncludes(adminResetRoute, "resetDemoWorkspace", "admin reset action");
 }
 
+function validateUnifiedApiContractAndSmokeHarness() {
+  const apiResponse = read("lib/api-response.ts");
+  const smokeHarness = read("scripts/smoke-working-site.js");
+  const casesRoute = read("app/api/cases/route.ts");
+  const caseRoute = read("app/api/cases/[caseId]/route.ts");
+  const caseEvidenceRoute = read("app/api/cases/[caseId]/evidence/route.ts");
+  const reviewRoute = read("app/api/evidence/[evidenceId]/review/route.ts");
+  const caseTasksRoute = read("app/api/cases/[caseId]/tasks/route.ts");
+  const taskTransitionRoute = read("app/api/tasks/[taskId]/transition/route.ts");
+  const caseAgentRunsRoute = read("app/api/cases/[caseId]/agent-runs/route.ts");
+  const readinessRoute = read("app/api/cases/[caseId]/readiness/route.ts");
+  const handoffRoute = read("app/api/cases/[caseId]/handoff/route.ts");
+  const healthRoute = read("app/api/health/route.ts");
+
+  [
+    "ApiSuccess",
+    "ApiFailure",
+    "preReviewBoundary",
+    "apiSuccess",
+    "apiError",
+    "ok: true",
+    "ok: false",
+    "boundary",
+    "disbursementAllowed: false",
+  ].forEach((expected) => assertIncludes(apiResponse, expected, "unified API response helper"));
+
+  [
+    casesRoute,
+    caseRoute,
+    caseEvidenceRoute,
+    reviewRoute,
+    caseTasksRoute,
+    taskTransitionRoute,
+    caseAgentRunsRoute,
+    readinessRoute,
+    handoffRoute,
+    healthRoute,
+  ].forEach((routeSource, index) => {
+    assertIncludes(routeSource, "apiSuccess", `target API route ${index} success contract`);
+  });
+
+  [
+    "GET",
+    "POST",
+    "createAgentRunReceipt",
+    "listAgentRunReceipts",
+    "caseId",
+    "apiSuccess",
+    "apiError",
+    "requireDemoRole",
+  ].forEach((expected) => assertIncludes(caseAgentRunsRoute, expected, "case-scoped agent runs route"));
+
+  [
+    "CHAINTRACE_SMOKE_BASE_URL",
+    "assertApiContract",
+    "assertBoundary",
+    "review evidence -> receipt persisted",
+    "gates/readiness recompute",
+    "task queue links to evidence/gates",
+    "handoff JSON opens",
+    "no disbursementAllowed=true",
+    "DB down uses fallback path",
+    "__chaintrace_smoke_missing_route__",
+  ].forEach((expected) => assertIncludes(smokeHarness, expected, "working-site smoke harness"));
+}
+
 function main() {
   validateAgentPipeline();
   validateGateDecision();
@@ -373,6 +439,7 @@ function main() {
   validateFinancingPackGeneration();
   validateProfessionalReviewHandoffPack();
   validateRoleBasedApiGuards();
+  validateUnifiedApiContractAndSmokeHarness();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
 
