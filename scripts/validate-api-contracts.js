@@ -52,6 +52,7 @@ function validateGateDecision() {
   assertIncludes(runRoute, "evaluateReadiness", "agent pipeline route");
   assertIncludes(gatesRoute, "evaluateLoanGates", "agent gates route");
   assertIncludes(gatesRoute, "evaluateReadiness", "agent gates route");
+  assertIncludes(gatesRoute, 'dynamic = "force-dynamic"', "agent gates route must not query durable evidence at build time");
 
   assertIncludes(gateEvaluator, "export function evaluateLoanGates", "gate evaluator");
   assertIncludes(gateEvaluator, "evidenceRecords", "gate evaluator");
@@ -93,6 +94,7 @@ function validatePreReviewDraft() {
 
 function validateRepositoryLayer() {
   const repository = read("lib/repositories/chaintrace-repository.ts");
+  const evidenceRoute = read("app/api/agents/evidence/route.ts");
   const evidenceSchema = read("docs/evidence-intake-schema.sql");
 
   [
@@ -131,6 +133,9 @@ function validateRepositoryLayer() {
   assertIncludes(repository, 'verified: "verified"', "default verified evidence");
   assertIncludes(repository, 'uploaded: "uploaded_pending_verification"', "default pending evidence");
   assertIncludes(repository, 'missing: "missing"', "default missing evidence");
+  assertIncludes(evidenceRoute, 'dynamic = "force-dynamic"', "agent evidence route must not freeze evidence at build time");
+  assertIncludes(evidenceRoute, "listEvidenceRecords", "agent evidence route must read durable evidence repository");
+  assertIncludes(evidenceRoute, "getCurrentTradeCase", "agent evidence route must read current trade case");
 
   [
     "create table if not exists evidence_records",

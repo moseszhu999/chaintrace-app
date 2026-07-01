@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { agentRuns } from "@/lib/agent-workbench-fixture";
-import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
+import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const workspace = await getWorkspaceSnapshot();
-  const trade = workspace.activeTrade;
-  const documents = trade.documents;
-  const verified = documents.filter((document) => document.status === "verified");
-  const open = documents.filter((document) => document.status !== "verified");
+  const trade = await getCurrentTradeCase();
+  const evidenceRecords = await listEvidenceRecords(trade.id);
+  const verified = evidenceRecords.filter((record) => record.status === "verified");
+  const open = evidenceRecords.filter((record) => record.status !== "verified");
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
@@ -23,23 +22,23 @@ export async function GET() {
         poNo: trade.poNo,
         invoiceNo: trade.invoiceNo,
         totalAmount: trade.totalAmount,
-        containerNo: trade.containerNo,
+        requestedAdvance: trade.requestedAdvance,
       },
-      filesReceived: documents.length,
+      filesReceived: evidenceRecords.length,
     },
     output: {
-      evidenceItems: documents.map((document) => ({
-        id: document.id,
-        typeZh: document.typeZh,
-        typeEn: document.typeEn,
-        fileName: document.fileName,
-        documentNo: document.documentNo,
-        status: document.status,
-        issuedAt: document.issuedAt,
-        amount: document.amount ?? null,
-        hash: document.hash ?? null,
-        noteZh: document.noteZh,
-        noteEn: document.noteEn,
+      evidenceItems: evidenceRecords.map((record) => ({
+        id: record.id,
+        documentType: record.documentType,
+        fileName: record.fileName,
+        documentNo: record.documentNo,
+        status: record.status,
+        issuedAt: record.issuedAt ?? null,
+        amount: record.amount ?? null,
+        hash: record.hash ?? null,
+        noteZh: record.noteZh ?? null,
+        noteEn: record.noteEn ?? null,
+        gateImpacts: record.gateImpacts,
       })),
       verifiedCount: verified.length,
       openCount: open.length,
