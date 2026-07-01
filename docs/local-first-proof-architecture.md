@@ -53,6 +53,41 @@ Trust:
 - audit hash chains
 - chain commitments
 
+## Recovery model
+
+Local-first does not mean no backup.
+
+It means ChainTrace must not store plaintext organization details as the trust source.
+
+The recovery options are:
+
+1. Browser localStorage for daily use.
+2. Downloadable Recovery Kit for user-controlled backup.
+3. Future encrypted cloud backup, where the server stores only ciphertext.
+4. Chain commitment for proof anchoring, not plaintext recovery.
+
+## Recovery Kit
+
+The Recovery Kit is a JSON file containing:
+
+```text
+version
+organization
+membership
+privateProfile
+proof.orgProfileHash
+proof.algorithm
+proof.chainCommitStatus
+```
+
+Import must verify:
+
+```text
+SHA-256(canonical privateProfile) == proof.orgProfileHash
+```
+
+If the hash does not match, the kit must be rejected.
+
 ## Current v2 rule
 
 Database schema files may remain as implementation notes, but runtime product flow must not require a database for organization identity.
@@ -63,7 +98,9 @@ The current organization flow is:
 Create local organization profile
 → store private details in browser localStorage
 → generate org profile hash
-→ show proof-ready commitment
+→ download Recovery Kit
+→ optionally sign proof with wallet
+→ optionally commit hash on-chain
 ```
 
 ## Future chain layer
