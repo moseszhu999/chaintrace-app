@@ -19,6 +19,19 @@ function orgTypeLabel(type: string) {
   return type.replaceAll("_", " ");
 }
 
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`).join(",")}}`;
+}
+
+async function sha256Hex(text: string) {
+  const data = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNetworkClientProps) {
   const [context, setContext] = useState(initialContext);
   const [name, setName] = useState("");
@@ -32,55 +45,74 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
   const currentMembership = context.membership;
   const canCreate = useMemo(() => name.trim().length > 0, [name]);
 
-  async function refreshContext() {
-    const res = await fetch("/api/organizations/current", {
-      headers: { "x-chaintrace-user-email": context.user.email },
-      cache: "no-store",
-    });
-    const json = await res.json();
-    if (json.ok && json.data?.context) setContext(json.data.context);
-  }
-
   async function createOrganization(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canCreate || busy) return;
     setBusy(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/organizations", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-chaintrace-user-email": context.user.email,
+      const createdAt = new Date().toISOString();
+      const privateProfile = {
+        name: name.trim(),
+        orgType,
+        country: country.trim() || null,
+        website: website.trim() || null,
+        localOwnerEmail: context.user.email,
+        createdAt,
+      };
+      const orgProfileHash = await sha256Hex(stableStringify(privateProfile));
+      const organization = {
+        id: `local-org-${orgProfileHash.slice(0, 16)}`,
+        name: privateProfile.name,
+        orgType,
+        country: privateProfile.country,
+        website: privateProfile.website,
+        verificationLevel: "LOCAL_ONLY",
+        status: "ACTIVE",
+        createdBy: context.user.id,
+        createdAt,
+        updatedAt: createdAt,
+        orgRegistryHash: orgProfileHash,
+        orgDid: `did:chaintrace:local:${orgProfileHash.slice(0, 32)}`,
+      };
+      const membership = {
+        id: `local-member-${orgProfileHash.slice(0, 16)}`,
+        organizationId: organization.id,
+        userId: context.user.id,
+        role: "ADMIN" as const,
+        status: "ACTIVE" as const,
+        invitedBy: context.user.id,
+        joinedAt: createdAt,
+        user: context.user,
+      };
+      const localBundle = {
+        organization,
+        membership,
+        privateProfile,
+        proof: {
+          proofType: "ORG_PROFILE_HASH",
+          algorithm: "SHA-256",
+          orgProfileHash,
+          chainCommitStatus: "NOT_COMMITTED",
+          rawProfileStored: "BROWSER_LOCAL_ONLY",
         },
-        body: JSON.stringify({ name, orgType, country, website }),
-      });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.message || "Failed to create organization.");
-
-      const createdOrganization = json.data?.organization;
-      const createdMembership = json.data?.membership;
-      if (createdOrganization && createdMembership) {
-        window.localStorage.setItem(currentOrgStorageKey, JSON.stringify({ organization: createdOrganization, membership: createdMembership }));
-        setContext((previous) => ({
-          ...previous,
-          organization: createdOrganization,
-          membership: createdMembership,
-          organizations: [
-            { organization: createdOrganization, membership: createdMembership },
-            ...previous.organizations.filter((item) => item.organization.id !== createdOrganization.id),
-          ],
-        }));
-      } else {
-        await refreshContext();
-      }
-
-      setMessage(label(zh, "组织已创建，并已绑定当前用户为 ADMIN。", "Organization created and current user is bound as ADMIN."));
+      };
+      window.localStorage.setItem(currentOrgStorageKey, JSON.stringify(localBundle));
+      setContext((previous) => ({
+        ...previous,
+        organization,
+        membership,
+        organizations: [
+          { organization, membership },
+          ...previous.organizations.filter((item) => item.organization.id !== organization.id),
+        ],
+      }));
+      setMessage(label(zh, "组织详情已保存在本地；链上只需要提交 org profile hash。", "Organization details are local-only; only org profile hash should be committed on-chain."));
       setName("");
       setCountry("");
       setWebsite("");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to create organization.");
+      setMessage(error instanceof Error ? error.message : "Failed to create local organization proof.");
     } finally {
       setBusy(false);
     }
@@ -92,25 +124,25 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
         <article className="metric-card">
           <span>{label(zh, "当前用户", "Current user")}</span>
           <strong>{context.user.email}</strong>
-          <small>{label(zh, "身份来源：v2 request identity bridge，后续替换为真实 Auth。", "Identity source: v2 request identity bridge; real Auth replaces this later.")}</small>
+          <small>{label(zh, "当前身份只作为本地 proof bundle 的 owner hint。", "Current identity is only an owner hint for the local proof bundle.")}</small>
         </article>
         <article className="metric-card">
           <span>{label(zh, "当前组织", "Current organization")}</span>
           <strong>{currentOrg ? currentOrg.name : label(zh, "未创建", "Not created")}</strong>
-          <small>{currentOrg ? `${currentOrg.orgType} · ${currentOrg.verificationLevel}` : label(zh, "先创建真实组织，再进入 Case / Evidence。", "Create a real organization before Case / Evidence.")}</small>
+          <small>{currentOrg ? `${currentOrg.orgType} · ${currentOrg.verificationLevel}` : label(zh, "组织详情不会上传数据库。", "Organization details are not uploaded to a database.")}</small>
         </article>
         <article className="metric-card">
-          <span>{label(zh, "当前角色", "Current role")}</span>
-          <strong>{currentMembership?.role ?? "—"}</strong>
-          <small>{label(zh, "v2 用 organization_members.role，不再以 demo role cookie 为产品依据。", "v2 uses organization_members.role; demo role cookie is no longer the product basis.")}</small>
+          <span>{label(zh, "Proof", "Proof")}</span>
+          <strong>{currentOrg?.orgRegistryHash ? "SHA-256" : "—"}</strong>
+          <small>{currentOrg?.orgRegistryHash ? currentOrg.orgRegistryHash.slice(0, 24) + "…" : label(zh, "创建后生成 org profile hash。", "Create to generate org profile hash.")}</small>
         </article>
       </div>
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
-          <span>{label(zh, "Organization Network", "Organization Network")}</span>
-          <h2>{label(zh, "创建真实业务组织", "Create a real business organization")}</h2>
-          <p>{label(zh, "这是 v2.1 的第一块真实底座。Case、Evidence、Passport、Invite 都必须挂在组织下面。", "This is the first real v2.1 foundation. Case, Evidence, Passport, and Invite must all be scoped by organization.")}</p>
+          <span>{label(zh, "Local-first Organization", "Local-first Organization")}</span>
+          <h2>{label(zh, "本地保存组织详情，只生成链上 proof", "Keep organization details local, generate proof only")}</h2>
+          <p>{label(zh, "组织名称、国家、网站等详细信息只保存在浏览器本地；对外只暴露 org profile hash、DID hint 和未来链上 commitment。", "Organization details stay in the browser; only org profile hash, DID hint, and future chain commitment are exposed.")}</p>
         </div>
 
         <form className="workspace-form" onSubmit={createOrganization}>
@@ -133,7 +165,7 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
             <input value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://example.com" />
           </label>
           <button className="primary-button" type="submit" disabled={!canCreate || busy}>
-            {busy ? label(zh, "创建中…", "Creating…") : label(zh, "创建组织", "Create organization")}
+            {busy ? label(zh, "生成中…", "Generating…") : label(zh, "生成本地组织 Proof", "Generate Local Org Proof")}
           </button>
           {message ? <p className="form-note">{message}</p> : null}
         </form>
@@ -141,8 +173,8 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
-          <span>{label(zh, "Organizations", "Organizations")}</span>
-          <h2>{label(zh, "当前用户所属组织", "Organizations for current user")}</h2>
+          <span>{label(zh, "Local Organizations", "Local Organizations")}</span>
+          <h2>{label(zh, "当前浏览器本地组织", "Local organization in this browser")}</h2>
         </div>
         <div className="table-like-list">
           {context.organizations.length ? context.organizations.map((item) => (
@@ -153,12 +185,12 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
               </div>
               <div>
                 <strong>{item.membership.role}</strong>
-                <span>{item.membership.status}</span>
+                <span>{item.organization.orgRegistryHash?.slice(0, 18) ?? "NO_HASH"}…</span>
               </div>
             </div>
           )) : (
             <div className="empty-state-card">
-              {label(zh, "还没有组织。请先创建 Exporter / Buyer / Logistics / Warehouse / QC / Funder 等真实组织。", "No organization yet. Create a real Exporter / Buyer / Logistics / Warehouse / QC / Funder organization first.")}
+              {label(zh, "还没有本地组织 proof。创建后详情只保存在当前浏览器。", "No local organization proof yet. Details stay only in this browser after creation.")}
             </div>
           )}
         </div>
