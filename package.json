@@ -12,10 +12,10 @@
     "ux:validate": "node scripts/validate-public-agent-entry.js",
     "agent:validate": "node scripts/validate-agent-workflow.js",
     "ops:validate": "node scripts/validate-operator-os.js",
-    "contracts:compile": "hardhat compile",
-    "contracts:test": "hardhat test",
-    "contracts:deploy:dev": "hardhat run scripts/deploy-dev.js --network hardhat",
-    "contracts:deploy:base-sepolia": "hardhat run scripts/deploy-base-sepolia.js --network baseSepolia"
+    "smoke:evidence": "node scripts/smoke-working-site.js evidence",
+    "smoke:case": "node scripts/smoke-working-site.js case",
+    "smoke:handoff": "node scripts/smoke-working-site.js handoff",
+    "smoke:production-fallback": "node scripts/smoke-working-site.js production-fallback"
   },
   "dependencies": {
     "@neondatabase/serverless": "latest",
