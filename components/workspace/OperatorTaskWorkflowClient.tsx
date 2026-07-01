@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { AgentRunReceipt, HumanAction, OperatorTask } from "@/lib/agent-workflow-store";
+import type { EvidenceLinkedTask, EvidenceTaskAction } from "@/lib/evidence-task-store";
 import styles from "./WorkspaceViews.module.css";
 
 type AgentRunsResponse = {
@@ -12,6 +13,7 @@ type AgentRunsResponse = {
 type OperatorTasksResponse = {
   latestAgentRunReceipt: AgentRunReceipt | null;
   tasks: OperatorTask[];
+  evidenceTasks?: EvidenceLinkedTask[];
 };
 
 const actionLabels: Record<HumanAction, string> = {
@@ -21,10 +23,18 @@ const actionLabels: Record<HumanAction, string> = {
   escalate_professional_review: "Escalate review",
 };
 
+const evidenceActionLabels: Record<EvidenceTaskAction, string> = {
+  assign_to_operator: "Assign",
+  request_changes: "Request changes",
+  keep_blocked: "Keep blocked",
+  mark_resolved: "Mark resolved",
+  escalate_review: "Escalate review",
+};
+
 function statusClass(status: string) {
-  if (status.includes("approved") || status.includes("escalated")) return `${styles.statusChip} ${styles.statusVerified}`;
-  if (status.includes("changes")) return `${styles.statusChip} ${styles.statusMedium}`;
-  if (status.includes("blocked")) return `${styles.statusChip} ${styles.statusHigh}`;
+  if (status.includes("approved") || status.includes("resolved") || status.includes("escalated")) return `${styles.statusChip} ${styles.statusVerified}`;
+  if (status.includes("changes") || status.includes("waiting") || status.includes("progress")) return `${styles.statusChip} ${styles.statusMedium}`;
+  if (status.includes("blocked") || status.includes("rejected")) return `${styles.statusChip} ${styles.statusHigh}`;
   return `${styles.statusChip} ${styles.statusOpen}`;
 }
 
@@ -32,15 +42,16 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
   const [receipt, setReceipt] = useState<AgentRunReceipt | null>(null);
   const [receipts, setReceipts] = useState<AgentRunReceipt[]>([]);
   const [tasks, setTasks] = useState<OperatorTask[]>([]);
+  const [evidenceTasks, setEvidenceTasks] = useState<EvidenceLinkedTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
 
   const summary = useMemo(() => {
-    const open = tasks.filter((task) => task.taskStatus === "open").length;
-    const transitioned = tasks.length - open;
+    const open = tasks.filter((task) => task.taskStatus === "open").length + evidenceTasks.filter((task) => task.taskStatus === "open").length;
+    const transitioned = tasks.length + evidenceTasks.length - open;
     return { open, transitioned };
-  }, [tasks]);
+  }, [tasks, evidenceTasks]);
 
   async function loadWorkflow() {
     setError("");
@@ -48,14 +59,13 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
       fetch("/api/agent-runs", { cache: "no-store" }),
       fetch("/api/operator-tasks", { cache: "no-store" }),
     ]);
-    if (!runsResponse.ok || !tasksResponse.ok) {
-      throw new Error("Could not load AgentRunReceipt workflow state.");
-    }
+    if (!runsResponse.ok || !tasksResponse.ok) throw new Error("Could not load workflow state.");
     const runsJson = (await runsResponse.json()) as AgentRunsResponse;
     const tasksJson = (await tasksResponse.json()) as OperatorTasksResponse;
     setReceipts(runsJson.receipts);
     setReceipt(tasksJson.latestAgentRunReceipt ?? runsJson.latestAgentRunReceipt);
-    setTasks(tasksJson.tasks);
+    setTasks(tasksJson.tasks ?? []);
+    setEvidenceTasks(tasksJson.evidenceTasks ?? []);
   }
 
   useEffect(() => {
@@ -72,7 +82,7 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
       if (!response.ok) throw new Error("Could not create AgentRunReceipt.");
       await loadWorkflow();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not run agent workflow.");
+      setError(caught instanceof Error ? caught.message : "Could not run workflow.");
     } finally {
       setIsRunning(false);
     }
@@ -86,23 +96,34 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
-      if (!response.ok) throw new Error("Operator task transition was rejected.");
+      if (!response.ok) throw new Error("Task transition was rejected.");
       await loadWorkflow();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not transition operator task.");
+      setError(caught instanceof Error ? caught.message : "Could not transition task.");
+    }
+  }
+
+  async function transitionEvidenceTask(taskId: string, action: EvidenceTaskAction) {
+    setError("");
+    try {
+      const response = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/transition`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!response.ok) throw new Error("Evidence task transition was rejected.");
+      await loadWorkflow();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not transition evidence task.");
     }
   }
 
   return (
     <div className="panel">
       <div className="section-heading">
-        <span>AgentRunReceipt workflow</span>
-        <h2>{zh ? "运行 Agent 后保存 receipt，并把缺口变成可处理任务。" : "Run the agent, save a receipt, and turn gaps into actionable tasks."}</h2>
-        <p>
-          {zh
-            ? "这不是 preview：/tasks 会读取同一份 workflow state。人工动作只改变任务状态，不发送消息、不签名、不放款。"
-            : "This is not a preview: /tasks reads the same workflow state. Human actions only change task status; they do not send messages, sign, or disburse."}
-        </p>
+        <span>Task queue workflow</span>
+        <h2>{zh ? "证据动作会生成任务。" : "Evidence actions now generate tasks."}</h2>
+        <p>{zh ? "人工动作只改变任务状态，不执行外部动作。" : "Human actions only change task state; they do not perform external actions."}</p>
       </div>
 
       <div className="converter-actions">
@@ -116,25 +137,44 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
 
       <div className="typed-data-status ai-boundary-status" style={{ marginTop: 16 }}>
         <strong>agentDecisionAuthority=none</strong>
-        <span>modelExecutionMode=deterministic_no_llm_call</span>
-        <span>Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false</span>
+        <span>Pre-review only · GATES_NOT_PASSED</span>
       </div>
 
       {error && <div className="error" style={{ marginTop: 16 }}>{error}</div>}
-      {isLoading && <div className="notice" style={{ marginTop: 16 }}>Loading AgentRunReceipt workflow...</div>}
+      {isLoading && <div className="notice" style={{ marginTop: 16 }}>Loading task workflow...</div>}
 
       <div className={styles.list} style={{ marginTop: 18 }}>
         <article className={styles.listRow}>
           <div className={styles.rowHeader}>
             <div className={styles.rowMain}>
-              <h3 className={styles.rowTitle}>AgentRunReceipt</h3>
-              <p className={styles.rowMeta}>{receipt ? receipt.id : "No receipt yet. Run agent workflow to create one."}</p>
-              <p className={styles.rowMeta}>receipts={receipts.length} · openTasks={summary.open} · transitionedTasks={summary.transitioned}</p>
-              {receipt && <p className={styles.rowMeta}>readiness={receipt.readinessScore}/{receipt.maxScore} · gates={receipt.gatesPassed}/{receipt.totalGates} · humanActionRequired=true</p>}
+              <h3 className={styles.rowTitle}>Task queue state</h3>
+              <p className={styles.rowMeta}>{receipt ? receipt.id : "No agent receipt yet. Evidence review tasks can still appear."}</p>
+              <p className={styles.rowMeta}>receipts={receipts.length} · agentTasks={tasks.length} · evidenceTasks={evidenceTasks.length} · openTasks={summary.open} · transitionedTasks={summary.transitioned}</p>
             </div>
-            <span className={`${styles.statusChip} ${styles.statusOpen}`}>{receipt?.receiptStatus ?? "not_started"}</span>
+            <span className={`${styles.statusChip} ${styles.statusOpen}`}>{receipt?.receiptStatus ?? "task_queue"}</span>
           </div>
         </article>
+
+        {evidenceTasks.map((task) => (
+          <article className={styles.listRow} key={task.id}>
+            <div className={styles.rowHeader}>
+              <div className={styles.rowMain}>
+                <h3 className={styles.rowTitle}>{task.title}</h3>
+                <p className={styles.rowMeta}>evidenceId={task.evidenceId} · documentNo={task.documentNo} · gate={task.gateId ?? "unmapped"}</p>
+                <p className={styles.rowMeta}>reason={task.reason}</p>
+                <p className={styles.rowMeta}>GATES_NOT_PASSED · sourceReviewReceipt={task.sourceReviewReceiptId ?? "seeded"}</p>
+                <div className="converter-actions" style={{ marginTop: 10 }}>
+                  {task.allowedActions.map((action) => (
+                    <button className="secondary-button" type="button" data-testid={`evidence-task-action-${action}`} key={action} onClick={() => transitionEvidenceTask(task.id, action)}>
+                      {evidenceActionLabels[action]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <span className={statusClass(task.taskStatus)}>{task.taskStatus}</span>
+            </div>
+          </article>
+        ))}
 
         {tasks.map((task) => (
           <article className={styles.listRow} key={task.id}>
@@ -142,17 +182,10 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
               <div className={styles.rowMain}>
                 <h3 className={styles.rowTitle}>{task.title}</h3>
                 <p className={styles.rowMeta}>{task.taskKind} · owner={task.ownerRole} · humanActionRequired={String(task.humanActionRequired)}</p>
-                <p className={styles.rowMeta}>GATES_NOT_PASSED · disbursementAllowed=false · agentDecisionAuthority=none</p>
                 {task.details.slice(0, 3).map((detail) => <p className={styles.rowMeta} key={detail}>{detail}</p>)}
                 <div className="converter-actions" style={{ marginTop: 10 }}>
                   {task.allowedHumanActions.map((action) => (
-                    <button
-                      className="secondary-button"
-                      type="button"
-                      data-testid={`operator-task-action-${task.taskKind}-${action}`}
-                      key={action}
-                      onClick={() => transitionTask(task.id, action)}
-                    >
+                    <button className="secondary-button" type="button" data-testid={`operator-task-action-${task.taskKind}-${action}`} key={action} onClick={() => transitionTask(task.id, action)}>
                       {actionLabels[action]}
                     </button>
                   ))}
