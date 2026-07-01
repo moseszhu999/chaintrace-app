@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { EvidenceUploadClient } from "@/components/v2/EvidenceUploadClient";
 import type { TradeCaseWorkspaceV2 } from "@/lib/v2/trade-case-types";
 import { stageLabel } from "@/lib/v2/trade-case-types";
 
-type Props = { zh: boolean; workspace: TradeCaseWorkspaceV2 };
+type Props = { zh: boolean; workspace: TradeCaseWorkspaceV2; userEmail: string };
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-export function TradeCaseWorkspaceView({ zh, workspace }: Props) {
+export function TradeCaseWorkspaceView({ zh, workspace, userEmail }: Props) {
   const tradeCase = workspace.case;
 
   return (
@@ -22,12 +23,12 @@ export function TradeCaseWorkspaceView({ zh, workspace }: Props) {
         <article className="metric-card">
           <span>{t(zh, "当前阶段", "Current stage")}</span>
           <strong>{stageLabel(tradeCase.currentStage)}</strong>
-          <small>{t(zh, "下一步把 Evidence 挂到阶段。", "Next step attaches Evidence to stages.")}</small>
+          <small>{t(zh, "Evidence 会挂到阶段。", "Evidence attaches to stages.")}</small>
         </article>
         <article className="metric-card">
           <span>{t(zh, "证据", "Evidence")}</span>
-          <strong>{t(zh, "待上传", "Pending")}</strong>
-          <small>{t(zh, "本页先建立真实 Case 容器。", "This page establishes the real Case container first.")}</small>
+          <strong>SHA-256</strong>
+          <small>{t(zh, "上传后生成真实 hash。", "Upload generates real hash.")}</small>
         </article>
       </div>
 
@@ -55,11 +56,13 @@ export function TradeCaseWorkspaceView({ zh, workspace }: Props) {
             <article className="proof-flow-card" key={stage.id}>
               <strong>{stageLabel(stage.stageCode)}</strong>
               <span>{stage.status}</span>
-              <span>{t(zh, "No evidence uploaded yet", "No evidence uploaded yet")}</span>
+              <span>{t(zh, "Evidence upload available below", "Evidence upload available below")}</span>
             </article>
           ))}
         </div>
       </section>
+
+      <EvidenceUploadClient zh={zh} caseId={tradeCase.id} userEmail={userEmail} />
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
