@@ -1,6 +1,6 @@
-export type WorkspaceNavKey = "flows" | "architecture" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "professionalReview" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
+export type WorkspaceNavKey = "cases" | "flows" | "architecture" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "professionalReview" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
-export type WorkspaceNavItem = { key: WorkspaceNavKey; href: string; zh: string; en: string };
+export type WorkspaceNavItem = { key: WorkspaceNavKey; href: string; zh: string; en: string; tier?: "primary" | "reference" };
 
 export type WorkspaceNavGroup = {
   id: string;
@@ -11,55 +11,36 @@ export type WorkspaceNavGroup = {
 
 export const workspaceNavGroups: WorkspaceNavGroup[] = [
   {
-    id: "overview",
-    zh: "方案总览",
-    en: "Blueprint",
+    id: "operating",
+    zh: "工作台主路径",
+    en: "Working path",
     items: [
-      { key: "dashboard", href: "/dashboard", zh: "业务总览", en: "Business overview" },
-      { key: "architecture", href: "/business-architecture", zh: "业务架构", en: "Business architecture" },
-      { key: "flows", href: "/business-flows", zh: "四流合一", en: "Four-flow view" },
+      { key: "dashboard", href: "/dashboard", zh: "操作台", en: "Command center", tier: "primary" },
+      { key: "cases", href: "/cases", zh: "Case", en: "Cases", tier: "primary" },
+      { key: "evidence", href: "/evidence", zh: "证据", en: "Evidence", tier: "primary" },
+      { key: "tasks", href: "/tasks", zh: "任务", en: "Tasks", tier: "primary" },
     ],
   },
   {
-    id: "agent",
-    zh: "Agent 工作",
-    en: "Agent work",
+    id: "review",
+    zh: "审查与交接",
+    en: "Review & handoff",
     items: [
-      { key: "business", href: "/business-ops", zh: "业务 Agent", en: "Business agent" },
-      { key: "evidence", href: "/evidence", zh: "业务文件", en: "Business documents" },
-      { key: "tasks", href: "/tasks", zh: "履约 / 验收", en: "Fulfillment / acceptance" },
-      { key: "assistant", href: "/assistant", zh: "业务建议", en: "Business advice" },
+      { key: "professionalReview", href: "/business-professional-review", zh: "专业审查", en: "Professional review", tier: "primary" },
+      { key: "proofPacks", href: "/proof-packs", zh: "Trust Pack", en: "Trust Pack", tier: "primary" },
+      { key: "readiness", href: "/business-readiness", zh: "Readiness", en: "Readiness", tier: "primary" },
     ],
   },
   {
-    id: "financing",
-    zh: "融资判断",
-    en: "Financing decision",
+    id: "reference",
+    zh: "参考 / Demo",
+    en: "Reference / Demo",
     items: [
-      { key: "readiness", href: "/business-readiness", zh: "融资评分", en: "Readiness score" },
-      { key: "professionalReview", href: "/business-professional-review", zh: "专业审查", en: "Professional review" },
-      { key: "proofPacks", href: "/proof-packs", zh: "证明 / 风控", en: "Proof & risk" },
-    ],
-  },
-  {
-    id: "contracts",
-    zh: "合约执行",
-    en: "Contract execution",
-    items: [
-      { key: "logistics", href: "/business-logistics", zh: "物流证据", en: "Logistics evidence" },
-      { key: "signing", href: "/business-signing", zh: "签章合约", en: "Signing contract" },
-      { key: "loan", href: "/business-loan", zh: "贷款合约", en: "Loan contract" },
-      { key: "contracts", href: "/business-contracts", zh: "合约控制台", en: "Contract console" },
-    ],
-  },
-  {
-    id: "capital",
-    zh: "资金与资产",
-    en: "Capital & assets",
-    items: [
-      { key: "funds", href: "/business-funds", zh: "业务资金", en: "Business funds" },
-      { key: "wallet", href: "/business-wallet", zh: "业务钱包", en: "Business wallet" },
-      { key: "approvals", href: "/business-financing", zh: "RWA 代币化", en: "RWA tokenization" },
+      { key: "business", href: "/business-ops", zh: "Agent 参考", en: "Agent reference", tier: "reference" },
+      { key: "architecture", href: "/business-architecture", zh: "架构参考", en: "Architecture reference", tier: "reference" },
+      { key: "flows", href: "/business-flows", zh: "四流参考", en: "Four-flow reference", tier: "reference" },
+      { key: "contracts", href: "/business-contracts", zh: "合约参考", en: "Contract reference", tier: "reference" },
+      { key: "wallet", href: "/business-wallet", zh: "钱包参考", en: "Wallet reference", tier: "reference" },
     ],
   },
 ];

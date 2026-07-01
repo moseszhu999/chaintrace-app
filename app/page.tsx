@@ -93,14 +93,14 @@ const proofBlocks = [
   {
     titleZh: "一眼看懂",
     titleEn: "Understand in 10 seconds",
-    textZh: "PDF → hash → wallet → registry → gate。公开页只讲这条链，不把人丢进后台菜单。",
-    textEn: "PDF → hash → wallet → registry → gate. The public page tells this one path instead of dropping visitors into an admin menu.",
+    textZh: "PDF → hash → case → evidence → task → review。公开页把用户送入真实工作台主路径。",
+    textEn: "PDF → hash → case → evidence → task → review. The public layer sends users into the working-site path.",
   },
   {
     titleZh: "一键可试",
     titleEn: "Try it immediately",
-    textZh: "转换器是页面中心：选 PDF、看本地 hash、看候选 JSON、看链上意图。",
-    textEn: "The converter is central: choose a PDF, see local hash, preview candidate JSON, and inspect on-chain intent.",
+    textZh: "转换器是页面中心：选 PDF、看本地 hash、创建 pre-review case。",
+    textEn: "The converter is central: choose a PDF, see local hash, and create a pre-review case.",
   },
   {
     titleZh: "诚实阻断",
@@ -135,9 +135,9 @@ export default function Home() {
                 )}
               </p>
               <div className="hero-actions">
-                <a href="#pdf-to-receivable" className="primary-button">{t(zh, "立即试 PDF 转换", "Try PDF conversion")}</a>
-                <a href="/agent" className="secondary-button">{t(zh, "看 Agent 故事", "See Agent story")}</a>
+                <a href="#pdf-to-receivable" className="primary-button">{t(zh, "创建预审 Case", "Create pre-review case")}</a>
                 <a href="/login" className="secondary-button">{t(zh, "登录进入工作台", "Login to workspace")}</a>
+                <a href="/agent" className="secondary-button">{t(zh, "看 Agent 故事", "See Agent story")}</a>
               </div>
               <div className="hero-badges">
                 <span className="badge-chip">Browser SHA-256</span>
@@ -230,18 +230,18 @@ export default function Home() {
           ))}
         </section>
 
-        <section className="panel proof-card public-proof-card">
+        <section id="security" className="panel proof-card public-proof-card">
           <div className="proof-card-header">
             <div>
               <span className="proof-type">AI trade-finance evidence OS</span>
-              <h3>{t(zh, "公开页负责传播，工作台负责处理业务。", "The public layer spreads the story; the workspace handles the work.")}</h3>
+              <h3>{t(zh, "公开页负责创建预审 Case，工作台负责处理业务。", "The public layer creates a pre-review case; the workspace handles the work.")}</h3>
             </div>
             <div className="status-pill warning">GATES_NOT_PASSED</div>
           </div>
           <dl className="proof-details">
-            <div><dt>{t(zh, "Agent 故事", "Agent story")}</dt><dd><a href="/agent" className="inline-link">/agent</a></dd></div>
+            <div><dt>{t(zh, "创建 Case", "Create case")}</dt><dd><a href="#pdf-to-receivable" className="inline-link">#pdf-to-receivable</a></dd></div>
             <div><dt>{t(zh, "登录入口", "Login entry")}</dt><dd><a href="/login" className="inline-link">/login</a></dd></div>
-            <div><dt>{t(zh, "公开 API", "Public API")}</dt><dd><a href="/api/financing-pack" className="inline-link">/api/financing-pack</a></dd></div>
+            <div><dt>{t(zh, "Case API", "Case API")}</dt><dd><a href="/api/cases" className="inline-link">/api/cases</a></dd></div>
           </dl>
           <p className="proof-note">Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false</p>
         </section>

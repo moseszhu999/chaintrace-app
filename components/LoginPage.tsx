@@ -37,12 +37,12 @@ export function LoginPage({ zh }: { zh: boolean }) {
         <section className="login-conversion">
           <div className="login-story">
             <div className="eyebrow">{t(zh, "登录前看到价值，登录后处理业务", "See value before login, work after login")}</div>
-            <h1>{t(zh, "进入预审级证据工作台原型。", "Enter the pre-review evidence workspace prototype.")}</h1>
+            <h1>{t(zh, "进入预审级证据工作台。", "Enter the pre-review evidence workspace.")}</h1>
             <p>
               {t(
                 zh,
-                "访客先看到为什么不能正式放款；登录后进入工作台原型，处理证据状态、缺口、融资预审、专业审查和合约 gate。",
-                "Visitors first see why formal disbursement is blocked; after login, operators enter a workspace prototype for evidence status, gaps, financing pre-review, professional review, and contract gates.",
+                "访客先创建预审 Case；登录后进入真实工作台主路径，处理证据、任务、专业审查和 handoff。",
+                "Visitors first create a pre-review case; after login, users enter the working-site path for evidence, tasks, review, and handoff.",
               )}
             </p>
 
@@ -66,8 +66,8 @@ export function LoginPage({ zh }: { zh: boolean }) {
             <div className="panel form-panel login-card">
               <div className="section-heading">
                 <span>{t(zh, "登录 ChainTrace", "Login to ChainTrace")}</span>
-                <h2>{t(zh, "打开操作员工作台。", "Open the operator workspace.")}</h2>
-                <p>{t(zh, "当前版本使用前端模拟登录；真实版本再接认证、组织、角色、权限和审计日志。", "This version uses a frontend login simulation; the real version will connect auth, organization, roles, permissions, and audit logs.")}</p>
+                <h2>{t(zh, "打开工作台主路径。", "Open the working-site path.")}</h2>
+                <p>{t(zh, "当前版本使用 demo role cookie；真实版本再接认证、组织、角色、权限和审计日志。", "This version uses a demo role cookie; the real version will connect auth, organization, roles, permissions, and audit logs.")}</p>
               </div>
 
               <label>
@@ -88,8 +88,8 @@ export function LoginPage({ zh }: { zh: boolean }) {
               </label>
 
               <div className="hero-actions">
-                <a className="primary-button" href="/business-ops" onClick={setDemoRoleCookie}>{t(zh, "登录并打开交易 Agent", "Login and open trade agent")}</a>
-                <a className="secondary-button" href="/dashboard" onClick={setDemoRoleCookie}>{t(zh, "查看交易总览", "View trade overview")}</a>
+                <a className="primary-button" href="/dashboard" onClick={setDemoRoleCookie}>{t(zh, "登录并打开操作台", "Login and open dashboard")}</a>
+                <a className="secondary-button" href="/cases" onClick={setDemoRoleCookie}>{t(zh, "查看 Case", "View cases")}</a>
               </div>
             </div>
 
