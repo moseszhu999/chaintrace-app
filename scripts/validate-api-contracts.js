@@ -93,6 +93,7 @@ function validatePreReviewDraft() {
 
 function validateRepositoryLayer() {
   const repository = read("lib/repositories/chaintrace-repository.ts");
+  const evidenceSchema = read("docs/evidence-intake-schema.sql");
 
   [
     "export type TradeCaseRecord",
@@ -104,6 +105,16 @@ function validateRepositoryLayer() {
     "export async function listEvidenceRecords",
     "export async function addEvidenceRecord",
     "export async function findEvidenceById",
+    "export function getEvidencePersistenceMode",
+    "createEvidenceRepository",
+    "createRuntimeEvidenceRepository",
+    "createNeonEvidenceRepository",
+    "@neondatabase/serverless",
+    "DATABASE_URL",
+    "neon_evidence_store",
+    "runtime_evidence_store",
+    "seededCaseEvidence",
+    "jsonb",
   ].forEach((expected) => assertIncludes(repository, expected, "chaintrace repository"));
 
   assertIncludes(repository, "doc_po", "default evidence records");
@@ -120,12 +131,26 @@ function validateRepositoryLayer() {
   assertIncludes(repository, 'verified: "verified"', "default verified evidence");
   assertIncludes(repository, 'uploaded: "uploaded_pending_verification"', "default pending evidence");
   assertIncludes(repository, 'missing: "missing"', "default missing evidence");
+
+  [
+    "create table if not exists evidence_records",
+    "evidence_payload jsonb not null",
+    "raw_document_storage text not null default 'not_stored'",
+    "evidence_records_trade_updated_idx",
+    "evidence_records_hash_idx",
+    "GATES_NOT_PASSED",
+    "disbursement_allowed boolean not null default false",
+  ].forEach((expected) => assertIncludes(evidenceSchema, expected, "durable evidence intake schema"));
 }
 
 function validateEvidenceUploadPersistence() {
   const uploadRoute = read("app/api/evidence/upload/route.ts");
 
   assertIncludes(uploadRoute, "addEvidenceRecord", "evidence upload route");
+  assertIncludes(uploadRoute, "getEvidencePersistenceMode", "evidence upload route");
+  assertIncludes(uploadRoute, "persistenceMode", "evidence upload response");
+  assertIncludes(uploadRoute, "runtime_evidence_store", "evidence upload fallback mode");
+  assertIncludes(uploadRoute, "neon_evidence_store", "evidence upload durable mode");
   assertIncludes(uploadRoute, "evidenceId", "evidence upload response");
   assertIncludes(uploadRoute, "evidenceRecord", "evidence upload response");
   assertIncludes(uploadRoute, "NextResponse.json(", "evidence upload response");

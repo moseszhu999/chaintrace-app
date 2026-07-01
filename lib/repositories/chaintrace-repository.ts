@@ -1,3 +1,4 @@
+import { neon } from "@neondatabase/serverless";
 import { concreteTradeCase, type TradeDocument, type TradeDocumentStatus } from "@/lib/concrete-trade-fixture";
 
 export type EvidenceStatus =
@@ -66,6 +67,8 @@ export type AddEvidenceRecordInput = Omit<EvidenceRecord, "id" | "createdAt" | "
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type EvidencePersistenceMode = "runtime_evidence_store" | "neon_evidence_store";
 
 const currentTradeCase: TradeCaseRecord = {
   id: concreteTradeCase.id,
@@ -140,8 +143,10 @@ function toEvidenceRecord(document: TradeDocument): EvidenceRecord {
   };
 }
 
+const seededCaseEvidence = concreteTradeCase.documents.map(toEvidenceRecord);
+
 const evidenceRecordsByTradeId = new Map<string, EvidenceRecord[]>([
-  [currentTradeCase.id, concreteTradeCase.documents.map(toEvidenceRecord)],
+  [currentTradeCase.id, seededCaseEvidence],
 ]);
 
 function cloneEvidenceRecord(record: EvidenceRecord): EvidenceRecord {
@@ -160,6 +165,138 @@ function nextEvidenceId(tradeId: string) {
   return `evidence_${tradeId}_${String(currentCount + 1).padStart(4, "0")}`;
 }
 
+type EvidenceRepository = {
+  listEvidenceRecords(tradeId: string): Promise<EvidenceRecord[]>;
+  findEvidenceById(evidenceId: string): Promise<EvidenceRecord | null>;
+  addEvidenceRecord(input: AddEvidenceRecordInput): Promise<EvidenceRecord>;
+};
+
+export function getEvidencePersistenceMode(): EvidencePersistenceMode {
+  return process.env.DATABASE_URL ? "neon_evidence_store" : "runtime_evidence_store";
+}
+
+function createRuntimeEvidenceRepository(): EvidenceRepository {
+  return {
+    async listEvidenceRecords(tradeId) {
+      return (evidenceRecordsByTradeId.get(tradeId) ?? []).map(cloneEvidenceRecord);
+    },
+    async findEvidenceById(evidenceId) {
+      for (const records of evidenceRecordsByTradeId.values()) {
+        const record = records.find((item) => item.id === evidenceId);
+        if (record) return cloneEvidenceRecord(record);
+      }
+      return null;
+    },
+    async addEvidenceRecord(input) {
+      const now = new Date().toISOString();
+      const record: EvidenceRecord = {
+        ...input,
+        id: input.id ?? nextEvidenceId(input.tradeId),
+        createdAt: input.createdAt ?? now,
+        updatedAt: input.updatedAt ?? now,
+        gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
+      };
+      const records = evidenceRecordsByTradeId.get(input.tradeId) ?? [];
+      const nextRecords = [record, ...records.filter((item) => item.id !== record.id)];
+      evidenceRecordsByTradeId.set(input.tradeId, nextRecords);
+      return cloneEvidenceRecord(record);
+    },
+  };
+}
+
+function getDatabaseUrl() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL is not configured for the Neon evidence store.");
+  return url;
+}
+
+function createNeonEvidenceRepository(): EvidenceRepository {
+  const sql = neon(getDatabaseUrl());
+
+  return {
+    async listEvidenceRecords(tradeId) {
+      const rows = await sql`
+        select evidence_payload
+        from evidence_records
+        where trade_id = ${tradeId}
+        order by updated_at desc;
+      ` as Array<{ evidence_payload: EvidenceRecord }>;
+      const uploaded = rows.map((row) => cloneEvidenceRecord(row.evidence_payload));
+      const uploadedIds = new Set(uploaded.map((record) => record.id));
+      const seeded = seededCaseEvidence
+        .filter((record) => record.tradeId === tradeId && !uploadedIds.has(record.id))
+        .map(cloneEvidenceRecord);
+      return [...uploaded, ...seeded];
+    },
+    async findEvidenceById(evidenceId) {
+      const rows = await sql`
+        select evidence_payload
+        from evidence_records
+        where id = ${evidenceId}
+        limit 1;
+      ` as Array<{ evidence_payload: EvidenceRecord }>;
+      if (rows[0]?.evidence_payload) return cloneEvidenceRecord(rows[0].evidence_payload);
+      const seeded = seededCaseEvidence.find((record) => record.id === evidenceId);
+      return seeded ? cloneEvidenceRecord(seeded) : null;
+    },
+    async addEvidenceRecord(input) {
+      const now = new Date().toISOString();
+      const record: EvidenceRecord = {
+        ...input,
+        id: input.id ?? nextEvidenceId(input.tradeId),
+        createdAt: input.createdAt ?? now,
+        updatedAt: input.updatedAt ?? now,
+        gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
+      };
+      await sql`
+        insert into evidence_records (
+          id,
+          trade_id,
+          document_type,
+          evidence_status,
+          file_name,
+          document_no,
+          file_hash,
+          raw_document_storage,
+          blocker_code,
+          disbursement_allowed,
+          created_at,
+          updated_at,
+          evidence_payload
+        ) values (
+          ${record.id},
+          ${record.tradeId},
+          ${record.documentType},
+          ${record.status},
+          ${record.fileName},
+          ${record.documentNo},
+          ${record.hash ?? null},
+          ${"not_stored"},
+          ${"GATES_NOT_PASSED"},
+          ${false},
+          ${record.createdAt},
+          ${record.updatedAt},
+          ${JSON.stringify(record)}::jsonb
+        )
+        on conflict (id) do update set
+          evidence_status = excluded.evidence_status,
+          file_name = excluded.file_name,
+          document_no = excluded.document_no,
+          file_hash = excluded.file_hash,
+          updated_at = excluded.updated_at,
+          evidence_payload = excluded.evidence_payload;
+      `;
+      return cloneEvidenceRecord(record);
+    },
+  };
+}
+
+function createEvidenceRepository(): EvidenceRepository {
+  return getEvidencePersistenceMode() === "neon_evidence_store"
+    ? createNeonEvidenceRepository()
+    : createRuntimeEvidenceRepository();
+}
+
 export async function getCurrentTradeCase(): Promise<TradeCaseRecord> {
   return cloneTradeCase(currentTradeCase);
 }
@@ -170,28 +307,13 @@ export async function getTradeCaseById(tradeId: string): Promise<TradeCaseRecord
 }
 
 export async function listEvidenceRecords(tradeId: string): Promise<EvidenceRecord[]> {
-  return (evidenceRecordsByTradeId.get(tradeId) ?? []).map(cloneEvidenceRecord);
+  return createEvidenceRepository().listEvidenceRecords(tradeId);
 }
 
 export async function findEvidenceById(evidenceId: string): Promise<EvidenceRecord | null> {
-  for (const records of evidenceRecordsByTradeId.values()) {
-    const record = records.find((item) => item.id === evidenceId);
-    if (record) return cloneEvidenceRecord(record);
-  }
-  return null;
+  return createEvidenceRepository().findEvidenceById(evidenceId);
 }
 
 export async function addEvidenceRecord(input: AddEvidenceRecordInput): Promise<EvidenceRecord> {
-  const now = new Date().toISOString();
-  const record: EvidenceRecord = {
-    ...input,
-    id: input.id ?? nextEvidenceId(input.tradeId),
-    createdAt: input.createdAt ?? now,
-    updatedAt: input.updatedAt ?? now,
-    gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
-  };
-  const records = evidenceRecordsByTradeId.get(input.tradeId) ?? [];
-  records.push(record);
-  evidenceRecordsByTradeId.set(input.tradeId, records);
-  return cloneEvidenceRecord(record);
+  return createEvidenceRepository().addEvidenceRecord(input);
 }
