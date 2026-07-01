@@ -192,6 +192,11 @@ export function TradeCasesClient({ zh, context, initialCases }: TradeCasesClient
         createdAt,
         updatedAt: createdAt,
         caseRootHash,
+        receivableCandidateStatus: "NOT_READY",
+        fundingReadinessScore: null,
+        rwaClaimStatus: "NOT_CREATED",
+        oracleEventCount: 0,
+        proofCommitStatus: "LOCAL_ONLY",
       };
       const nextBundle: LocalTradeCaseBundle = {
         version: "chaintrace-local-trade-case-v1",
@@ -255,6 +260,11 @@ export function TradeCasesClient({ zh, context, initialCases }: TradeCasesClient
         case: {
           ...imported.case,
           caseRootHash: recalculated,
+          receivableCandidateStatus: imported.case.receivableCandidateStatus ?? "NOT_READY",
+          fundingReadinessScore: imported.case.fundingReadinessScore ?? null,
+          rwaClaimStatus: imported.case.rwaClaimStatus ?? "NOT_CREATED",
+          oracleEventCount: imported.case.oracleEventCount ?? 0,
+          proofCommitStatus: imported.case.proofCommitStatus ?? "LOCAL_ONLY",
         },
         proof: {
           ...imported.proof,
