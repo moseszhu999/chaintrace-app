@@ -97,7 +97,7 @@ export function ProfessionalReviewView({
         eyebrow={t(zh, "Review receipt handoff", "Review receipt handoff")}
         title={t(zh, "专业审查可以直接看到已持久化的人工证据审查轨迹。", "Professional review can see the persisted human evidence-review trail directly.")}
         subtitle="Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false"
-        actions={[{ href: "/evidence", label: t(zh, "打开证据审计时间线", "Open evidence audit timeline") }]}
+        actions={[{ href: "/evidence", label: t(zh, "打开证据审计时间线", "Open evidence audit timeline") }, { href: "/api/review-handoff", label: "Open JSON", external: true }]}
       >
         <StatusList
           items={
