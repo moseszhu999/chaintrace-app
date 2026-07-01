@@ -1,24 +1,15 @@
 import { ProfessionalReviewView } from "@/components/workspace/ProfessionalReviewView";
 import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
-import { getFallbackEvidenceRecords } from "@/lib/evidence-fallback";
+import { getCaseReviewHandoffPack } from "@/lib/case-review-handoff";
 import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
-import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
 export const dynamic = "force-dynamic";
 
-async function getProfessionalReviewEvidenceRecords() {
-  try {
-    const trade = await getCurrentTradeCase();
-    return await listEvidenceRecords(trade.id);
-  } catch (error) {
-    console.error("Falling back to seeded evidence records for professional review", error);
-    return getFallbackEvidenceRecords();
-  }
-}
-
 export default async function BusinessProfessionalReviewPage() {
-  const { zh, workspace } = await getWorkspaceRouteContext();
-  const evidenceRecords = await getProfessionalReviewEvidenceRecords();
+  const [{ zh, workspace }, handoffPack] = await Promise.all([
+    getWorkspaceRouteContext(),
+    getCaseReviewHandoffPack(),
+  ]);
 
   return (
     <WorkspaceFrame
@@ -33,9 +24,9 @@ export default async function BusinessProfessionalReviewPage() {
         subtitleZh: "授信、合规、法律结构、争议和重大例外",
         subtitleEn: "Underwriting, compliance, legal structure, disputes, and material exceptions",
       }}
-      action={{ href: "/business-ops", labelZh: "Agent 工作台", labelEn: "Agent workbench" }}
+      action={{ href: `/api/cases/${handoffPack.caseSummary.id}/handoff`, labelZh: "打开 JSON", labelEn: "Open JSON", variant: "secondary" }}
     >
-      <ProfessionalReviewView zh={zh} workspace={workspace} evidenceRecords={evidenceRecords} />
+      <ProfessionalReviewView zh={zh} workspace={workspace} handoffPack={handoffPack} />
     </WorkspaceFrame>
   );
 }

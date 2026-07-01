@@ -55,7 +55,7 @@ export function DashboardOperatingSnapshotView({ zh, workspace, snapshot }: { zh
           {snapshot.gates.blocked.map((gate) => (
             <article className={styles.listRow} key={gate.id}>
               <div className={styles.rowHeader}>
-                <div className={styles.rowMain}><h3 className={styles.rowTitle}>{t(zh, gate.titleZh, gate.titleEn)}</h3><p className={styles.rowMeta}>gateId={gate.id} · sourceEvidence={gate.sourceEvidenceIds.join(", ") || "none"}</p></div>
+                <div className={styles.rowMain}><h3 className={styles.rowTitle}>{t(zh, gate.labelZh, gate.labelEn)}</h3><p className={styles.rowMeta}>gateId={gate.id} · sourceEvidence={gate.sourceEvidenceIds.join(", ") || "none"}</p></div>
                 <span className={statusClass(gate.status)}>{gate.status}</span>
               </div>
             </article>

@@ -18,11 +18,17 @@ function assertIncludes(source, expected, label) {
 }
 
 function main() {
-  const dashboard = read("components/workspace/DashboardView.tsx");
+  const dashboard = read("components/workspace/DashboardOperatingSnapshotView.tsx");
   const evidenceView = read("components/workspace/EvidenceView.tsx");
   const evidenceRoute = read("app/evidence/page.tsx");
   const tasksView = read("components/workspace/TasksView.tsx");
   const tasksRoute = read("app/tasks/page.tsx");
+  const professionalReviewPage = read("app/business-professional-review/page.tsx");
+  const professionalReviewView = read("components/workspace/ProfessionalReviewView.tsx");
+  const legacyProfessionalReviewRoute = read("app/api/professional-review/route.ts");
+  const handoffRoute = read("app/api/cases/[caseId]/handoff/route.ts");
+  const reviewSummaryRoute = read("app/api/cases/[caseId]/review-summary/route.ts");
+  const handoffBuilder = read("lib/case-review-handoff.ts");
   const styles = read("components/workspace/WorkspaceViews.module.css");
   const dashboardRoute = read("app/dashboard/page.tsx");
   const workspaceNav = read("lib/workspace-navigation.ts");
@@ -33,17 +39,20 @@ function main() {
     read("lib/receivable-readiness-fixture.ts"),
   ].join("\n");
 
-  assertIncludes(dashboardRoute, "DashboardView", "dashboard route");
+  assertIncludes(dashboardRoute, "DashboardOperatingSnapshotView", "dashboard route");
+  assertIncludes(dashboardRoute, "getCaseOperatingSnapshot", "dashboard route");
   assertIncludes(tasksRoute, "TasksView", "task center route");
   assertIncludes(workspaceNav, 'href: "/dashboard"', "workspace navigation dashboard entry");
-  assertIncludes(dashboard, "activeTrade.totalAmount", "dashboard first-screen trade value binding");
-  assertIncludes(dashboard, "receivableLoanContract.receivableAmount", "dashboard first-screen blocked receivable binding");
-  assertIncludes(dashboard, "receivableLoanContract.advanceAmount", "dashboard first-screen requested advance binding");
-  assertIncludes(dashboard, "receivableReadinessReport.score", "dashboard first-screen readiness binding");
-  assertIncludes(dashboard, "loanGates.filter", "dashboard first-screen gate binding");
+  assertIncludes(dashboard, "snapshot.case", "dashboard operating snapshot active case");
+  assertIncludes(dashboard, "snapshot.evidenceSummary", "dashboard operating snapshot evidence summary");
+  assertIncludes(dashboard, "snapshot.gates.summary", "dashboard operating snapshot gate summary");
+  assertIncludes(dashboard, "snapshot.readiness", "dashboard operating snapshot readiness");
+  assertIncludes(dashboard, "snapshot.tasks", "dashboard operating snapshot evidence-linked tasks");
+  assertIncludes(dashboard, "snapshot.reviewReceipts", "dashboard operating snapshot review receipts");
+  assertIncludes(dashboard, "snapshot.nextHumanAction", "dashboard operating snapshot next human action");
+  assertIncludes(dashboard, "snapshot.boundary.mode", "dashboard operating snapshot boundary");
 
   for (const expected of [
-    "Operator OS",
     "USD 52,800",
     "USD 36,960",
     "USDC 29,500",
@@ -56,107 +65,30 @@ function main() {
   }
 
   for (const expected of [
-    "statusStrip",
-    "commandGrid",
-    "workflowConsole",
-    "decisionRail",
-    "queueTable",
-    "responsibilityMatrix",
+    "Active case command center",
+    "Next human action",
+    "Blocked gates",
+    "Open tasks",
+    "Latest receipts",
+    "Open evidence",
+    "View tasks",
+    "Handoff",
   ]) {
-    assertIncludes(dashboard, expected, "dashboard command-console structure");
-    assertIncludes(styles, expected, "dashboard command-console styles");
-  }
-
-  for (const expected of [
-    "Next human decision",
-    "Agent prepared",
-    "Approve chasing",
-    "View readiness",
-    "Escalate review",
-  ]) {
-    assertIncludes(dashboard, expected, "dashboard decision rail");
-  }
-
-  for (const expected of [
-    "Evidence inbox",
-    "Agent extracted fields",
-    "Gate mismatches",
-    "Missing documents",
-    "Human approvals needed",
-    "Professional review pending",
-    "Contract actions blocked",
-  ]) {
-    assertIncludes(dashboard, expected, "dashboard operational queues");
-  }
-
-  for (const expected of [
-    "PDF / evidence intake",
-    "browser-local hash / candidate creation",
-    "Agent classification",
-    "gate evaluation",
-    "gap chasing",
-    "financing pack",
-    "human / professional review",
-    "LoanRequestRegistry pre-review",
-    "contract gate check",
-    "restricted receivable token / loan conversion only after approval",
-  ]) {
-    assertIncludes(dashboard, expected, "dashboard workflow map");
-  }
-
-  for (const expected of ["Agent does", "Operator does", "Professional institution does", "Contract does"]) {
-    assertIncludes(dashboard, expected, "dashboard responsibility split");
-  }
-
-  for (const expected of [
-    "operatorIntakeMirror",
-    "Intake queue mirror",
-    "source",
-    "public_converter",
-    "intakeStatus",
-    "draft_preview",
-    "allowedAction",
-    "PROFESSIONAL_REVIEW_INTAKE_ONLY",
-    "Bank pre-review",
-    "Legal exception",
-    "Factor operations",
-    "Operator evidence desk",
-    "humanReviewRequired=true",
-    "professionalReviewRequired=true",
-    "agentDecisionAuthority=none",
-  ]) {
-    assertIncludes(dashboard, expected, "dashboard intake queue mirror");
-  }
-
-  for (const expected of [
-    "operatorDecisionReceiptPreview",
-    "Operator decision receipt preview",
-    "receiptVersion",
-    "operator-decision-receipt.v0.1",
-    "sourceIntakeStatus",
-    "selectedDecision",
-    "selectedDecision=null",
-    "allowedAction",
-    "OPERATOR_DECISION_RECEIPT_PREVIEW_ONLY",
-    "availableDecisionOptions",
-    "recommendedPreviewPath",
-    "escalationHandoffTarget",
-    "Professional escalation handoff preview",
-    "not submitted, not persisted, not assigned, not notified",
-    "decisionStatus=not_started",
-  ]) {
-    assertIncludes(dashboard, expected, "dashboard operator decision receipt preview");
+    assertIncludes(dashboard, expected, "dashboard operating snapshot surface");
   }
 
   for (const expected of [
     "OperatorTaskWorkflowClient",
-    "AgentRunReceipt workflow",
+    "Task queue workflow",
+    "Evidence actions now generate tasks",
     "Run agent workflow",
+    "evidenceTasks",
     "/api/agent-runs",
     "/api/operator-tasks",
-    "humanActionRequired=true",
+    "/api/tasks/",
+    "humanActionRequired",
     "agentDecisionAuthority=none",
-    "modelExecutionMode=deterministic_no_llm_call",
+    "sourceReviewReceipt",
     "GATES_NOT_PASSED",
     "disbursementAllowed=false",
   ]) {
@@ -187,7 +119,39 @@ function main() {
     assertIncludes(evidenceRoute, expected, "evidence route durable records");
   }
 
-  console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, real agent workflow tasks, and responsibility boundaries.");
+  for (const expected of [
+    "getCaseReviewHandoffPack",
+    "handoffPack",
+  ]) {
+    assertIncludes(professionalReviewPage, expected, "professional review page handoff pack");
+  }
+
+  for (const expected of [
+    "handoffPack.caseSummary",
+    "handoffPack.evidenceSummary",
+    "handoffPack.reviewReceiptTimeline",
+    "handoffPack.gateStatus",
+    "handoffPack.blockedReasons",
+    "handoffPack.missingEvidence",
+    "handoffPack.openExceptions",
+    "handoffPack.recommendedNextActions",
+    "handoffPack.boundary",
+    "Open JSON",
+    "not a legal opinion",
+    "not a credit approval",
+    "disbursementAllowed=false",
+  ]) {
+    assertIncludes(professionalReviewView, expected, "professional review handoff UI");
+  }
+  assert(!professionalReviewView.includes("professional-review-fixture"), "professional review page must not read fixture queue");
+  assertIncludes(handoffRoute, "getCaseReviewHandoffPack", "case handoff API route");
+  assertIncludes(legacyProfessionalReviewRoute, "getCaseReviewHandoffPack", "legacy professional review API route");
+  assert(!legacyProfessionalReviewRoute.includes("professional-review-fixture"), "legacy professional review API route must not read fixture queue");
+  assertIncludes(reviewSummaryRoute, "getCaseReviewSummary", "case review summary API route");
+  assertIncludes(handoffBuilder, "reviewReceiptTimeline", "case review handoff pack");
+  assertIncludes(styles, "list", "workspace list styles");
+
+  console.log("Operator OS validation passed: dashboard reads operating snapshot, evidence/tasks mutate shared state, and professional review reads the handoff pack boundary.");
 }
 
 main();
