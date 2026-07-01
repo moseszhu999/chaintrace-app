@@ -3,6 +3,7 @@ import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
 import {
   addEvidenceRecord,
   getCurrentTradeCase,
+  getEvidencePersistenceMode,
   getTradeCaseById,
   type EvidenceDocumentType,
   type EvidenceStatus,
@@ -180,6 +181,9 @@ export async function POST(request: NextRequest) {
     receivedAt: new Date().toISOString(),
     version: "chaintrace-evidence-upload-v0.1",
     accepted: true,
+    persistenceMode: getEvidencePersistenceMode(),
+    fallbackPersistenceMode: "runtime_evidence_store",
+    durablePersistenceMode: "neon_evidence_store",
     evidenceId: evidenceRecord.id,
     tradeId,
     storageBoundary: "metadata-and-hash-only; binary file storage is not implemented in this mock endpoint",
