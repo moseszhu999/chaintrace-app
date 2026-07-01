@@ -1,35 +1,40 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { normalizeLocale } from "@/lib/i18n";
+import { getIsZhRequest } from "@/lib/request-locale";
+import { safeGetCurrentTradeCase } from "@/lib/repositories/safe-chaintrace-repository";
+
+export const dynamic = "force-dynamic";
 
 export default async function CasesPage() {
-  const cookieStore = await cookies();
-  const locale = normalizeLocale(cookieStore.get("chaintrace_locale")?.value);
-  const zh = locale === "zh-CN";
+  const [zh, trade] = await Promise.all([getIsZhRequest(), safeGetCurrentTradeCase()]);
 
   return (
     <main className="page-shell">
-      <section className="hero landing-hero">
-        <div className="eyebrow">{zh ? "ChainTrace 案例库" : "ChainTrace Case Library"}</div>
-        <h1>{zh ? "用真实供应链场景，解释可信证明到底解决什么问题。" : "Use real supply-chain scenarios to explain what trust proofs actually solve."}</h1>
-        <p>
-          {zh
-            ? "每个案例都把一条复杂供应链拆成事实节点、证据槽、风险点和 Ready / Missing evidence 状态，让小白也能看懂 ChainTrace 在做什么。"
-            : "Each case breaks a complex supply chain into fact nodes, evidence slots, risk points, and Ready / Missing evidence status so non-technical users can understand ChainTrace."}
-        </p>
-      </section>
+      <section className="panel workspace-panel">
+        <div className="workspace-topbar">
+          <div>
+            <div className="eyebrow">{zh ? "贸易 Case" : "Trade cases"}</div>
+            <h1 className="workspace-title">{zh ? "Case 工作台" : "Case workspace"}</h1>
+            <p className="workspace-subtitle">
+              {zh ? "把 demo 模块收束到 case-centered workflow。" : "The demo modules now start from a case-centered workflow."}
+            </p>
+          </div>
+          <Link className="primary-button" href={`/cases/${trade.id}`}>
+            {zh ? "打开当前 Case" : "Open active case"}
+          </Link>
+        </div>
 
-      <section className="story-grid">
-        <article className="story-card">
-          <span>{zh ? "跨境食品溯源" : "Cross-border food traceability"}</span>
-          <strong>{zh ? "乌拉圭牛肉进口中国" : "Uruguay beef imported to China"}</strong>
-          <p>
-            {zh
-              ? "从牧场、屠宰、分割、装柜、海运，到中国口岸清关、仓储和终端销售。"
-              : "From ranch, slaughter, cutting, container loading, and ocean freight to China customs, warehousing, and downstream sale."}
-          </p>
-          <Link href="/cases/uruguay-beef-china" className="primary-button">{zh ? "打开案例" : "Open case"}</Link>
-        </article>
+        <div className="proof-flow-grid" style={{ marginTop: "24px" }}>
+          <article className="proof-flow-card">
+            <strong>{zh ? trade.titleZh : trade.titleEn}</strong>
+            <span>{trade.id}</span>
+            <span>PO: {trade.poNo}</span>
+            <span>Invoice: {trade.invoiceNo}</span>
+            <span>{zh ? "边界：Pre-review only" : "Boundary: Pre-review only"}</span>
+            <Link className="secondary-button" href={`/cases/${trade.id}`}>
+              {zh ? "进入 Case" : "Enter case"}
+            </Link>
+          </article>
+        </div>
       </section>
     </main>
   );
