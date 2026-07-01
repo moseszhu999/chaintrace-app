@@ -1,5 +1,7 @@
+import { roleCan, type DemoRole } from "@/lib/demo-roles";
 import type { CaseReviewHandoffPack } from "@/lib/case-review-handoff";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
+import { ProfessionalReviewActions } from "./ProfessionalReviewActions";
 import { DecisionPanel, MetricCard, MetricGrid, StatusList, WorkspaceHero } from "./WorkspacePrimitives";
 import styles from "./WorkspaceViews.module.css";
 
@@ -23,14 +25,17 @@ function documentLabel(value: string) {
 export function ProfessionalReviewView({
   zh,
   workspace,
+  role,
   handoffPack,
 }: {
   zh: boolean;
   workspace: WorkspaceSnapshot;
+  role: DemoRole;
   handoffPack: CaseReviewHandoffPack;
 }) {
   const caseSummary = handoffPack.caseSummary;
   const latestReceipt = handoffPack.reviewReceiptTimeline[0];
+  const canWriteProfessionalReview = roleCan(role, "professional_review:note");
 
   return (
     <section className="workspace">
@@ -98,6 +103,10 @@ export function ProfessionalReviewView({
           }))}
         />
       </DecisionPanel>
+
+      {canWriteProfessionalReview && (
+        <ProfessionalReviewActions caseId={caseSummary.id} role={role} zh={zh} />
+      )}
 
       <DecisionPanel
         eyebrow={t(zh, "Missing evidence", "Missing evidence")}

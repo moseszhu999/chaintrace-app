@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { requireDemoRole } from "@/lib/demo-role-api";
 import { allowedEvidenceTaskActions, transitionEvidenceTask, type EvidenceTaskAction } from "@/lib/evidence-task-store";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,9 @@ type TransitionPayload = {
 };
 
 export async function POST(request: NextRequest, context: { params: Promise<{ taskId: string }> }) {
+  const roleGuard = requireDemoRole(request, ["operator", "admin"], "task:transition");
+  if (!roleGuard.ok) return roleGuard.response;
+
   const { taskId } = await context.params;
   const payload = (await request.json().catch(() => ({}))) as TransitionPayload;
   const action = payload.action as EvidenceTaskAction | undefined;

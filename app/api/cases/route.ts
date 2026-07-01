@@ -1,4 +1,5 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { requireDemoRole } from "@/lib/demo-role-api";
 import { safeCreatePreReviewCase, safeGetCurrentTradeCase, safeListTradeCases } from "@/lib/repositories/safe-chaintrace-repository";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const roleGuard = requireDemoRole(request, ["sme_user", "admin"], "case:create");
+  if (!roleGuard.ok) return roleGuard.response;
+
   const payload = (await request.json().catch(() => ({}))) as CreatePreReviewCasePayload;
   const missingFields = [
     ["source", payload.source],

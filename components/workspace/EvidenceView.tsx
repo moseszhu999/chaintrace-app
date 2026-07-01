@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { roleCan, type DemoRole } from "@/lib/demo-roles";
 import type { EvidenceRecord, EvidenceReviewAction, EvidenceReviewReceipt } from "@/lib/repositories/chaintrace-repository";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 import styles from "./WorkspaceViews.module.css";
@@ -101,10 +102,12 @@ function buildReviewTimeline(records: EvidenceRecord[]): ReviewTimelineItem[] {
 export function EvidenceView({
   zh,
   workspace,
+  role,
   initialEvidenceRecords,
 }: {
   zh: boolean;
   workspace: WorkspaceSnapshot;
+  role: DemoRole;
   initialEvidenceRecords: EvidenceRecord[];
 }) {
   const { activeTrade } = workspace;
@@ -119,6 +122,7 @@ export function EvidenceView({
   const missingDocs = evidenceRecords.filter((doc) => doc.status === "missing" || doc.status === "rejected" || doc.status === "needs_agent_review");
   const verifiedDocs = evidenceRecords.filter((doc) => doc.status === "verified");
   const reviewTimeline = buildReviewTimeline(evidenceRecords);
+  const canReviewEvidence = roleCan(role, "evidence:review");
 
   function partyName(id: string) {
     return activeTrade.parties.find((party) => party.id === id)?.name ?? id;
@@ -130,7 +134,7 @@ export function EvidenceView({
     try {
       const response = await fetch(`/api/evidence/${encodeURIComponent(evidenceId)}/review`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-chaintrace-role": role },
         body: JSON.stringify({
           action,
           reviewerRole: "operator",
@@ -185,7 +189,7 @@ export function EvidenceView({
                 </div>
                 <span className={statusClass(doc.status)}>{statusLabel(doc.status, zh)}</span>
               </div>
-              {canReview(doc) && (
+              {canReviewEvidence && canReview(doc) && (
                 <div className={styles.rowActions}>
                   {(["verify", "reject", "request_more_evidence"] as EvidenceReviewAction[]).map((action) => (
                     <button

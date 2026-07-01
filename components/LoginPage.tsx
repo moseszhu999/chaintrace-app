@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PublicHeader } from "@/components/PublicHeader";
+import { demoRoleCookieName, demoRoleLabels, demoRoles, type DemoRole } from "@/lib/demo-roles";
 
 function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
@@ -23,7 +24,11 @@ const workspacePreview = [
 export function LoginPage({ zh }: { zh: boolean }) {
   const [email, setEmail] = useState("maya@example-exporter.com");
   const [org, setOrg] = useState("Example Small Exporter");
-  const [role, setRole] = useState("Operations lead");
+  const [role, setRole] = useState<DemoRole>("operator");
+
+  function setDemoRoleCookie() {
+    document.cookie = `${demoRoleCookieName}=${encodeURIComponent(role)}; path=/; max-age=31536000`;
+  }
 
   return (
     <>
@@ -75,18 +80,16 @@ export function LoginPage({ zh }: { zh: boolean }) {
               </label>
               <label>
                 {t(zh, "角色", "Role")}
-                <select value={role} onChange={(event) => setRole(event.target.value)}>
-                  <option>Operations lead</option>
-                  <option>Finance manager</option>
-                  <option>Supplier</option>
-                  <option>Buyer</option>
-                  <option>Auditor</option>
+                <select value={role} onChange={(event) => setRole(event.target.value as DemoRole)}>
+                  {demoRoles.map((item) => (
+                    <option key={item} value={item}>{zh ? demoRoleLabels[item].zh : demoRoleLabels[item].en}</option>
+                  ))}
                 </select>
               </label>
 
               <div className="hero-actions">
-                <a className="primary-button" href="/business-ops">{t(zh, "登录并打开交易 Agent", "Login and open trade agent")}</a>
-                <a className="secondary-button" href="/dashboard">{t(zh, "查看交易总览", "View trade overview")}</a>
+                <a className="primary-button" href="/business-ops" onClick={setDemoRoleCookie}>{t(zh, "登录并打开交易 Agent", "Login and open trade agent")}</a>
+                <a className="secondary-button" href="/dashboard" onClick={setDemoRoleCookie}>{t(zh, "查看交易总览", "View trade overview")}</a>
               </div>
             </div>
 
@@ -105,7 +108,7 @@ export function LoginPage({ zh }: { zh: boolean }) {
               </div>
               <dl className="proof-details compact-details">
                 <div><dt>{t(zh, "当前用户", "Current user")}</dt><dd>{email}</dd></div>
-                <div><dt>{t(zh, "角色", "Role")}</dt><dd>{role}</dd></div>
+                <div><dt>{t(zh, "角色", "Role")}</dt><dd>{zh ? demoRoleLabels[role].zh : demoRoleLabels[role].en}</dd></div>
                 <div><dt>{t(zh, "权限边界", "Permission boundary")}</dt><dd>{t(zh, "关键商业动作仍需人工确认。", "Key commercial actions still require human confirmation.")}</dd></div>
               </dl>
             </div>

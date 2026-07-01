@@ -17,12 +17,12 @@ async function getInitialEvidenceRecords() {
 }
 
 export default async function EvidencePage() {
-  const { zh, workspace } = await getWorkspaceRouteContext();
+  const { zh, workspace, role } = await getWorkspaceRouteContext();
   const initialEvidenceRecords = await getInitialEvidenceRecords();
 
   return (
-    <WorkspaceFrame zh={zh} active="evidence" workspace={workspace} action={{ href: "/tasks", labelZh: "查看任务", labelEn: "View tasks", variant: "secondary" }}>
-      <EvidenceView zh={zh} workspace={workspace} initialEvidenceRecords={initialEvidenceRecords} />
+    <WorkspaceFrame zh={zh} active="evidence" workspace={workspace} role={role} action={{ href: "/tasks", labelZh: "查看任务", labelEn: "View tasks", variant: "secondary" }}>
+      <EvidenceView zh={zh} workspace={workspace} role={role} initialEvidenceRecords={initialEvidenceRecords} />
     </WorkspaceFrame>
   );
 }

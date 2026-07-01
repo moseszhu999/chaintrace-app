@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { DemoRoleSelector } from "@/components/workspace/DemoRoleSelector";
+import type { DemoRole } from "@/lib/demo-roles";
 import { workspaceNavGroups, type WorkspaceNavKey } from "@/lib/workspace-navigation";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
@@ -23,6 +25,7 @@ export function WorkspaceShell({
   children,
   actionSlot,
   header,
+  role = "sme_user",
 }: {
   zh: boolean;
   active: WorkspaceNavKey;
@@ -30,6 +33,7 @@ export function WorkspaceShell({
   children: ReactNode;
   actionSlot?: ReactNode;
   header?: WorkspaceHeaderCopy;
+  role?: DemoRole;
 }) {
   const { businessContext, operatingSummary, organization } = workspace;
   const eyebrow = t(zh, header?.eyebrowZh ?? "交易 Agent", header?.eyebrowEn ?? "Trade agent");
@@ -76,6 +80,7 @@ export function WorkspaceShell({
                 <p className="workspace-subtitle">{subtitle}</p>
               </div>
               <div className="hero-actions workspace-action">
+                <DemoRoleSelector role={role} zh={zh} />
                 {actionSlot ?? <Link className="secondary-button" href="/assistant">{t(zh, "问 Agent", "Ask agent")}</Link>}
               </div>
             </div>

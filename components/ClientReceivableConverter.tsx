@@ -329,7 +329,7 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
     try {
       const response = await fetch("/api/cases", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-chaintrace-role": "sme_user" },
         body: JSON.stringify({
           source: "public_converter",
           candidateHash,

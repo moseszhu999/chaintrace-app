@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CaseEvidencePage({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params;
-  const [{ zh, workspace }, trade] = await Promise.all([getWorkspaceRouteContext(), safeGetTradeCaseById(caseId)]);
+  const [{ zh, workspace, role }, trade] = await Promise.all([getWorkspaceRouteContext(), safeGetTradeCaseById(caseId)]);
   if (!trade) notFound();
 
   const evidence = await safeListEvidenceRecords(trade.id);
@@ -26,9 +26,10 @@ export default async function CaseEvidencePage({ params }: { params: Promise<{ c
         subtitleZh: `${trade.id} · ${trade.poNo}`,
         subtitleEn: `${trade.id} · ${trade.poNo}`,
       }}
+      role={role}
       action={{ href: `/cases/${trade.id}/tasks`, labelZh: "查看 Case 任务", labelEn: "View case tasks", variant: "secondary" }}
     >
-      <EvidenceView zh={zh} workspace={workspace} initialEvidenceRecords={evidence.records} />
+      <EvidenceView zh={zh} workspace={workspace} role={role} initialEvidenceRecords={evidence.records} />
     </WorkspaceFrame>
   );
 }

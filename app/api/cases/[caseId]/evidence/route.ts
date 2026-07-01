@@ -1,4 +1,5 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { requireDemoRole } from "@/lib/demo-role-api";
 import { safeGetCurrentTradeCase, safeListEvidenceRecords } from "@/lib/repositories/safe-chaintrace-repository";
 import { addEvidenceRecord, type EvidenceDocumentType } from "@/lib/repositories/chaintrace-repository";
 
@@ -25,6 +26,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const roleGuard = requireDemoRole(request, ["sme_user", "operator", "admin"], "evidence:add");
+  if (!roleGuard.ok) return roleGuard.response;
+
   const trade = await safeGetCurrentTradeCase();
   const payload = (await request.json().catch(() => ({}))) as EvidencePayload;
   const documentNo = clean(payload.documentNo) || `META-${Date.now()}`;

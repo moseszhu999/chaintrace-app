@@ -25,10 +25,12 @@ function main() {
   const tasksRoute = read("app/tasks/page.tsx");
   const professionalReviewPage = read("app/business-professional-review/page.tsx");
   const professionalReviewView = read("components/workspace/ProfessionalReviewView.tsx");
+  const professionalReviewActions = read("components/workspace/ProfessionalReviewActions.tsx");
   const legacyProfessionalReviewRoute = read("app/api/professional-review/route.ts");
   const handoffRoute = read("app/api/cases/[caseId]/handoff/route.ts");
   const reviewSummaryRoute = read("app/api/cases/[caseId]/review-summary/route.ts");
   const handoffBuilder = read("lib/case-review-handoff.ts");
+  const roleModel = read("lib/demo-roles.ts");
   const styles = read("components/workspace/WorkspaceViews.module.css");
   const dashboardRoute = read("app/dashboard/page.tsx");
   const workspaceNav = read("lib/workspace-navigation.ts");
@@ -82,6 +84,8 @@ function main() {
     "Task queue workflow",
     "Evidence actions now generate tasks",
     "Run agent workflow",
+    "roleCan(role, \"task:transition\")",
+    "x-chaintrace-role",
     "evidenceTasks",
     "/api/agent-runs",
     "/api/operator-tasks",
@@ -98,6 +102,8 @@ function main() {
   for (const expected of [
     "initialEvidenceRecords",
     "reviewEvidence",
+    "roleCan(role, \"evidence:review\")",
+    "x-chaintrace-role",
     "/api/evidence/",
     "/review",
     "Verify evidence",
@@ -115,6 +121,7 @@ function main() {
     "listEvidenceRecords",
     "getCurrentTradeCase",
     "initialEvidenceRecords",
+    "role={role}",
   ]) {
     assertIncludes(evidenceRoute, expected, "evidence route durable records");
   }
@@ -136,12 +143,16 @@ function main() {
     "handoffPack.openExceptions",
     "handoffPack.recommendedNextActions",
     "handoffPack.boundary",
+    "roleCan(role, \"professional_review:note\")",
+    "professionalReviewNote",
+    "exceptionStatus",
+    "x-chaintrace-role",
     "Open JSON",
     "not a legal opinion",
     "not a credit approval",
     "disbursementAllowed=false",
   ]) {
-    assertIncludes(professionalReviewView, expected, "professional review handoff UI");
+    assertIncludes(professionalReviewView + professionalReviewActions, expected, "professional review handoff UI");
   }
   assert(!professionalReviewView.includes("professional-review-fixture"), "professional review page must not read fixture queue");
   assertIncludes(handoffRoute, "getCaseReviewHandoffPack", "case handoff API route");
@@ -149,6 +160,7 @@ function main() {
   assert(!legacyProfessionalReviewRoute.includes("professional-review-fixture"), "legacy professional review API route must not read fixture queue");
   assertIncludes(reviewSummaryRoute, "getCaseReviewSummary", "case review summary API route");
   assertIncludes(handoffBuilder, "reviewReceiptTimeline", "case review handoff pack");
+  assertIncludes(roleModel, "roleCan", "workspace role model");
   assertIncludes(styles, "list", "workspace list styles");
 
   console.log("Operator OS validation passed: dashboard reads operating snapshot, evidence/tasks mutate shared state, and professional review reads the handoff pack boundary.");

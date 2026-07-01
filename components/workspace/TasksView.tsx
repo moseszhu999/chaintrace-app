@@ -1,3 +1,4 @@
+import type { DemoRole } from "@/lib/demo-roles";
 import type { TradeMilestoneStatus } from "@/lib/concrete-trade-fixture";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 import { OperatorTaskWorkflowClient } from "./OperatorTaskWorkflowClient";
@@ -17,7 +18,7 @@ function statusClass(status: TradeMilestoneStatus) {
   return `${styles.statusChip} ${map[status]}`;
 }
 
-export function TasksView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+export function TasksView({ zh, workspace, role }: { zh: boolean; workspace: WorkspaceSnapshot; role: DemoRole }) {
   const { activeTrade } = workspace;
   const actionMilestones = activeTrade.milestones.filter((item) => item.status !== "done");
   const missingDocs = activeTrade.documents.filter((doc) => doc.status === "missing" || doc.status === "rejected");
@@ -67,7 +68,7 @@ export function TasksView({ zh, workspace }: { zh: boolean; workspace: Workspace
           </article>
         </div>
       </div>
-      <OperatorTaskWorkflowClient zh={zh} />
+      <OperatorTaskWorkflowClient zh={zh} role={role} />
     </section>
   );
 }

@@ -312,6 +312,56 @@ function validateProfessionalReviewHandoffPack() {
   assertIncludes(caseReviewPage, "getCaseReviewSummary", "case review page");
 }
 
+function validateRoleBasedApiGuards() {
+  const roleModel = read("lib/demo-roles.ts");
+  const roleApi = read("lib/demo-role-api.ts");
+  const casesRoute = read("app/api/cases/route.ts");
+  const uploadRoute = read("app/api/evidence/upload/route.ts");
+  const reviewRoute = read("app/api/evidence/[evidenceId]/review/route.ts");
+  const evidenceTaskRoute = read("app/api/tasks/[taskId]/transition/route.ts");
+  const operatorTaskRoute = read("app/api/operator-tasks/[taskId]/transition/route.ts");
+  const agentRunsRoute = read("app/api/agent-runs/route.ts");
+  const professionalActionRoute = read("app/api/cases/[caseId]/professional-review/route.ts");
+  const adminResetRoute = read("app/api/admin/reset-demo/route.ts");
+
+  [
+    "sme_user",
+    "operator",
+    "professional_reviewer",
+    "admin",
+    "chaintrace_role",
+    "x-chaintrace-role",
+    "case:create",
+    "evidence:review",
+    "task:transition",
+    "professional_review:note",
+    "professional_review:exception",
+    "admin:reset_demo",
+    "roleCan",
+  ].forEach((expected) => assertIncludes(roleModel, expected, "demo role model"));
+
+  [
+    "requireDemoRole",
+    "ROLE_NOT_ALLOWED",
+    "apiError",
+    "boundary",
+    "{ status: 403 }",
+  ].forEach((expected) => assertIncludes(roleApi, expected, "demo role API guard"));
+
+  assertIncludes(casesRoute, 'requireDemoRole(request, ["sme_user", "admin"]', "case creation role guard");
+  assertIncludes(uploadRoute, 'requireDemoRole(request, ["sme_user", "operator", "admin"]', "evidence upload role guard");
+  assertIncludes(reviewRoute, 'requireDemoRole(request, ["operator", "admin"]', "evidence review role guard");
+  assertIncludes(reviewRoute, 'reviewerRole: "operator"', "evidence review should not let payload spoof professional role");
+  assertIncludes(evidenceTaskRoute, 'requireDemoRole(request, ["operator", "admin"]', "evidence task transition role guard");
+  assertIncludes(operatorTaskRoute, 'requireDemoRole(request, ["operator", "admin"]', "operator task transition role guard");
+  assertIncludes(agentRunsRoute, 'requireDemoRole(request, ["operator", "admin"]', "agent run creation role guard");
+  assertIncludes(professionalActionRoute, 'requireDemoRole(request, ["professional_reviewer", "admin"]', "professional review action role guard");
+  assertIncludes(professionalActionRoute, "professionalReviewNote", "professional review note action");
+  assertIncludes(professionalActionRoute, "exceptionStatus", "professional review exception status action");
+  assertIncludes(adminResetRoute, 'requireDemoRole(request, ["admin"]', "admin reset role guard");
+  assertIncludes(adminResetRoute, "resetDemoWorkspace", "admin reset action");
+}
+
 function main() {
   validateAgentPipeline();
   validateGateDecision();
@@ -322,6 +372,7 @@ function main() {
   validateEvidenceReviewTransition();
   validateFinancingPackGeneration();
   validateProfessionalReviewHandoffPack();
+  validateRoleBasedApiGuards();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
 
