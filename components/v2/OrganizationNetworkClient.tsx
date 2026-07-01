@@ -28,7 +28,7 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
 
   const currentOrg = context.organization;
   const currentMembership = context.membership;
-  const canCreate = useMemo(() => name.trim().length > 1, [name]);
+  const canCreate = useMemo(() => name.trim().length > 0, [name]);
 
   async function refreshContext() {
     const res = await fetch("/api/organizations/current", {
