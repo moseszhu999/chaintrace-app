@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { StartEvidenceMiniForm } from "@/components/v2/StartEvidenceMiniForm";
 import { StartOrganizationProofMiniForm } from "@/components/v2/StartOrganizationProofMiniForm";
 import { StartSecondaryFunctionMap } from "@/components/v2/StartSecondaryFunctionMap";
 import { StartTradeCaseMiniForm } from "@/components/v2/StartTradeCaseMiniForm";
@@ -178,6 +179,8 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
       <StartOrganizationProofMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
 
       <StartTradeCaseMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
+
+      <StartEvidenceMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
