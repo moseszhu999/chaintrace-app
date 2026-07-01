@@ -28,7 +28,7 @@ export default async function TradeCaseWorkspaceRoute({ params }: PageProps) {
       }}
     >
       {result.workspace ? (
-        <TradeCaseWorkspaceView zh={ctx.zh} workspace={result.workspace} />
+        <TradeCaseWorkspaceView zh={ctx.zh} workspace={result.workspace} userEmail={ctx.organizationContext.user.email} />
       ) : (
         <div className="empty-state-card">
           <strong>{ctx.zh ? "Case 不存在或无权限" : "Case not found or not accessible"}</strong>
