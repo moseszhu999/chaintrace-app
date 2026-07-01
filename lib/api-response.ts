@@ -21,8 +21,18 @@ export type ApiFailure = {
   boundary: ChainTraceBoundary;
 };
 
+function topLevelData(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return value as Record<string, unknown>;
+}
+
 export function apiSuccess<T>(data: T, init?: ResponseInit) {
-  return NextResponse.json<ApiSuccess<T>>({ ok: true, data, boundary: preReviewBoundary }, init);
+  return NextResponse.json({
+    ok: true,
+    data,
+    boundary: preReviewBoundary,
+    ...topLevelData(data),
+  }, init);
 }
 
 export function apiError(error: string, message: string, init?: ResponseInit) {
