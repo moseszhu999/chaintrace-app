@@ -3,7 +3,7 @@ import { neon } from "@neondatabase/serverless";
 import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { evaluateReadiness } from "@/lib/readiness-evaluator";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
-import { getCurrentTradeCase, listEvidenceRecords, type EvidenceRecord } from "@/lib/repositories/chaintrace-repository";
+import { getCurrentTradeCase, getTradeCaseById, listEvidenceRecords, type EvidenceRecord } from "@/lib/repositories/chaintrace-repository";
 
 export const agentRunReceiptStore = "agent_workflow_store";
 export type AgentWorkflowPersistenceMode = "runtime_workflow_store" | "neon_workflow_store";
@@ -481,10 +481,11 @@ export function createWorkflowStore(): WorkflowStore {
   return createRuntimeWorkflowStore();
 }
 
-export async function createAgentRunReceipt(): Promise<{ receipt: AgentRunReceipt; tasks: OperatorTask[] }> {
+export async function createAgentRunReceipt(caseId?: string): Promise<{ receipt: AgentRunReceipt; tasks: OperatorTask[] }> {
   const workflowStore = createWorkflowStore();
   const persistenceMode = getAgentWorkflowPersistenceMode();
-  const trade = await getCurrentTradeCase();
+  const trade = caseId ? await getTradeCaseById(caseId) : await getCurrentTradeCase();
+  if (!trade) throw new Error("CASE_NOT_FOUND");
   const evidenceRecords = await listEvidenceRecords(trade.id);
   const gateResult = evaluateLoanGates(evidenceRecords);
   const readiness = evaluateReadiness(trade, gateResult.summary);

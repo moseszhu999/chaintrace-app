@@ -157,6 +157,21 @@ Validate mocked API contracts:
 npm run api:validate
 ```
 
+Run smoke checks:
+
+```bash
+npm run smoke:evidence
+npm run smoke:case
+npm run smoke:handoff
+npm run smoke:production-fallback
+```
+
+With a running app, set `CHAINTRACE_SMOKE_BASE_URL` to exercise real HTTP workflow smoke:
+
+```bash
+CHAINTRACE_SMOKE_BASE_URL=http://localhost:3000 npm run smoke:evidence
+```
+
 Try the mock POST APIs:
 
 [docs/api-examples.md](docs/api-examples.md)
