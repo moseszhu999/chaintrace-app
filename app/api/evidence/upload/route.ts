@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { chaintraceApiError, chaintraceApiOk, chaintraceGuardrails } from "@/lib/api-response";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
 import {
   addEvidenceRecord,
@@ -140,73 +141,98 @@ export async function POST(request: NextRequest) {
   const payload = (await request.json().catch(() => ({}))) as UploadPayload;
   const missingFields = validatePayload(payload);
   if (missingFields.length) {
-    return NextResponse.json({
-      accepted: false,
-      error: "INVALID_EVIDENCE_UPLOAD",
-      missingFields,
-    }, { status: 400 });
-  }
-
-  const currentTradeCase = await getCurrentTradeCase();
-  const tradeId = normalizeText(payload.tradeId) || currentTradeCase.id;
-  const trade = await getTradeCaseById(tradeId);
-  if (!trade) {
-    return NextResponse.json({
-      accepted: false,
-      error: "UNKNOWN_TRADE_CASE",
-      tradeId,
-    }, { status: 404 });
-  }
-
-  const documentType = normalizeText(payload.documentType);
-  const fileName = normalizeText(payload.fileName);
-  const documentNo = normalizeText(payload.documentNo);
-  const hash = normalizeText(payload.hash);
-  const inferredStatus = inferEvidenceStatus(documentType);
-  const gateImpact = inferGateImpact(documentType);
-  const evidenceRecord = await addEvidenceRecord({
-    id: buildEvidenceId(tradeId, documentNo, hash),
-    tradeId,
-    documentType: inferEvidenceDocumentType(documentType),
-    fileName,
-    documentNo,
-    issuerPartyId: normalizeText(payload.issuer) || undefined,
-    status: inferredStatus,
-    hash,
-    noteEn: normalizeText(payload.note) || undefined,
-    gateImpacts: inferGateImpacts(documentType),
-  });
-
-  return NextResponse.json({
-    receivedAt: new Date().toISOString(),
-    version: "chaintrace-evidence-upload-v0.1",
-    accepted: true,
-    persistenceMode: getEvidencePersistenceMode(),
-    fallbackPersistenceMode: "runtime_evidence_store",
-    durablePersistenceMode: "neon_evidence_store",
-    evidenceId: evidenceRecord.id,
-    tradeId,
-    storageBoundary: "metadata-and-hash-only; binary file storage is not implemented in this mock endpoint",
-    upload: {
-      fileName,
-      documentType,
-      issuer: payload.issuer ?? null,
-      documentNo,
-      hash,
-      note: payload.note ?? null,
-    },
-    evidenceRecord,
-    agentPlan: {
-      nextAgents: ["/api/agents/evidence", "/api/agents/gates", "/api/agents/gaps", "/api/agents/risk-memo"],
-      inferredEvidenceStatus: formatEvidenceStatus(inferredStatus),
-      gateImpact,
-      financingDecisionBeforeRecheck: {
-        readinessScore: receivableReadinessReport.score,
-        maxScore: receivableReadinessReport.maxScore,
-        disbursementAllowed: false,
-        blockerCode: "GATES_NOT_PASSED",
+    return chaintraceApiError(
+      "INVALID_EVIDENCE_UPLOAD",
+      "Evidence upload requires fileName, documentType, documentNo, and hash.",
+      { status: 400 },
+      {
+        accepted: false,
+        missingFields,
+        guardrails: chaintraceGuardrails(),
       },
-    },
-    recommendedNextCall: "/api/agents/run",
-  });
+    );
+  }
+
+  try {
+    const currentTradeCase = await getCurrentTradeCase();
+    const tradeId = normalizeText(payload.tradeId) || currentTradeCase.id;
+    const trade = await getTradeCaseById(tradeId);
+    if (!trade) {
+      return chaintraceApiError(
+        "UNKNOWN_TRADE_CASE",
+        "The requested trade case does not exist in the current workspace.",
+        { status: 404 },
+        {
+          accepted: false,
+          tradeId,
+          guardrails: chaintraceGuardrails(),
+        },
+      );
+    }
+
+    const documentType = normalizeText(payload.documentType);
+    const fileName = normalizeText(payload.fileName);
+    const documentNo = normalizeText(payload.documentNo);
+    const hash = normalizeText(payload.hash);
+    const inferredStatus = inferEvidenceStatus(documentType);
+    const gateImpact = inferGateImpact(documentType);
+    const evidenceRecord = await addEvidenceRecord({
+      id: buildEvidenceId(tradeId, documentNo, hash),
+      tradeId,
+      documentType: inferEvidenceDocumentType(documentType),
+      fileName,
+      documentNo,
+      issuerPartyId: normalizeText(payload.issuer) || undefined,
+      status: inferredStatus,
+      hash,
+      noteEn: normalizeText(payload.note) || undefined,
+      gateImpacts: inferGateImpacts(documentType),
+    });
+
+    return chaintraceApiOk({
+      receivedAt: new Date().toISOString(),
+      version: "chaintrace-evidence-upload-v0.1",
+      accepted: true,
+      persistenceMode: getEvidencePersistenceMode(),
+      fallbackPersistenceMode: "runtime_evidence_store",
+      durablePersistenceMode: "neon_evidence_store",
+      evidenceId: evidenceRecord.id,
+      tradeId,
+      storageBoundary: "metadata-and-hash-only; binary file storage is not implemented in this mock endpoint",
+      guardrails: chaintraceGuardrails(),
+      upload: {
+        fileName,
+        documentType,
+        issuer: payload.issuer ?? null,
+        documentNo,
+        hash,
+        note: payload.note ?? null,
+      },
+      evidenceRecord,
+      agentPlan: {
+        nextAgents: ["/api/agents/evidence", "/api/agents/gates", "/api/agents/gaps", "/api/agents/risk-memo"],
+        inferredEvidenceStatus: formatEvidenceStatus(inferredStatus),
+        gateImpact,
+        financingDecisionBeforeRecheck: {
+          readinessScore: receivableReadinessReport.score,
+          maxScore: receivableReadinessReport.maxScore,
+          disbursementAllowed: false,
+          blockerCode: "GATES_NOT_PASSED",
+        },
+      },
+      recommendedNextCall: "/api/agents/run",
+    });
+  } catch (error) {
+    return chaintraceApiError(
+      "EVIDENCE_UPLOAD_FAILED",
+      error instanceof Error ? error.message : "Unknown evidence upload error.",
+      { status: 500 },
+      {
+        accepted: false,
+        fallbackPersistenceMode: "runtime_evidence_store",
+        durablePersistenceMode: "neon_evidence_store",
+        guardrails: chaintraceGuardrails(),
+      },
+    );
+  }
 }
