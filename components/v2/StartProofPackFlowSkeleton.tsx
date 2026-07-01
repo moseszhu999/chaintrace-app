@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { StartBusinessScenarioMap } from "@/components/v2/StartBusinessScenarioMap";
 import { StartEvidenceMiniForm } from "@/components/v2/StartEvidenceMiniForm";
 import { StartOrganizationProofMiniForm } from "@/components/v2/StartOrganizationProofMiniForm";
 import { StartProofPackMiniForm } from "@/components/v2/StartProofPackMiniForm";
@@ -143,13 +144,23 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
     <div className="workspace-stack">
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
-          <span>{t(zh, "Small Entry", "Small Entry")}</span>
-          <h2>{t(zh, "一键生成可验证贸易证据护照", "Generate a verifiable Trade Evidence Passport")}</h2>
-          <p>{t(zh, "这个页面先作为总入口：先铺出二级功能点，再一点点把表单、上传、签名动作填进去。", "This page is the entry: lay out secondary functions first, then gradually embed forms, upload, and signature actions.")}</p>
+          <span>{t(zh, "Business Entry", "Business Entry")}</span>
+          <h2>{t(zh, "你是谁？你现在要完成什么业务结果？", "Who are you, and what business result do you need now?")}</h2>
+          <p>{t(zh, "ChainTrace 的入口不应该先问用户要不要生成 Hash，而应该先问：你是出口商、质检员、银行职员，还是平台运营？你要融资、质检确认、放款判断，还是合约维护？", "ChainTrace should not first ask whether the user wants to generate hashes. It should first ask: are you an exporter, QC inspector, bank officer, or platform operator? Do you need financing, QC confirmation, funding decision, or contract maintenance?")}</p>
         </div>
         <div className="hero-actions">
-          <Link className="primary-button" href="/organization-network">{t(zh, "完整组织工作台", "Full Organization Workspace")}</Link>
-          <Link className="secondary-button" href="/verify/local">{t(zh, "我已有 Proof Pack，去验证", "I have a Proof Pack, verify it")}</Link>
+          <a className="primary-button" href="#exporter-financing-flow">{t(zh, "我是出口商，我要融资", "I am an exporter, I need financing")}</a>
+          <Link className="secondary-button" href="/business-readiness">{t(zh, "我是资金方，我要判断能不能放款", "I am a funder, I need a funding decision")}</Link>
+        </div>
+      </section>
+
+      <StartBusinessScenarioMap zh={zh} />
+
+      <section className="proof-flow-card" id="exporter-financing-flow">
+        <div className="section-heading compact-heading">
+          <span>{t(zh, "Exporter Financing Flow", "Exporter Financing Flow")}</span>
+          <h2>{t(zh, "出口商融资准备：我缺钱，我要提交一个可验证融资案件", "Exporter financing prep: I need money and must submit a verifiable funding case")}</h2>
+          <p>{t(zh, "下面的 Proof 动作只是为了支持这个业务目标：准备证据、提交案件、等待资金方判断、最终看到资金账户到账。", "The proof actions below only support this business goal: prepare evidence, submit a case, wait for the funder decision, and eventually see funds credited.")}</p>
         </div>
       </section>
 
@@ -160,17 +171,17 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
           <small>{t(zh, "本地组织身份", "Local organization identity")}</small>
         </article>
         <article className="metric-card">
-          <span>{t(zh, "Trade Cases", "Trade Cases")}</span>
+          <span>{t(zh, "融资案件", "Funding Cases")}</span>
           <strong>{status.caseCount}</strong>
           <small>{t(zh, "本地 caseRootHash", "Local caseRootHash")}</small>
         </article>
         <article className="metric-card">
-          <span>{t(zh, "Evidence", "Evidence")}</span>
+          <span>{t(zh, "证据文件", "Evidence Files")}</span>
           <strong>{status.evidenceCount}</strong>
           <small>{t(zh, "本地 fileSha256", "Local fileSha256")}</small>
         </article>
         <article className="metric-card">
-          <span>{t(zh, "Proof Packs", "Proof Packs")}</span>
+          <span>{t(zh, "可提交 Passport", "Submittable Passports")}</span>
           <strong>{status.proofPackCount}</strong>
           <small>{t(zh, "Trade Evidence Passport", "Trade Evidence Passport")}</small>
         </article>
@@ -190,8 +201,9 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
-          <span>{t(zh, "One-click Flow Skeleton", "One-click Flow Skeleton")}</span>
-          <h2>{t(zh, "5 步路径", "Five-step path")}</h2>
+          <span>{t(zh, "Advanced Proof Builder", "Advanced Proof Builder")}</span>
+          <h2>{t(zh, "技术证明链路", "Technical proof chain")}</h2>
+          <p>{t(zh, "这部分不是用户目标，而是底层证明动作。以后可以折叠到高级模式。", "This is not the user goal; it is the underlying proof operation. Later it can be collapsed into an advanced mode.")}</p>
         </div>
         <div className="proof-flow-grid">
           {steps.map((step) => {
@@ -218,12 +230,11 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
         <div className="section-heading compact-heading">
           <span>{t(zh, "Big Product Mapping", "Big Product Mapping")}</span>
           <h2>{t(zh, "页面骨架对应 5 层功能 / 5 层数据", "Skeleton mapped to five-layer function / data architecture")}</h2>
-          <p>{t(zh, "这个入口只暴露一个简单路径，但背后连接 Organization Domain、Trade Case Domain、Evidence Domain、Passport Domain 和 Proof / Signature 层。", "This entry exposes a simple path, but underneath it connects Organization Domain, Trade Case Domain, Evidence Domain, Passport Domain, and the Proof / Signature layer.")}</p>
+          <p>{t(zh, "业务入口在上面，Proof / Hash / Signature 是底层支撑，不是第一屏卖点。", "The business entry is above; Proof / Hash / Signature is the supporting layer, not the first-screen selling point.")}</p>
         </div>
         <div className="table-like-list">
-          <div className="table-like-row"><div><strong>F-L1</strong><span>Product Domain</span></div><div><strong>Start Flow</strong><span>/start</span></div></div>
-          <div className="table-like-row"><div><strong>F-L2</strong><span>Business Capability</span></div><div><strong>Proof Pack Generation</strong><span>Organization / Case / Evidence / Passport</span></div></div>
-          <div className="table-like-row"><div><strong>F-L3</strong><span>Workspace Page</span></div><div><strong>Existing Pages</strong><span>/organization-network, /trade-cases, /evidence, /proof-packs, /verify/local</span></div></div>
+          <div className="table-like-row"><div><strong>{t(zh, "业务角色", "Business Role")}</strong><span>Exporter / QC / Funder / Operator</span></div><div><strong>{t(zh, "业务结果", "Business Result")}</strong><span>Funding / QC Pass / Funding Decision / Maintenance</span></div></div>
+          <div className="table-like-row"><div><strong>F-L2</strong><span>Scenario Capability</span></div><div><strong>{t(zh, "融资准备 / 质检确认 / 放款判断", "Financing prep / QC confirmation / funding decision")}</strong><span>role-based entry</span></div></div>
           <div className="table-like-row"><div><strong>D-L5</strong><span>Proof Layer</span></div><div><strong>Hash + Signature</strong><span>orgProfileHash / caseRootHash / fileSha256 / passportRootHash</span></div></div>
         </div>
       </section>
