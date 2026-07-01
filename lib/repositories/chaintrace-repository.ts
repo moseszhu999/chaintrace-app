@@ -265,6 +265,13 @@ const evidenceRecordsByTradeId = new Map<string, EvidenceRecord[]>([
   [currentTradeCase.id, seededCaseEvidence],
 ]);
 
+export function resetRuntimeEvidenceRepository() {
+  tradeCasesById.clear();
+  tradeCasesById.set(currentTradeCase.id, currentTradeCase);
+  evidenceRecordsByTradeId.clear();
+  evidenceRecordsByTradeId.set(currentTradeCase.id, seededCaseEvidence.map(cloneEvidenceRecord));
+}
+
 function cloneEvidenceRecord(record: EvidenceRecord): EvidenceRecord {
   return {
     ...record,

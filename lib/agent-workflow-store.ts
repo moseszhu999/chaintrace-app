@@ -116,6 +116,13 @@ function getState(): WorkflowState {
   return globalWorkflowState.__chaintraceAgentWorkflowState;
 }
 
+export function resetRuntimeWorkflowStore() {
+  globalWorkflowState.__chaintraceAgentWorkflowState = {
+    receipts: [],
+    tasks: [],
+  };
+}
+
 type WorkflowStore = {
   createReceiptWithTasks(receipt: AgentRunReceipt, tasks: OperatorTask[]): Promise<void>;
   listReceipts(): Promise<AgentRunReceipt[]>;

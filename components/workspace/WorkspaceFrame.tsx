@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { WorkspaceShell, type WorkspaceHeaderCopy } from "@/components/workspace/WorkspaceShell";
+import type { DemoRole } from "@/lib/demo-roles";
 import type { WorkspaceNavKey } from "@/lib/workspace-navigation";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 
@@ -19,6 +20,7 @@ type WorkspaceFrameProps = {
   action?: WorkspaceFrameAction;
   actionSlot?: ReactNode;
   header?: WorkspaceHeaderCopy;
+  role?: DemoRole;
 };
 
 function renderAction(zh: boolean, action?: WorkspaceFrameAction, actionSlot?: ReactNode) {
@@ -34,7 +36,7 @@ function renderAction(zh: boolean, action?: WorkspaceFrameAction, actionSlot?: R
 
 export function WorkspaceFrame(props: WorkspaceFrameProps) {
   return (
-    <WorkspaceShell zh={props.zh} active={props.active} workspace={props.workspace} header={props.header} actionSlot={renderAction(props.zh, props.action, props.actionSlot)}>
+    <WorkspaceShell zh={props.zh} active={props.active} workspace={props.workspace} role={props.role} header={props.header} actionSlot={renderAction(props.zh, props.action, props.actionSlot)}>
       {props.children}
     </WorkspaceShell>
   );

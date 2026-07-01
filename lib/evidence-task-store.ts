@@ -48,6 +48,10 @@ function getState(): EvidenceTaskState {
   return evidenceTaskGlobal.__chaintraceEvidenceTaskState;
 }
 
+export function resetEvidenceTaskStore() {
+  evidenceTaskGlobal.__chaintraceEvidenceTaskState = { tasks: [] };
+}
+
 function cloneTask(task: EvidenceLinkedTask): EvidenceLinkedTask {
   return {
     ...task,

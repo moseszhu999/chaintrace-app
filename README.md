@@ -72,8 +72,24 @@ These routes are kept for the Vercel demo and regression validation. They are no
 - `GET /api/professional-review` - professional exception review queue
 - `GET /api/cases/[caseId]/handoff` - professional review handoff pack from the operating snapshot
 - `GET /api/cases/[caseId]/review-summary` - lightweight professional review summary from the same handoff pack
+- `POST /api/evidence/[evidenceId]/review` - Operator/Admin evidence review transition
+- `POST /api/tasks/[taskId]/transition` - Operator/Admin evidence-linked task transition
+- `POST /api/operator-tasks/[taskId]/transition` - Operator/Admin workflow task transition
+- `POST /api/cases/[caseId]/professional-review` - Professional reviewer/Admin note and exception status action
+- `POST /api/admin/reset-demo` - Admin-only runtime demo reset
 - `GET /api/loan-requests/pre-review` - pre-review request draft
 - `POST /api/loan-requests/pre-review` - mocked pre-review request creation
+
+## Demo Roles
+
+The working site uses a minimal demo role selector, not enterprise auth. The selected role is stored in the `chaintrace_role` cookie, and mutation APIs also accept `x-chaintrace-role`.
+
+- `sme_user` can create a pre-review case, add evidence metadata, and view own case surfaces.
+- `operator` can review evidence, create/run operator workflow tasks, request changes, and prepare handoff work.
+- `professional_reviewer` can record professional review notes and exception status.
+- `admin` can perform all protected actions and reset runtime demo state.
+
+Denied role transitions return structured JSON with `error=ROLE_NOT_ALLOWED` and the pre-review boundary object.
 
 ## Contract Map
 

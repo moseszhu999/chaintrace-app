@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { roleCan, type DemoRole } from "@/lib/demo-roles";
 import type { AgentRunReceipt, HumanAction, OperatorTask } from "@/lib/agent-workflow-store";
 import type { EvidenceLinkedTask, EvidenceTaskAction } from "@/lib/evidence-task-store";
 import styles from "./WorkspaceViews.module.css";
@@ -38,7 +39,7 @@ function statusClass(status: string) {
   return `${styles.statusChip} ${styles.statusOpen}`;
 }
 
-export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
+export function OperatorTaskWorkflowClient({ zh, role }: { zh: boolean; role: DemoRole }) {
   const [receipt, setReceipt] = useState<AgentRunReceipt | null>(null);
   const [receipts, setReceipts] = useState<AgentRunReceipt[]>([]);
   const [tasks, setTasks] = useState<OperatorTask[]>([]);
@@ -52,6 +53,8 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
     const transitioned = tasks.length + evidenceTasks.length - open;
     return { open, transitioned };
   }, [tasks, evidenceTasks]);
+  const canCreateTasks = roleCan(role, "task:create");
+  const canTransitionTasks = roleCan(role, "task:transition");
 
   async function loadWorkflow() {
     setError("");
@@ -78,7 +81,7 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
     setIsRunning(true);
     setError("");
     try {
-      const response = await fetch("/api/agent-runs", { method: "POST" });
+      const response = await fetch("/api/agent-runs", { method: "POST", headers: { "x-chaintrace-role": role } });
       if (!response.ok) throw new Error("Could not create AgentRunReceipt.");
       await loadWorkflow();
     } catch (caught) {
@@ -93,7 +96,7 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
     try {
       const response = await fetch(`/api/operator-tasks/${encodeURIComponent(taskId)}/transition`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-chaintrace-role": role },
         body: JSON.stringify({ action }),
       });
       if (!response.ok) throw new Error("Task transition was rejected.");
@@ -108,7 +111,7 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
     try {
       const response = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/transition`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-chaintrace-role": role },
         body: JSON.stringify({ action }),
       });
       if (!response.ok) throw new Error("Evidence task transition was rejected.");
@@ -127,9 +130,11 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
       </div>
 
       <div className="converter-actions">
-        <button className="primary-button" type="button" data-testid="run-agent-workflow" onClick={runAgentWorkflow} disabled={isRunning}>
-          {isRunning ? "Running..." : "Run agent workflow"}
-        </button>
+        {canCreateTasks && (
+          <button className="primary-button" type="button" data-testid="run-agent-workflow" onClick={runAgentWorkflow} disabled={isRunning}>
+            {isRunning ? "Running..." : "Run agent workflow"}
+          </button>
+        )}
         <button className="secondary-button" type="button" onClick={() => loadWorkflow()} disabled={isLoading || isRunning}>
           Refresh workflow
         </button>
@@ -164,13 +169,15 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
                 <p className={styles.rowMeta}>evidenceId={task.evidenceId} · documentNo={task.documentNo} · gate={task.gateId ?? "unmapped"}</p>
                 <p className={styles.rowMeta}>reason={task.reason}</p>
                 <p className={styles.rowMeta}>GATES_NOT_PASSED · sourceReviewReceipt={task.sourceReviewReceiptId ?? "seeded"}</p>
-                <div className="converter-actions" style={{ marginTop: 10 }}>
-                  {task.allowedActions.map((action) => (
-                    <button className="secondary-button" type="button" data-testid={`evidence-task-action-${action}`} key={action} onClick={() => transitionEvidenceTask(task.id, action)}>
-                      {evidenceActionLabels[action]}
-                    </button>
-                  ))}
-                </div>
+                {canTransitionTasks && (
+                  <div className="converter-actions" style={{ marginTop: 10 }}>
+                    {task.allowedActions.map((action) => (
+                      <button className="secondary-button" type="button" data-testid={`evidence-task-action-${action}`} key={action} onClick={() => transitionEvidenceTask(task.id, action)}>
+                        {evidenceActionLabels[action]}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <span className={statusClass(task.taskStatus)}>{task.taskStatus}</span>
             </div>
@@ -184,13 +191,15 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
                 <h3 className={styles.rowTitle}>{task.title}</h3>
                 <p className={styles.rowMeta}>{task.taskKind} · owner={task.ownerRole} · humanActionRequired={String(task.humanActionRequired)}</p>
                 {task.details.slice(0, 3).map((detail) => <p className={styles.rowMeta} key={detail}>{detail}</p>)}
-                <div className="converter-actions" style={{ marginTop: 10 }}>
-                  {task.allowedHumanActions.map((action) => (
-                    <button className="secondary-button" type="button" data-testid={`operator-task-action-${task.taskKind}-${action}`} key={action} onClick={() => transitionTask(task.id, action)}>
-                      {actionLabels[action]}
-                    </button>
-                  ))}
-                </div>
+                {canTransitionTasks && (
+                  <div className="converter-actions" style={{ marginTop: 10 }}>
+                    {task.allowedHumanActions.map((action) => (
+                      <button className="secondary-button" type="button" data-testid={`operator-task-action-${task.taskKind}-${action}`} key={action} onClick={() => transitionTask(task.id, action)}>
+                        {actionLabels[action]}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <span className={statusClass(task.taskStatus)}>{task.taskStatus}</span>
             </div>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDemoRole } from "@/lib/demo-role-api";
 import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
 import {
   addEvidenceRecord,
@@ -137,6 +138,9 @@ function buildEvidenceId(tradeId: string, documentNo: string, hash: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const roleGuard = requireDemoRole(request, ["sme_user", "operator", "admin"], "evidence:add");
+  if (!roleGuard.ok) return roleGuard.response;
+
   const payload = (await request.json().catch(() => ({}))) as UploadPayload;
   const missingFields = validatePayload(payload);
   if (missingFields.length) {

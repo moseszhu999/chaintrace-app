@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { requireDemoRole } from "@/lib/demo-role-api";
 import { buildFinancingPack } from "@/lib/financing-pack-builder";
 import { syncEvidenceReviewTask } from "@/lib/evidence-task-store";
 import { safeReviewEvidenceRecord } from "@/lib/repositories/safe-chaintrace-repository";
@@ -38,20 +39,24 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ evidenceId: string }> },
 ) {
+  const roleGuard = requireDemoRole(request, ["operator", "admin"], "evidence:review");
+  if (!roleGuard.ok) return roleGuard.response;
+
   const { evidenceId } = await params;
   const payload = (await request.json().catch(() => ({}))) as ReviewPayload;
   const action = parseAction(payload.action);
-  const reviewerRole = parseReviewerRole(payload.reviewerRole);
+  // Legacy clients may still send reviewerRole; the session role guard controls the actual receipt role.
+  parseReviewerRole(payload.reviewerRole);
   const reason = normalize(payload.reason);
 
-  if (!action || !reviewerRole || !reason) {
-    return apiError("INVALID_EVIDENCE_REVIEW", "Evidence review requires action, reviewerRole, and reason.", { status: 400 });
+  if (!action || !reason) {
+    return apiError("INVALID_EVIDENCE_REVIEW", "Evidence review requires action and reason.", { status: 400 });
   }
 
   try {
     const { evidenceRecord, reviewReceipt, store } = await safeReviewEvidenceRecord(evidenceId, {
       action,
-      reviewerRole,
+      reviewerRole: "operator",
       reviewerName: normalize(payload.reviewerName) || undefined,
       reason,
     });
