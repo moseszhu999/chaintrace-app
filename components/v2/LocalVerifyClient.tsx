@@ -10,7 +10,7 @@ type CheckResult = {
 };
 
 type VerifyResult = {
-  kitType: "Organization Recovery Kit" | "Trade Case Kit" | "Unknown";
+  kitType: "Organization Recovery Kit" | "Trade Case Kit" | "Evidence Kit" | "Unknown";
   status: "PASS" | "FAIL" | "WARN";
   summary: string;
   claimedHash?: string;
@@ -71,16 +71,8 @@ async function verifyOrganizationKit(input: Record<string, unknown>): Promise<Ve
   const orgRegistryHash = typeof organization.orgRegistryHash === "string" ? organization.orgRegistryHash : undefined;
   const recomputedHash = await sha256Hex(stableStringify(privateProfile));
 
-  checks.push({
-    label: "Profile hash",
-    status: claimedHash === recomputedHash ? "PASS" : "FAIL",
-    detail: `SHA-256(canonical privateProfile) ${claimedHash === recomputedHash ? "matches" : "does not match"} proof.orgProfileHash.`,
-  });
-  checks.push({
-    label: "Organization hash mirror",
-    status: orgRegistryHash === claimedHash ? "PASS" : "FAIL",
-    detail: "organization.orgRegistryHash should mirror proof.orgProfileHash.",
-  });
+  checks.push({ label: "Profile hash", status: claimedHash === recomputedHash ? "PASS" : "FAIL", detail: `SHA-256(canonical privateProfile) ${claimedHash === recomputedHash ? "matches" : "does not match"} proof.orgProfileHash.` });
+  checks.push({ label: "Organization hash mirror", status: orgRegistryHash === claimedHash ? "PASS" : "FAIL", detail: "organization.orgRegistryHash should mirror proof.orgProfileHash." });
 
   let signatureStatus: VerifyResult["signatureStatus"] = "NOT_PROVIDED";
   const signerAddress = typeof proof.signerAddress === "string" ? proof.signerAddress : undefined;
@@ -89,19 +81,11 @@ async function verifyOrganizationKit(input: Record<string, unknown>): Promise<Ve
 
   if (signerAddress && signature && signedMessage) {
     const messageContainsHash = claimedHash ? signedMessage.includes(claimedHash) : false;
-    checks.push({
-      label: "Signed message hash binding",
-      status: messageContainsHash ? "PASS" : "FAIL",
-      detail: "signedMessage must include the org profile hash.",
-    });
+    checks.push({ label: "Signed message hash binding", status: messageContainsHash ? "PASS" : "FAIL", detail: "signedMessage must include the org profile hash." });
     try {
       const verified = await verifyMessage({ address: signerAddress as `0x${string}`, message: signedMessage, signature: signature as `0x${string}` });
       signatureStatus = verified ? "VERIFIED" : "FAILED";
-      checks.push({
-        label: "Wallet signature",
-        status: verified ? "PASS" : "FAIL",
-        detail: verified ? "Signature recovers the claimed signer address." : "Signature does not recover the claimed signer address.",
-      });
+      checks.push({ label: "Wallet signature", status: verified ? "PASS" : "FAIL", detail: verified ? "Signature recovers the claimed signer address." : "Signature does not recover the claimed signer address." });
     } catch (error) {
       signatureStatus = "FAILED";
       checks.push({ label: "Wallet signature", status: "FAIL", detail: error instanceof Error ? error.message : "Signature verification failed." });
@@ -112,7 +96,6 @@ async function verifyOrganizationKit(input: Record<string, unknown>): Promise<Ve
 
   const failed = checks.some((check) => check.status === "FAIL");
   const warned = checks.some((check) => check.status === "WARN");
-
   return {
     kitType: "Organization Recovery Kit",
     status: failed ? "FAIL" : warned ? "WARN" : "PASS",
@@ -148,29 +131,56 @@ async function verifyTradeCaseKit(input: Record<string, unknown>): Promise<Verif
   const privateRecord = asRecord(privateData);
   const privateSellerHash = typeof privateRecord?.sellerOrgProfileHash === "string" ? privateRecord.sellerOrgProfileHash : null;
 
-  checks.push({
-    label: "Case root hash",
-    status: claimedHash === recomputedHash ? "PASS" : "FAIL",
-    detail: `SHA-256(canonical privateData) ${claimedHash === recomputedHash ? "matches" : "does not match"} proof.caseRootHash.`,
-  });
-  checks.push({
-    label: "Case hash mirror",
-    status: caseRecordHash === claimedHash ? "PASS" : "FAIL",
-    detail: "case.caseRootHash should mirror proof.caseRootHash.",
-  });
-  checks.push({
-    label: "Seller organization linkage",
-    status: sellerOrgProfileHash === privateSellerHash ? "PASS" : "WARN",
-    detail: "proof.sellerOrgProfileHash should match privateData.sellerOrgProfileHash when present.",
-  });
+  checks.push({ label: "Case root hash", status: claimedHash === recomputedHash ? "PASS" : "FAIL", detail: `SHA-256(canonical privateData) ${claimedHash === recomputedHash ? "matches" : "does not match"} proof.caseRootHash.` });
+  checks.push({ label: "Case hash mirror", status: caseRecordHash === claimedHash ? "PASS" : "FAIL", detail: "case.caseRootHash should mirror proof.caseRootHash." });
+  checks.push({ label: "Seller organization linkage", status: sellerOrgProfileHash === privateSellerHash ? "PASS" : "WARN", detail: "proof.sellerOrgProfileHash should match privateData.sellerOrgProfileHash when present." });
 
   const failed = checks.some((check) => check.status === "FAIL");
   const warned = checks.some((check) => check.status === "WARN");
-
   return {
     kitType: "Trade Case Kit",
     status: failed ? "FAIL" : warned ? "WARN" : "PASS",
     summary: failed ? "Trade Case proof failed verification." : warned ? "Trade Case hash is valid, but seller linkage is incomplete." : "Trade Case proof passed verification.",
+    claimedHash,
+    recomputedHash,
+    signatureStatus: "NOT_PROVIDED",
+    chainCommitStatus: typeof proof.chainCommitStatus === "string" ? proof.chainCommitStatus : undefined,
+    checks,
+  };
+}
+
+async function verifyEvidenceKit(input: Record<string, unknown>): Promise<VerifyResult> {
+  const checks: CheckResult[] = [];
+  const evidence = asRecord(input.evidence);
+  const proof = asRecord(input.proof);
+
+  if (!evidence || !proof) {
+    return {
+      kitType: "Evidence Kit",
+      status: "FAIL",
+      summary: "Invalid evidence kit shape.",
+      checks: [{ label: "Shape", status: "FAIL", detail: "evidence and proof are required." }],
+    };
+  }
+
+  const claimedHash = typeof proof.evidenceHash === "string" ? proof.evidenceHash : undefined;
+  const recomputedHash = await sha256Hex(stableStringify(evidence));
+  const caseRootHash = typeof proof.caseRootHash === "string" ? proof.caseRootHash : undefined;
+  const evidenceCaseRootHash = typeof evidence.caseRootHash === "string" ? evidence.caseRootHash : undefined;
+  const fileSha256 = typeof evidence.fileSha256 === "string" ? evidence.fileSha256 : undefined;
+  const evidenceRootHash = typeof proof.evidenceRootHash === "string" ? proof.evidenceRootHash : undefined;
+
+  checks.push({ label: "Evidence hash", status: claimedHash === recomputedHash ? "PASS" : "FAIL", detail: `SHA-256(canonical evidence manifest) ${claimedHash === recomputedHash ? "matches" : "does not match"} proof.evidenceHash.` });
+  checks.push({ label: "Case root binding", status: caseRootHash === evidenceCaseRootHash ? "PASS" : "FAIL", detail: "proof.caseRootHash should match evidence.caseRootHash." });
+  checks.push({ label: "File SHA-256 present", status: fileSha256 ? "PASS" : "FAIL", detail: "Evidence manifest must include the original file SHA-256." });
+  checks.push({ label: "Evidence root present", status: evidenceRootHash ? "PASS" : "WARN", detail: "Evidence root anchors the case-level evidence set." });
+
+  const failed = checks.some((check) => check.status === "FAIL");
+  const warned = checks.some((check) => check.status === "WARN");
+  return {
+    kitType: "Evidence Kit",
+    status: failed ? "FAIL" : warned ? "WARN" : "PASS",
+    summary: failed ? "Evidence proof failed verification." : warned ? "Evidence hash is valid, but evidence root is incomplete." : "Evidence proof passed verification.",
     claimedHash,
     recomputedHash,
     signatureStatus: "NOT_PROVIDED",
@@ -193,6 +203,7 @@ async function verifyKit(raw: string): Promise<VerifyResult> {
 
   if (input.version === "chaintrace-local-org-proof-v1") return verifyOrganizationKit(input);
   if (input.version === "chaintrace-local-trade-case-v1") return verifyTradeCaseKit(input);
+  if (input.version === "chaintrace-local-evidence-bundle-v1") return verifyEvidenceKit(input);
 
   return {
     kitType: "Unknown",
@@ -230,14 +241,14 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
           <span>{label(zh, "Proof-safe Verify", "Proof-safe Verify")}</span>
-          <h2>{label(zh, "本地验证 Recovery Kit / Case Kit", "Locally verify a Recovery Kit / Case Kit")}</h2>
+          <h2>{label(zh, "本地验证 Recovery / Case / Evidence Kit", "Locally verify a Recovery / Case / Evidence Kit")}</h2>
           <p>{label(zh, "把 JSON 粘贴到这里。验证在浏览器本地完成，不上传服务器，不写数据库。", "Paste JSON here. Verification runs in your browser only; nothing is uploaded or stored.")}</p>
         </div>
         <textarea
           value={raw}
           onChange={(event) => setRaw(event.target.value)}
           rows={14}
-          placeholder={label(zh, "粘贴 chaintrace-local-org-proof-v1 或 chaintrace-local-trade-case-v1 JSON", "Paste chaintrace-local-org-proof-v1 or chaintrace-local-trade-case-v1 JSON")}
+          placeholder={label(zh, "粘贴 chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 JSON", "Paste chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 JSON")}
         />
         <button className="primary-button" type="button" onClick={runVerification} disabled={!raw.trim() || busy}>
           {busy ? label(zh, "验证中…", "Verifying…") : label(zh, "本地验证 Proof", "Verify Proof Locally")}
