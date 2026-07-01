@@ -17,7 +17,9 @@ The first deliverables are business requirements, role definitions, registration
 
 ## Product positioning
 
-ChainTrace is an Agent Native + Crypto Native supply-chain-finance front office.
+ChainTrace is an Agent Native + Crypto Native supply-chain-finance system.
+
+It is not only a front-office intake layer. It includes exporter workflows, bank / funding-provider workflows, third-party fact-provider workflows, platform operation, and the DeFi smart-contract financial execution layer.
 
 The system starts from real business roles and financing outcomes:
 
@@ -25,6 +27,7 @@ The system starts from real business roles and financing outcomes:
 - funding provider / bank / factoring institution
 - inspection party
 - platform / contract operator
+- DeFi smart-contract financial execution layer
 - logistics party
 - customs / declaration data party
 - insurance company
@@ -39,4 +42,4 @@ Each wallet registers one permanent business role. After registration, the walle
 - implementation code
 - database design
 - hash/proof/wallet-signature implementation details
-- smart-contract implementation details
+- DeFi smart-contract implementation details

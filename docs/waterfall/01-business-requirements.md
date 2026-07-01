@@ -2,9 +2,15 @@
 
 ## Core principle
 
-ChainTrace is not a traditional manual workflow system.
+ChainTrace is not a traditional manual workflow system, and it is not a supply-chain-finance front office.
 
-It is an Agent Native + Crypto Native supply-chain-finance front office.
+It is an Agent Native + Crypto Native supply-chain-finance system.
+
+It includes the bank / funding-provider workflow, the exporter workflow, third-party fact-provider workflows, platform operation, and the DeFi smart-contract execution layer.
+
+At the business level, ChainTrace should be understood as:
+
+> A supply-chain-finance system whose financing workflow is coordinated by role-specific agents and whose core financial execution is constrained by DeFi smart contracts.
 
 Normal cases should be advanced mostly by agents and rule execution. Human users should mainly handle authorization, exceptions, disputes, and high-value judgment.
 
@@ -34,7 +40,8 @@ No more than approximately 30% of cases should require human handling due to mis
 | Customs / declaration data party | Provide trade authenticity and clearance facts. | Confirm declaration/clearance status and regulatory abnormalities. |
 | Insurance company | Provide underwriting, claim, and risk mitigation judgment. | Know whether to cover, add premium, reject, request materials, or process claims. |
 | Buyer / importer / payer | Confirm trade relevance, receipt, dispute, and payment responsibility. | Know what to confirm and whether payment responsibility exists. |
+| DeFi smart contract layer | Enforce financial execution conditions, pool constraints, rules, and settlement states. | Know whether execution is allowed, blocked, waiting, failed, or completed. |
 
 ## Boundary
 
-This document intentionally does not define pages, components, hashes, proofs, wallet signatures, database tables, or smart-contract implementation.
+This document intentionally does not define pages, components, hashes, proofs, wallet signatures, database tables, Solidity, ABI, or deployment implementation.
