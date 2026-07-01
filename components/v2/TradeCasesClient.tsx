@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { OrganizationContext } from "@/lib/v2/organization-types";
 import type { TradeCaseRecordV2 } from "@/lib/v2/trade-case-types";
 
@@ -11,11 +11,14 @@ type TradeCasesClientProps = {
   initialCases: TradeCaseRecordV2[];
 };
 
+const currentOrgStorageKey = "chaintrace_v2_current_org";
+
 function label(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
 export function TradeCasesClient({ zh, context, initialCases }: TradeCasesClientProps) {
+  const [clientContext, setClientContext] = useState(context);
   const [cases, setCases] = useState(initialCases);
   const [caseName, setCaseName] = useState("");
   const [buyerName, setBuyerName] = useState("");
@@ -30,12 +33,30 @@ export function TradeCasesClient({ zh, context, initialCases }: TradeCasesClient
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const organization = context.organization;
-  const canCreate = Boolean(organization && caseName.trim().length > 1);
+  useEffect(() => {
+    if (clientContext.organization) return;
+    const raw = window.localStorage.getItem(currentOrgStorageKey);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed.organization?.id || !parsed.membership?.id) return;
+      setClientContext((previous) => ({
+        ...previous,
+        organization: parsed.organization,
+        membership: parsed.membership,
+        organizations: [{ organization: parsed.organization, membership: parsed.membership }],
+      }));
+    } catch {
+      window.localStorage.removeItem(currentOrgStorageKey);
+    }
+  }, [clientContext.organization]);
+
+  const organization = clientContext.organization;
+  const canCreate = Boolean(organization && caseName.trim().length > 0);
 
   async function refreshCases() {
     const res = await fetch("/api/trade-cases", {
-      headers: { "x-chaintrace-user-email": context.user.email },
+      headers: { "x-chaintrace-user-email": clientContext.user.email },
       cache: "no-store",
     });
     const json = await res.json();
@@ -44,7 +65,7 @@ export function TradeCasesClient({ zh, context, initialCases }: TradeCasesClient
 
   async function createCase(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!canCreate || busy) return;
+    if (!canCreate || busy || !organization) return;
     setBusy(true);
     setMessage(null);
     try {
@@ -52,9 +73,10 @@ export function TradeCasesClient({ zh, context, initialCases }: TradeCasesClient
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-chaintrace-user-email": context.user.email,
+          "x-chaintrace-user-email": clientContext.user.email,
         },
         body: JSON.stringify({
+          sellerOrgId: organization.id,
           caseName,
           buyerName,
           amount,
