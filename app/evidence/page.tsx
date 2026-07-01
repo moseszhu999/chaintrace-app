@@ -1,28 +1,9 @@
-import { EvidenceView } from "@/components/workspace/EvidenceView";
-import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
-import { getFallbackEvidenceRecords } from "@/lib/evidence-fallback";
-import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
-import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
+import { redirect } from "next/navigation";
+import { safeGetCurrentTradeCase } from "@/lib/repositories/safe-chaintrace-repository";
 
 export const dynamic = "force-dynamic";
 
-async function getInitialEvidenceRecords() {
-  try {
-    const trade = await getCurrentTradeCase();
-    return await listEvidenceRecords(trade.id);
-  } catch (error) {
-    console.error("Falling back to seeded evidence records for /evidence", error);
-    return getFallbackEvidenceRecords();
-  }
-}
-
 export default async function EvidencePage() {
-  const { zh, workspace, role } = await getWorkspaceRouteContext();
-  const initialEvidenceRecords = await getInitialEvidenceRecords();
-
-  return (
-    <WorkspaceFrame zh={zh} active="evidence" workspace={workspace} role={role} action={{ href: "/tasks", labelZh: "查看任务", labelEn: "View tasks", variant: "secondary" }}>
-      <EvidenceView zh={zh} workspace={workspace} role={role} initialEvidenceRecords={initialEvidenceRecords} />
-    </WorkspaceFrame>
-  );
+  const trade = await safeGetCurrentTradeCase();
+  redirect(`/cases/${trade.id}/evidence`);
 }

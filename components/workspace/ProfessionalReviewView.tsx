@@ -176,7 +176,7 @@ export function ProfessionalReviewView({
                   id: "no-review-receipts",
                   title: t(zh, "还没有人工证据审查 receipt", "No human evidence-review receipt yet"),
                   meta: [
-                    t(zh, "先在 /evidence 对一份证据执行 Verify / Reject / Request more evidence。", "Run Verify / Reject / Request more evidence on /evidence first."),
+                    t(zh, `先在 /cases/${caseSummary.id}/evidence 对一份证据执行 Verify / Reject / Request more evidence。`, `Run Verify / Reject / Request more evidence on /cases/${caseSummary.id}/evidence first.`),
                     "Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false",
                   ],
                   status: "open",

@@ -64,7 +64,14 @@ Use these as the main path when testing or demoing the product as a working site
 - `/cases/[caseId]/review` - case-scoped professional review surface
 - `/cases/[caseId]/handoff` - case-scoped handoff / Trust Pack JSON preview
 - `/dashboard` - active case command center from `getCaseOperatingSnapshot(caseId)`
-- `/evidence` and `/tasks` - legacy-compatible shortcuts into the active case workflow
+
+## Active-Case Shortcuts
+
+These routes exist only as compatibility shortcuts and redirect/resolve to the active case path:
+
+- `/evidence` -> `/cases/[activeCaseId]/evidence`
+- `/tasks` -> `/cases/[activeCaseId]/tasks`
+- `/business-professional-review` -> `/cases/[activeCaseId]/review`
 
 ## Reference / Demo Routes
 
@@ -75,7 +82,6 @@ These are still useful for explanation and regression checks, but they are not t
 - `/business-architecture` - consulting-grade architecture reference
 - `/business-flows` - four-flow reference view
 - `/business-readiness` - readiness reference view
-- `/business-professional-review` - legacy-compatible professional review shortcut
 - `/business-contracts` - smart contract reference console
 - `/business-wallet` - wallet reference view
 - `/proof-packs` - proof pack reference view
