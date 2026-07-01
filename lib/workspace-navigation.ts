@@ -1,4 +1,4 @@
-export type WorkspaceNavKey = "cases" | "flows" | "architecture" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "professionalReview" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
+export type WorkspaceNavKey = "start" | "organization" | "cases" | "verify" | "flows" | "architecture" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "professionalReview" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
 export type WorkspaceNavItem = { key: WorkspaceNavKey; href: string; zh: string; en: string; tier?: "primary" | "reference" };
 
@@ -11,12 +11,22 @@ export type WorkspaceNavGroup = {
 
 export const workspaceNavGroups: WorkspaceNavGroup[] = [
   {
+    id: "v2foundation",
+    zh: "v2 真实底座",
+    en: "v2 real foundation",
+    items: [
+      { key: "start", href: "/start", zh: "一键入口", en: "Start", tier: "primary" },
+      { key: "organization", href: "/organization-network", zh: "组织网络", en: "Organization", tier: "primary" },
+      { key: "cases", href: "/trade-cases", zh: "Trade Case", en: "Trade Cases", tier: "primary" },
+      { key: "verify", href: "/verify/local", zh: "本地验证", en: "Local Verify", tier: "primary" },
+    ],
+  },
+  {
     id: "operating",
     zh: "工作台主路径",
     en: "Working path",
     items: [
       { key: "dashboard", href: "/dashboard", zh: "操作台", en: "Command center", tier: "primary" },
-      { key: "cases", href: "/cases", zh: "Case", en: "Cases", tier: "primary" },
       { key: "evidence", href: "/evidence", zh: "证据", en: "Evidence", tier: "primary" },
       { key: "tasks", href: "/tasks", zh: "任务", en: "Tasks", tier: "primary" },
     ],
