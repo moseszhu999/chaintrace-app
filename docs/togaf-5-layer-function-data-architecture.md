@@ -1,255 +1,563 @@
-# ChainTrace TOGAF Five-layer Function and Data Architecture
+# ChainTrace Product-specific Five-layer Function and Data Architecture
 
-## Positioning
+## Architecture decision
 
-ChainTrace is not just a local proof tool.
+This document uses the ChainTrace product-specific five-layer model, not a generic TOGAF layer list.
 
-The small entry is:
+The purpose is to connect:
 
 ```text
-Upload trade documents -> generate a verifiable Trade Evidence Passport.
+product navigation
+-> workspace pages
+-> components and actions
+-> local data objects
+-> proof bundles / signatures / future chain commitments
 ```
 
-The large product is:
+Small entry:
 
 ```text
-A local-first, proof-first trade evidence infrastructure for small exporters, buyers, financiers, platforms, and AI agents.
+Upload trade documents -> get a verifiable Trade Evidence Passport.
 ```
 
-This document restores the missing enterprise architecture backbone: five functional layers and five data layers.
-
----
-
-## Five-layer functional architecture
-
-### F1. Business capability layer
-
-Purpose: define what business capabilities ChainTrace provides to the market.
-
-Core capabilities:
-
-- exporter organization proof
-- trade case creation
-- trade evidence passport generation
-- proof-safe sharing
-- external verification
-- buyer / counterparty confirmation
-- finance-readiness pre-review
-- reputation accumulation
-- AI-agent-readable trade fact layer
-
-User-facing meaning:
+Large product:
 
 ```text
-Small exporters can turn messy trade records into verifiable business evidence.
+A supply-chain fact and proof infrastructure for small exporters, buyers, logistics partners, financiers, marketplaces, and AI agents.
 ```
 
 ---
 
-### F2. Business process layer
+# Part I. Five-layer function architecture
 
-Purpose: define the end-to-end operating flow.
-
-Current local-first flow:
+The function architecture is a product decomposition from menu to action.
 
 ```text
-Create Organization Proof
--> Create Trade Case Proof
--> Attach Evidence Hashes
--> Generate Proof Pack / Passport
--> Sign Passport Root
--> Share Proof Pack
--> External Local Verify
--> Optional Raw File Re-Verify
+F-L1 Product Domain / Primary Menu
+F-L2 Business Capability / Secondary Module
+F-L3 Workspace Page / Use Case
+F-L4 Panel / Component / Tab
+F-L5 Action / Field / State / Permission
 ```
 
-Future network flow:
-
-```text
-Buyer confirmation
--> Logistics confirmation
--> Platform confirmation
--> Funder review
--> Risk exception handling
--> Chain commitment
--> Reputation update
-```
+This makes the architecture directly implementable.
 
 ---
 
-### F3. Application function layer
+## F-L1 Product Domain / Primary Menu
 
-Purpose: define product modules and screens.
+L1 is the top-level product domain. It should map to the main navigation and commercial product modules.
 
-Current modules:
+Current and target L1 domains:
 
-- `/organization-network`: local organization proof
-- `/trade-cases`: local trade case proof
-- `/evidence`: local evidence hash workspace
-- `/proof-packs`: proof pack / passport generator
-- `/verify/local`: browser-local verifier
+1. Organization Network
+2. Trade Case Workspace
+3. Evidence Registry
+4. AI Review Center
+5. Trade Evidence Passport
+6. Trust Page / Public Verify
+7. Counterparty Confirmation
+8. Scenario and Exception Engine
+9. RWA / Funding Readiness
+10. Oracle / IoT Event Layer
+11. Audit Trail and Compliance Boundary
+12. Platform Admin / Operator OS
 
-Next modules:
-
-- `/start`: one-click proof pack flow
-- `/verify`: public lightweight verifier
-- `/trust/:id`: public proof-safe trust page
-- `/confirm`: counterparty confirmation flow
-- `/finance-readiness`: pre-financing evidence review
-- `/agent-api`: AI-agent-readable proof interface
-
----
-
-### F4. Trust protocol layer
-
-Purpose: define why nobody needs to trust the ChainTrace database.
-
-Trust primitives:
-
-- canonical JSON
-- SHA-256 profile hash
-- case root hash
-- file SHA-256
-- evidence hash
-- evidence root hash
-- passport root hash
-- wallet signature
-- signed message binding
-- optional chain commitment
-- local verification
-- raw file byte-level re-verification
-
-Trust principle:
+Current implemented L1 subset:
 
 ```text
-Do not trust ChainTrace storage.
-Verify the proof.
+Organization Network
+Trade Case Workspace
+Evidence Registry
+Trade Evidence Passport
+Trust Page / Public Verify
 ```
 
 ---
 
-### F5. Ecosystem integration layer
+## F-L2 Business Capability / Secondary Module
 
-Purpose: define how ChainTrace grows from tool into infrastructure.
+L2 is the business capability inside each L1 domain.
 
-External actors:
+### Organization Network
 
-- small exporters
-- buyers
-- trading companies
-- logistics providers
-- warehouses
-- inspection companies
-- banks
-- factoring companies
-- insurers
-- marketplaces
-- customs / compliance partners
-- third-party AI agents
+- create local organization proof
+- export Organization Recovery Kit
+- import Organization Recovery Kit
+- wallet-sign organization profile hash
+- manage local organization identity
 
-Integration patterns:
+### Trade Case Workspace
 
-- exported Proof Pack JSON
-- public verifier
-- signed passport root
-- optional on-chain registry
-- partner confirmation
-- API / agent-readable proof summary
-- encrypted cloud backup without plaintext trust
+- create local trade case
+- generate case root hash
+- export Case Kit
+- import Case Kit
+- bind case to seller organization hash
+
+### Evidence Registry
+
+- select trade case
+- attach evidence metadata
+- compute browser-local file SHA-256
+- generate evidence hash
+- generate evidence root hash
+- export Evidence Kit
+- import Evidence Kit
+
+### AI Review Center
+
+- extract document fields
+- attach provenance to each extracted field
+- compare invoice / PO / BL / packing list
+- detect conflicts
+- create review flags
+- generate human-readable explanation
+
+### Trade Evidence Passport
+
+- collect organization proof
+- collect case proof
+- collect evidence proofs
+- calculate evidence root hash
+- calculate passport root hash
+- wallet-sign passport root hash
+- export Proof Pack
+
+### Trust Page / Public Verify
+
+- paste proof JSON
+- recompute hash
+- verify signature
+- optional raw file re-verify
+- show proof-safe result
+
+### Counterparty Confirmation
+
+- invite buyer / logistics / warehouse / inspection party
+- sign confirmation
+- bind confirmation to case root
+- record acceptance / dispute
+
+### Scenario and Exception Engine
+
+- detect missing evidence
+- detect inconsistent facts
+- detect unsupported financing claims
+- classify risk scenarios
+- generate exception case
+
+### RWA / Funding Readiness
+
+- evaluate receivable candidate
+- calculate readiness score
+- classify RWA claim status
+- enforce pre-review only boundary
+- block disbursement claims
+
+### Oracle / IoT Event Layer
+
+- ingest external event hash
+- bind logistics / warehouse / inspection events
+- record source and timestamp
+- create oracle event proof
+
+### Audit Trail and Compliance Boundary
+
+- record local actions
+- record proof generation events
+- record signature events
+- record verification events
+- preserve disclaimer records
+
+### Platform Admin / Operator OS
+
+- monitor product health
+- manage feature flags
+- manage partner configurations
+- manage proof protocol versions
+- inspect non-private operational metrics
 
 ---
 
-## Five-layer data architecture
+## F-L3 Workspace Page / Use Case
 
-### D1. Raw evidence data layer
+L3 is the page or major use case.
 
-Purpose: preserve the real-world source materials without making ChainTrace the trust source.
+Current L3 pages:
+
+```text
+/organization-network
+/trade-cases
+/evidence
+/proof-packs
+/verify/local
+```
+
+Target L3 pages:
+
+```text
+/start
+/organization-network
+/trade-cases
+/trade-cases/[id]
+/evidence
+/ai-review
+/proof-packs
+/verify
+/verify/local
+/trust/[passportRootHash]
+/confirm/[inviteId]
+/finance-readiness
+/oracle-events
+/audit
+/operator-os
+```
+
+The key public small-entry pages should be:
+
+```text
+/start
+/verify
+/trust/[passportRootHash]
+```
+
+The workspace pages can remain deeper for power users.
+
+---
+
+## F-L4 Panel / Component / Tab
+
+L4 is the actual UI section inside a workspace.
 
 Examples:
 
-- contract PDF
-- purchase order
-- invoice
-- packing list
-- bill of lading
-- warehouse receipt
-- QC report
-- buyer acceptance
-- payment proof
-- photos / scans / attachments
+### Organization Network panels
 
-Current rule:
+- organization profile form
+- proof summary card
+- wallet signature panel
+- Recovery Kit export / import panel
 
-```text
-Raw files stay user-local by default.
-ChainTrace stores or shares only file hash and metadata unless the user explicitly shares the file.
-```
+### Trade Case panels
+
+- case form
+- case proof summary
+- Case Kit export / import panel
+- case list
+
+### Evidence panels
+
+- case selector
+- evidence type selector
+- file picker
+- SHA-256 result card
+- evidence list
+- Evidence Kit export / import panel
+
+### Proof Pack panels
+
+- case selector
+- proof dependency summary
+- evidence count summary
+- passport root summary
+- wallet signature panel
+- Proof Pack export panel
+
+### Verify panels
+
+- JSON input
+- optional raw file input
+- recomputed hash summary
+- signature verification result
+- detailed check list
+- boundary disclaimer
 
 ---
 
-### D2. Extracted fact data layer
+## F-L5 Action / Field / State / Permission
 
-Purpose: convert documents into business facts.
+L5 is the smallest executable product unit.
 
-Examples:
+Examples of L5 actions:
 
+- create organization proof
+- copy org profile hash
+- connect wallet
+- sign org profile hash
+- download Recovery Kit
+- import Recovery Kit
+- create trade case
+- copy case root hash
+- download Case Kit
+- upload local file
+- compute file SHA-256
+- download Evidence Kit
+- generate Proof Pack
+- sign passport root hash
+- download Proof Pack
+- paste proof JSON
+- verify proof locally
+- upload raw file for re-verification
+
+Examples of L5 fields:
+
+- organization name
+- organization type
+- country
+- owner email
+- case name
 - buyer name
-- seller name
-- invoice number
-- PO number
 - amount
 - currency
 - goods description
-- shipment date
-- destination
-- payment term
-- due date
-- quantity
-- acceptance status
+- origin country
+- destination country
+- evidence type
+- stage code
+- file name
+- file size
+- file SHA-256
 
-Current status:
+Examples of L5 states:
+
+- LOCAL_ONLY
+- NOT_COMMITTED
+- COMMITTED
+- NOT_SIGNED
+- SIGNED
+- VERIFIED
+- FAILED
+- WARN
+- DRAFT
+- PRE_REVIEW_ONLY
+- GATES_NOT_PASSED
+
+Examples of L5 permissions:
+
+- local owner
+- organization member
+- signer
+- invited verifier
+- counterparty confirmer
+- operator
+- public verifier
+
+---
+
+# Part II. Five-layer data architecture
+
+The data architecture is a decomposition from business data domain to proof commitment.
 
 ```text
-Partly manual in the local proof flow.
-Future step: AI extraction with confidence and field provenance.
+D-L1 Data Domain
+D-L2 Aggregate Root / Main Entity
+D-L3 Child Entity / Relationship Entity
+D-L4 Field / State / Event
+D-L5 Proof / Hash / Signature / Version / Commitment
+```
+
+This makes the architecture directly mappable to localStorage, future database tables, API contracts, and chain registry contracts.
+
+---
+
+## D-L1 Data Domain
+
+L1 is the major data domain.
+
+Current and target D-L1 domains:
+
+1. Organization Domain
+2. Trade Case Domain
+3. Evidence Domain
+4. AI Review Domain
+5. Passport Domain
+6. Confirmation Domain
+7. Oracle / IoT Domain
+8. Exception Domain
+9. RWA / Funding Domain
+10. Audit / Compliance Domain
+11. User / Permission Domain
+12. Protocol / Version Domain
+
+Current implemented D-L1 subset:
+
+```text
+Organization Domain
+Trade Case Domain
+Evidence Domain
+Passport Domain
+Audit / Compliance boundary text
+Protocol / Version Domain
 ```
 
 ---
 
-### D3. Structured trade object layer
+## D-L2 Aggregate Root / Main Entity
 
-Purpose: organize facts into business objects.
+L2 is the aggregate root or main object in each domain.
 
-Objects:
+### Organization Domain
 
-- Organization Profile
-- Trade Case
-- Evidence Manifest
-- Evidence Set
-- Proof Pack / Trade Evidence Passport
-- Confirmation Record
-- Exception Case
-- Funding Readiness Snapshot
+- OrganizationProfile
+- OrganizationRecord
+- OrganizationMember
+- OrganizationProofBundle
 
-Current local storage keys:
+### Trade Case Domain
 
-```text
-chaintrace_v2_current_org
-chaintrace_v2_trade_cases
-chaintrace_v2_evidence_bundles
-chaintrace_v2_proof_packs
-```
+- TradeCase
+- TradeCasePrivateData
+- TradeCaseProofBundle
+- TradeCaseStage
+- TradeCaseTransition
+
+### Evidence Domain
+
+- EvidenceManifest
+- EvidenceFileHash
+- EvidenceProofBundle
+- EvidenceSet
+
+### AI Review Domain
+
+- AIReviewRun
+- ExtractedField
+- FieldProvenance
+- ConsistencyCheck
+- RiskFlag
+
+### Passport Domain
+
+- TradeEvidencePassport
+- ProofPack
+- PassportRoot
+- PassportSignature
+
+### Confirmation Domain
+
+- Invite
+- Confirmation
+- CounterpartySignature
+- ConfirmationHash
+
+### Oracle / IoT Domain
+
+- OracleEvent
+- EventSource
+- EventPayloadHash
+- EventTimestamp
+
+### Exception Domain
+
+- ExceptionCase
+- ExceptionType
+- ExceptionResolution
+
+### RWA / Funding Domain
+
+- ReceivableCandidate
+- FundingReadinessSnapshot
+- RWAClaim
+- FundingGate
+
+### Audit / Compliance Domain
+
+- AuditEvent
+- DisclaimerRecord
+- PolicyBoundary
+
+### User / Permission Domain
+
+- User
+- Role
+- Permission
+- Membership
+
+### Protocol / Version Domain
+
+- ProofVersion
+- HashAlgorithm
+- SignatureScheme
+- RegistryVersion
 
 ---
 
-### D4. Proof and commitment data layer
+## D-L3 Child Entity / Relationship Entity
 
-Purpose: create verifiable, portable proof objects.
+L3 represents child objects or relationship objects.
 
-Proof data:
+Examples:
 
+### Organization Domain
+
+- member belongs to organization
+- organization profile belongs to signer
+- organization proof binds profile hash to local owner
+
+### Trade Case Domain
+
+- case belongs to seller organization proof
+- case may reference buyer organization
+- case has stages
+- case has transitions
+- case has evidence set
+
+### Evidence Domain
+
+- evidence belongs to case root
+- evidence manifest references file SHA-256
+- evidence belongs to trade stage
+- evidence set belongs to case root
+
+### Passport Domain
+
+- passport contains organization proof
+- passport contains case proof
+- passport contains evidence proofs
+- passport signature signs passport root hash
+
+### Confirmation Domain
+
+- confirmation belongs to passport root or case root
+- confirmation belongs to counterparty
+- confirmation signs acceptance / rejection / dispute
+
+### RWA / Funding Domain
+
+- receivable candidate references case root
+- funding snapshot references evidence root
+- RWA claim references passport root
+
+---
+
+## D-L4 Field / State / Event
+
+L4 is the concrete data field, state, or event.
+
+### Key fields
+
+- organizationName
+- orgType
+- country
+- ownerEmail
 - orgProfileHash
+- caseName
+- buyerName
+- amount
+- currency
+- goodsDescription
+- originCountry
+- destinationCountry
+- paymentTerm
+- expectedShipmentDate
+- expectedDueDate
 - caseRootHash
+- evidenceType
+- stageCode
+- filename
+- mimeType
+- fileSize
 - fileSha256
 - evidenceHash
 - evidenceRootHash
@@ -258,10 +566,45 @@ Proof data:
 - signature
 - signedMessage
 - signedAt
-- chainCommitStatus
-- future transaction hash
 
-Current proof versions:
+### Key states
+
+- DRAFT
+- LOCAL_ONLY
+- NOT_COMMITTED
+- COMMITTED
+- NOT_SIGNED
+- SIGNED
+- VERIFIED
+- FAILED
+- WARN
+- PRE_REVIEW_ONLY
+- GATES_NOT_PASSED
+- NOT_READY
+- NOT_CREATED
+
+### Key events
+
+- organization proof generated
+- organization proof signed
+- case root generated
+- evidence hash generated
+- evidence root updated
+- proof pack generated
+- passport root signed
+- proof verified
+- raw file re-verified
+- counterparty confirmed
+- exception raised
+- readiness snapshot generated
+
+---
+
+## D-L5 Proof / Hash / Signature / Version / Commitment
+
+L5 is the verifiable data layer.
+
+Current local proof versions:
 
 ```text
 chaintrace-local-org-proof-v1
@@ -270,81 +613,119 @@ chaintrace-local-evidence-bundle-v1
 chaintrace-local-proof-pack-v1
 ```
 
----
-
-### D5. Network intelligence and decision data layer
-
-Purpose: convert verified facts into network value.
-
-Future data products:
-
-- buyer confirmation graph
-- supplier reliability history
-- document consistency score
-- dispute / exception history
-- finance-readiness score
-- receivable candidate status
-- RWA claim status
-- oracle event count
-- platform trust score
-- AI-agent trust summary
-
-Important boundary:
+Current hashes:
 
 ```text
-Decision data must be derived from verifiable lower-layer facts, not from opaque database claims.
+orgProfileHash = SHA-256(canonical privateProfile)
+caseRootHash = SHA-256(canonical privateData)
+fileSha256 = SHA-256(raw file bytes)
+evidenceHash = SHA-256(canonical evidence manifest)
+evidenceRootHash = SHA-256(sorted evidence hashes + case root)
+passportRootHash = SHA-256(org hash + case root + evidence root + evidence hashes)
+```
+
+Current signatures:
+
+```text
+organization signature signs orgProfileHash
+passport signature signs passportRootHash
+```
+
+Future chain commitments:
+
+```text
+OrganizationRegistry: orgProfileHash, signer, timestamp, version
+CaseRegistry: caseRootHash, sellerOrgProfileHash, signer, timestamp, version
+EvidenceRegistry: evidenceHash, evidenceRootHash, caseRootHash, signer, timestamp, version
+PassportRegistry: passportRootHash, caseRootHash, evidenceRootHash, signer, timestamp, version
+ConfirmationRegistry: confirmationHash, passportRootHash, confirmer, timestamp, version
 ```
 
 ---
 
-## Cross-map: function layer to data layer
+# Part III. Function-to-data mapping
 
-| Function layer | Main data dependency | Product meaning |
+| Function L1 | Main Data L1 | Current implementation |
 | --- | --- | --- |
-| F1 Business capability | D3 + D5 | What ChainTrace sells as business value |
-| F2 Business process | D1 + D2 + D3 | How users complete a trade evidence workflow |
-| F3 Application function | D3 + D4 | What screens and modules manipulate |
-| F4 Trust protocol | D4 | Why the proof is verifiable without database trust |
-| F5 Ecosystem integration | D4 + D5 | How ChainTrace becomes infrastructure |
+| Organization Network | Organization Domain | local org proof, wallet signature, Recovery Kit |
+| Trade Case Workspace | Trade Case Domain | local case root, Case Kit |
+| Evidence Registry | Evidence Domain | file SHA-256, evidence hash, Evidence Kit |
+| Trade Evidence Passport | Passport Domain | proof pack, passport root, wallet signature |
+| Trust Page / Public Verify | Proof / Audit Domain | local verify, raw file re-verify |
+| AI Review Center | AI Review Domain | not implemented |
+| Counterparty Confirmation | Confirmation Domain | not implemented |
+| Scenario and Exception Engine | Exception Domain | not implemented |
+| RWA / Funding Readiness | RWA / Funding Domain | type fields only |
+| Oracle / IoT Event Layer | Oracle / IoT Domain | type fields only |
+| Audit Trail and Compliance Boundary | Audit / Compliance Domain | boundary text only |
+| Platform Admin / Operator OS | Operator / Protocol Domain | not implemented in v2 local flow |
 
 ---
 
-## Current implementation coverage
+# Part IV. Current implementation coverage
 
-Implemented now:
+## Already implemented
 
-- F2 local proof process
-- F3 local organization / case / evidence / proof pack / verifier modules
-- F4 hash, signature, and raw file re-verification primitives
-- D1 raw file local rule
-- D3 structured local objects
-- D4 portable proof bundles
+### Function layers
 
-Still missing:
+- F-L1 subset: Organization, Trade Case, Evidence, Passport, Verify
+- F-L2 local capabilities for proof generation and verification
+- F-L3 workspace pages
+- F-L4 proof panels and verifier panels
+- F-L5 actions: generate, sign, export, import, verify, raw file re-verify
 
-- F1 polished business capability map in product UI
-- F5 partner / agent / finance integration
-- D2 AI extraction and provenance
-- D5 decision intelligence and reputation layer
+### Data layers
+
+- D-L1 Organization / Trade Case / Evidence / Passport domains
+- D-L2 local proof bundles
+- D-L3 object relationships through hash binding
+- D-L4 states and fields
+- D-L5 hashes, signatures, versions
+
+## Not yet implemented
+
+- AI Review Center
+- ExtractedField and FieldProvenance
+- ConsistencyCheck and RiskFlag
+- CounterpartyConfirmation
+- ExceptionCase
+- FundingReadinessSnapshot UI
+- ReceivableCandidate workflow
+- OracleEvent workflow
+- Public Trust Page
+- One-click Start flow
+- Chain registry commitment
 
 ---
 
-## Product direction
+# Part V. Correct product interpretation
 
-The small entry must stay simple:
+The small product entry is not the whole architecture.
+
+Small entry:
 
 ```text
 Upload docs -> get verifiable passport.
 ```
 
-The large product must be architected as:
+Large product architecture:
 
 ```text
-Raw evidence
--> extracted facts
--> structured trade objects
--> cryptographic proof
--> network intelligence
+F-L1 menu domain
+-> F-L2 business capability
+-> F-L3 workspace
+-> F-L4 component
+-> F-L5 action / field / state
 ```
 
-This is the actual ChainTrace moat.
+Large data architecture:
+
+```text
+D-L1 domain
+-> D-L2 aggregate
+-> D-L3 relationship
+-> D-L4 field / state / event
+-> D-L5 proof / hash / signature / commitment
+```
+
+This is the ChainTrace product-specific TOGAF skeleton.
