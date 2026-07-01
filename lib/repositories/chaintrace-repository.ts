@@ -48,6 +48,35 @@ export type EvidenceReviewReceipt = {
   agentDecisionAuthority: "none";
 };
 
+export type CaseAuditTrailEntry = {
+  id: string;
+  action: "created_from_public_converter";
+  actorRole: "sme_user";
+  createdAt: string;
+  summary: string;
+  rawPdfPolicy: "raw PDF stays browser-local / off-chain";
+};
+
+export type TradeCaseInitialSnapshot = {
+  capturedAt: string;
+  evidencePackHash: string;
+  gates: {
+    passed: number;
+    pending: number;
+    blocked: number;
+    total: number;
+    blockerCode: "GATES_NOT_PASSED";
+    disbursementAllowed: false;
+  };
+  readiness: {
+    readinessScore: number;
+    maxScore: number;
+    blockerCode: "GATES_NOT_PASSED";
+    disbursementAllowed: false;
+    preReviewAllowed: true;
+  };
+};
+
 export type TradeCaseRecord = {
   id: string;
   titleZh: string;
@@ -61,6 +90,10 @@ export type TradeCaseRecord = {
   readinessMaxScore: number;
   gateBlockerCode: "GATES_NOT_PASSED";
   disbursementAllowed: false;
+  createdAt: string;
+  source: "seeded_demo_case" | "public_converter";
+  initialSnapshot: TradeCaseInitialSnapshot;
+  caseAuditTrail: CaseAuditTrailEntry[];
 };
 
 export type EvidenceRecord = {
@@ -73,6 +106,7 @@ export type EvidenceRecord = {
   issuedAt?: string;
   status: EvidenceStatus;
   hash?: string;
+  rawDocumentStorage: "not_stored";
   amount?: string;
   noteZh?: string;
   noteEn?: string;
@@ -82,10 +116,11 @@ export type EvidenceRecord = {
   updatedAt: string;
 };
 
-export type AddEvidenceRecordInput = Omit<EvidenceRecord, "id" | "createdAt" | "updatedAt" | "reviewReceipts"> & {
+export type AddEvidenceRecordInput = Omit<EvidenceRecord, "id" | "createdAt" | "updatedAt" | "reviewReceipts" | "rawDocumentStorage"> & {
   id?: string;
   createdAt?: string;
   updatedAt?: string;
+  rawDocumentStorage?: "not_stored";
   reviewReceipts?: EvidenceReviewReceipt[];
 };
 
@@ -97,6 +132,23 @@ export type ReviewEvidenceRecordInput = {
   reason: string;
   reviewerName?: string;
   reviewedAt?: string;
+};
+
+export type CreatePreReviewCaseInput = {
+  source: "public_converter";
+  candidateHash: string;
+  documentHash: string;
+  fileName: string;
+  documentType: string;
+  documentNo?: string;
+  tradeId?: string;
+  titleZh?: string;
+  titleEn?: string;
+  poNo?: string;
+  invoiceNo?: string;
+  totalAmount?: string;
+  receivableAmount?: string;
+  requestedAdvance?: string;
 };
 
 const currentTradeCase: TradeCaseRecord = {
@@ -112,6 +164,35 @@ const currentTradeCase: TradeCaseRecord = {
   readinessMaxScore: 100,
   gateBlockerCode: "GATES_NOT_PASSED",
   disbursementAllowed: false,
+  createdAt: "2026-01-15T00:00:00.000Z",
+  source: "seeded_demo_case",
+  initialSnapshot: {
+    capturedAt: "2026-01-15T00:00:00.000Z",
+    evidencePackHash: "seeded-demo-case",
+    gates: {
+      passed: 6,
+      pending: 2,
+      blocked: 4,
+      total: 12,
+      blockerCode: "GATES_NOT_PASSED",
+      disbursementAllowed: false,
+    },
+    readiness: {
+      readinessScore: 62,
+      maxScore: 100,
+      blockerCode: "GATES_NOT_PASSED",
+      disbursementAllowed: false,
+      preReviewAllowed: true,
+    },
+  },
+  caseAuditTrail: [{
+    id: "audit_seeded_demo_case",
+    action: "created_from_public_converter",
+    actorRole: "sme_user",
+    createdAt: "2026-01-15T00:00:00.000Z",
+    summary: "Seeded demo case loaded for ChainTrace public workflow.",
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+  }],
 };
 
 const documentTypeById: Record<string, EvidenceDocumentType> = {
@@ -163,6 +244,7 @@ function toEvidenceRecord(document: TradeDocument): EvidenceRecord {
     issuedAt: document.issuedAt,
     status: mapEvidenceStatus(document.status),
     hash: document.hash,
+    rawDocumentStorage: "not_stored",
     amount: document.amount,
     noteZh: document.noteZh,
     noteEn: document.noteEn,
@@ -174,6 +256,10 @@ function toEvidenceRecord(document: TradeDocument): EvidenceRecord {
 }
 
 const seededCaseEvidence = concreteTradeCase.documents.map(toEvidenceRecord);
+
+const tradeCasesById = new Map<string, TradeCaseRecord>([
+  [currentTradeCase.id, currentTradeCase],
+]);
 
 const evidenceRecordsByTradeId = new Map<string, EvidenceRecord[]>([
   [currentTradeCase.id, seededCaseEvidence],
@@ -188,12 +274,95 @@ function cloneEvidenceRecord(record: EvidenceRecord): EvidenceRecord {
 }
 
 function cloneTradeCase(record: TradeCaseRecord): TradeCaseRecord {
-  return { ...record };
+  return {
+    ...record,
+    initialSnapshot: {
+      ...record.initialSnapshot,
+      gates: { ...record.initialSnapshot.gates },
+      readiness: { ...record.initialSnapshot.readiness },
+    },
+    caseAuditTrail: record.caseAuditTrail.map((entry) => ({ ...entry })),
+  };
 }
 
 function nextEvidenceId(tradeId: string) {
   const currentCount = evidenceRecordsByTradeId.get(tradeId)?.length ?? 0;
   return `evidence_${tradeId}_${String(currentCount + 1).padStart(4, "0")}`;
+}
+
+function slugPart(value: string | undefined, fallback: string) {
+  const slug = (value ?? "")
+    .toLowerCase()
+    .replace(/^0x/, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 48);
+  return slug || fallback;
+}
+
+function publicConverterCaseId(input: CreatePreReviewCaseInput) {
+  const hashPart = slugPart(input.candidateHash, "candidate").slice(0, 18);
+  const filePart = slugPart(input.fileName, "document").slice(0, 24);
+  return `case_pre_review_${filePart}_${hashPart}`;
+}
+
+function publicConverterDocumentType(value: string): EvidenceDocumentType {
+  if (value === "invoice") return "commercial_invoice";
+  if (value === "quality_report") return "arrival_quality_inspection";
+  if (value === "purchase_order") return "purchase_order";
+  if (value === "bill_of_lading") return "bill_of_lading";
+  if (value === "warehouse_receipt") return "warehouse_receipt";
+  if (value === "buyer_acceptance") return "buyer_acceptance";
+  return "other";
+}
+
+function gateImpactForCreatedDocument(documentType: EvidenceDocumentType): GateImpact[] {
+  const gateByType: Partial<Record<EvidenceDocumentType, GateImpact>> = {
+    purchase_order: {
+      gateId: "po_signed",
+      status: "candidate_pending_gate",
+      noteZh: "公开转换器创建了采购订单 metadata/hash，仍需 SME 或 operator 审查。",
+      noteEn: "The public converter created purchase-order metadata/hash; SME or operator review is still required.",
+    },
+    commercial_invoice: {
+      gateId: "invoice_matched",
+      status: "candidate_pending_gate",
+      noteZh: "公开转换器创建了发票 metadata/hash，仍需与 PO 匹配核验。",
+      noteEn: "The public converter created invoice metadata/hash; PO matching still requires review.",
+    },
+    bill_of_lading: {
+      gateId: "final_bl",
+      status: "candidate_pending_gate",
+      noteZh: "公开转换器创建了提单 metadata/hash，仍需最终签章核验。",
+      noteEn: "The public converter created B/L metadata/hash; final seal review is still required.",
+    },
+    warehouse_receipt: {
+      gateId: "warehouse_receipt",
+      status: "candidate_pending_gate",
+      noteZh: "公开转换器创建了仓库回执 metadata/hash，仍需柜号、铅封和重量核验。",
+      noteEn: "The public converter created warehouse-receipt metadata/hash; container, seal, and weight still require review.",
+    },
+    arrival_quality_inspection: {
+      gateId: "arrival_qc",
+      status: "candidate_pending_gate",
+      noteZh: "公开转换器创建了质检 metadata/hash，仍需争议和实验室结论审查。",
+      noteEn: "The public converter created QC metadata/hash; dispute and lab conclusions still require review.",
+    },
+    buyer_acceptance: {
+      gateId: "buyer_acceptance",
+      status: "candidate_pending_gate",
+      noteZh: "公开转换器创建了买家验收 metadata/hash，仍需验收/扣款/拒收决定审查。",
+      noteEn: "The public converter created buyer-acceptance metadata/hash; accept, discount, or reject decision still requires review.",
+    },
+  };
+  const impact = gateByType[documentType];
+  if (impact) return [impact];
+  return [{
+    gateId: "unmapped_evidence",
+    status: "no_automatic_gate_change",
+    noteZh: "公开转换器创建了 metadata/hash，但不会自动改变 gate。",
+    noteEn: "The public converter created metadata/hash, but it does not automatically change a gate.",
+  }];
 }
 
 type EvidenceRepository = {
@@ -226,6 +395,7 @@ function createRuntimeEvidenceRepository(): EvidenceRepository {
         id: input.id ?? nextEvidenceId(input.tradeId),
         createdAt: input.createdAt ?? now,
         updatedAt: input.updatedAt ?? now,
+        rawDocumentStorage: input.rawDocumentStorage ?? "not_stored",
         gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
         reviewReceipts: input.reviewReceipts ?? [],
       };
@@ -393,6 +563,7 @@ function createNeonEvidenceRepository(): EvidenceRepository {
         id: input.id ?? nextEvidenceId(input.tradeId),
         createdAt: input.createdAt ?? now,
         updatedAt: input.updatedAt ?? now,
+        rawDocumentStorage: input.rawDocumentStorage ?? "not_stored",
         gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
         reviewReceipts: input.reviewReceipts ?? [],
       };
@@ -420,8 +591,88 @@ export async function getCurrentTradeCase(): Promise<TradeCaseRecord> {
 }
 
 export async function getTradeCaseById(tradeId: string): Promise<TradeCaseRecord | null> {
-  if (tradeId !== currentTradeCase.id) return null;
-  return cloneTradeCase(currentTradeCase);
+  const tradeCase = tradeCasesById.get(tradeId);
+  return tradeCase ? cloneTradeCase(tradeCase) : null;
+}
+
+export async function listTradeCases(): Promise<TradeCaseRecord[]> {
+  return Array.from(tradeCasesById.values()).map(cloneTradeCase);
+}
+
+export async function createPreReviewCase(input: CreatePreReviewCaseInput): Promise<{ tradeCase: TradeCaseRecord; evidenceRecords: EvidenceRecord[]; auditTrail: CaseAuditTrailEntry[] }> {
+  const now = new Date().toISOString();
+  const id = input.tradeId ? slugPart(input.tradeId, "case") : publicConverterCaseId(input);
+  const documentType = publicConverterDocumentType(input.documentType);
+  const documentNo = input.documentNo?.trim() || `PUBLIC-${slugPart(input.candidateHash, "candidate").slice(0, 12).toUpperCase()}`;
+  const evidenceRecord: EvidenceRecord = {
+    id: `evidence_${slugPart(id, "case")}_${slugPart(documentNo, "document")}`,
+    tradeId: id,
+    documentType,
+    fileName: input.fileName,
+    documentNo,
+    status: "uploaded_pending_verification",
+    hash: input.documentHash,
+    rawDocumentStorage: "not_stored",
+    noteEn: "Created from public converter metadata/hash only; raw PDF stays browser-local.",
+    noteZh: "由公开转换器创建，仅保存 metadata/hash；PDF 原文留在浏览器本地。",
+    gateImpacts: gateImpactForCreatedDocument(documentType),
+    reviewReceipts: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  const initialSnapshot: TradeCaseInitialSnapshot = {
+    capturedAt: now,
+    evidencePackHash: input.candidateHash,
+    gates: {
+      passed: 0,
+      pending: 1,
+      blocked: 11,
+      total: 12,
+      blockerCode: "GATES_NOT_PASSED",
+      disbursementAllowed: false,
+    },
+    readiness: {
+      readinessScore: 20,
+      maxScore: 100,
+      blockerCode: "GATES_NOT_PASSED",
+      disbursementAllowed: false,
+      preReviewAllowed: true,
+    },
+  };
+  const caseAuditTrail: CaseAuditTrailEntry[] = [{
+    id: `audit_${id}_created`,
+    action: "created_from_public_converter",
+    actorRole: "sme_user",
+    createdAt: now,
+    summary: "Created pre-review case from public converter candidate preview; raw PDF was not uploaded.",
+    rawPdfPolicy: "raw PDF stays browser-local / off-chain",
+  }];
+  const tradeCase: TradeCaseRecord = {
+    id,
+    titleZh: input.titleZh?.trim() || "公开转换器预审 Case",
+    titleEn: input.titleEn?.trim() || "Public converter pre-review case",
+    poNo: input.poNo?.trim() || "PO-PENDING",
+    invoiceNo: input.invoiceNo?.trim() || documentNo,
+    totalAmount: input.totalAmount?.trim() || "USD 52,800",
+    requestedAdvance: input.requestedAdvance?.trim() || "USDC 29,500",
+    receivableAmount: input.receivableAmount?.trim() || "USD 36,960",
+    readinessScore: initialSnapshot.readiness.readinessScore,
+    readinessMaxScore: initialSnapshot.readiness.maxScore,
+    gateBlockerCode: "GATES_NOT_PASSED",
+    disbursementAllowed: false,
+    createdAt: now,
+    source: "public_converter",
+    initialSnapshot,
+    caseAuditTrail,
+  };
+
+  tradeCasesById.set(tradeCase.id, tradeCase);
+  evidenceRecordsByTradeId.set(tradeCase.id, [evidenceRecord]);
+  return {
+    tradeCase: cloneTradeCase(tradeCase),
+    evidenceRecords: [cloneEvidenceRecord(evidenceRecord)],
+    auditTrail: caseAuditTrail.map((entry) => ({ ...entry })),
+  };
 }
 
 export async function listEvidenceRecords(tradeId: string): Promise<EvidenceRecord[]> {

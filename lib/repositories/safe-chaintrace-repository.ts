@@ -1,11 +1,14 @@
 import { getFallbackEvidenceRecords } from "@/lib/evidence-fallback";
 import {
   findEvidenceById,
+  createPreReviewCase,
   getCurrentTradeCase,
   getEvidencePersistenceMode,
   getTradeCaseById,
+  listTradeCases,
   listEvidenceRecords,
   reviewEvidenceRecord,
+  type CreatePreReviewCaseInput,
   type EvidenceRecord,
   type EvidenceReviewAction,
   type EvidenceReviewReceipt,
@@ -100,8 +103,16 @@ export async function safeGetCurrentTradeCase(): Promise<TradeCaseRecord> {
   return getCurrentTradeCase();
 }
 
+export async function safeListTradeCases(): Promise<TradeCaseRecord[]> {
+  return listTradeCases();
+}
+
 export async function safeGetTradeCaseById(tradeId: string): Promise<TradeCaseRecord | null> {
   return getTradeCaseById(tradeId);
+}
+
+export async function safeCreatePreReviewCase(input: CreatePreReviewCaseInput) {
+  return createPreReviewCase(input);
 }
 
 export async function safeListEvidenceRecords(tradeId: string): Promise<{ records: EvidenceRecord[]; store: SafeEvidenceStoreStatus }> {

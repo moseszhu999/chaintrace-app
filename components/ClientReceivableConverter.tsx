@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { sha256File, shortHash } from "@/lib/hash";
 
 type EvidenceDocumentType = "invoice" | "purchase_order" | "bill_of_lading" | "warehouse_receipt" | "quality_report" | "buyer_acceptance";
@@ -65,11 +66,14 @@ function CopyButton({ label, value }: { label: string; value: string }) {
 }
 
 export function ClientReceivableConverter({ zh }: { zh: boolean }) {
+  const router = useRouter();
   const [documentType, setDocumentType] = useState<EvidenceDocumentType>("invoice");
   const [fileName, setFileName] = useState("Vietnam-coffee-invoice-demo.pdf");
   const [fileHash, setFileHash] = useState("0x7f5c9a4e2b18d42a8d0f9f1d4f9f93d3e98a2c4d6b71a0e6c2d44e7b8f0b1a63");
   const [candidateHash, setCandidateHash] = useState("0x91f3d4a6b2c88e24f3dd2a71bc4ec46ea7fbd61a9ac1bd522c36f9f7d2ed1a04");
   const [isHashing, setIsHashing] = useState(false);
+  const [isCreatingCase, setIsCreatingCase] = useState(false);
+  const [createdCaseId, setCreatedCaseId] = useState("");
   const [error, setError] = useState("");
 
   const candidate: ReceivableCandidate = useMemo(() => ({
@@ -317,6 +321,42 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
     await refreshCandidateHash({ ...candidate, documentType: nextType });
   }
 
+  async function createPreReviewCase() {
+    setError("");
+    setIsCreatingCase(true);
+    setCreatedCaseId("");
+
+    try {
+      const response = await fetch("/api/cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: "public_converter",
+          candidateHash,
+          documentHash: candidate.fileHash,
+          fileName: candidate.fileName,
+          documentType: candidate.documentType,
+          documentNo: `${candidate.documentType.toUpperCase()}-${shortHash(candidate.fileHash).replace(/[^a-zA-Z0-9]/g, "").toUpperCase()}`,
+          titleZh: "公开转换器预审 Case",
+          titleEn: "Public converter pre-review case",
+          totalAmount: "USD 52,800",
+          receivableAmount: candidate.receivableAmount,
+          requestedAdvance: candidate.requestedAdvance,
+        }),
+      });
+      const json = await response.json();
+      if (!response.ok) throw new Error(json.message ?? "Could not create pre-review case.");
+      const caseId = json.data?.caseId ?? json.caseId;
+      if (!caseId) throw new Error("Case creation response did not include caseId.");
+      setCreatedCaseId(caseId);
+      router.push(`/cases/${caseId}`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : t(zh, "无法创建预审 Case。", "Could not create pre-review case."));
+    } finally {
+      setIsCreatingCase(false);
+    }
+  }
+
   return (
     <section className="panel receivable-converter" id="pdf-to-receivable">
       <div className="converter-grid">
@@ -335,8 +375,15 @@ export function ClientReceivableConverter({ zh }: { zh: boolean }) {
             <a className="primary-button" href="#ai-native-preview">{t(zh, "预览 AI 证据推理", "Preview AI evidence reasoning")}</a>
             <a className="secondary-button" href="#typed-data-preview">{t(zh, "预览签名载荷", "Preview signing payload")}</a>
             <a className="secondary-button" href="#professional-review-intake-preview">{t(zh, "预览专业审核入口", "Preview professional intake")}</a>
+            <button className="primary-button button-reset" type="button" onClick={createPreReviewCase} disabled={isCreatingCase}>
+              {isCreatingCase ? t(zh, "正在创建...", "Creating...") : "Create pre-review case"}
+            </button>
             <a className="secondary-button" href="/login">{t(zh, "登录查看链上状态机", "Login to view on-chain state machine")}</a>
           </div>
+          <p className="proof-note">
+            candidate preview remains visible before case creation · metadata-and-hash-only · raw PDF stays browser-local / off-chain
+          </p>
+          {createdCaseId && <div className="notice">{t(zh, "已创建预审 Case：", "Created pre-review case: ")}{createdCaseId}</div>}
         </div>
 
         <div className="converter-board">
