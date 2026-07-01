@@ -33,20 +33,20 @@ const functionPoints: FunctionPoint[] = [
     groupZh: "Evidence Hash",
     groupEn: "Evidence Hash",
     items: [
-      { zh: "选择本地文件", en: "Select local file", status: "NEXT" },
-      { zh: "浏览器计算 fileSha256", en: "Compute fileSha256 in browser", status: "NEXT" },
-      { zh: "生成 Evidence Kit", en: "Generate Evidence Kit", status: "NEXT" },
-      { zh: "计算 evidenceRootHash", en: "Compute evidenceRootHash", status: "NEXT" },
+      { zh: "选择本地文件", en: "Select local file", status: "READY" },
+      { zh: "浏览器计算 fileSha256", en: "Compute fileSha256 in browser", status: "READY" },
+      { zh: "生成 Evidence Kit", en: "Generate Evidence Kit", status: "READY" },
+      { zh: "计算 evidenceRootHash", en: "Compute evidenceRootHash", status: "READY" },
     ],
   },
   {
     groupZh: "Proof Pack / Passport",
     groupEn: "Proof Pack / Passport",
     items: [
-      { zh: "聚合 Org / Case / Evidence Proof", en: "Bundle Org / Case / Evidence Proof", status: "TODO" },
-      { zh: "生成 passportRootHash", en: "Generate passportRootHash", status: "TODO" },
-      { zh: "钱包签名 Passport Root", en: "Wallet-sign Passport Root", status: "TODO" },
-      { zh: "下载 Proof Pack", en: "Download Proof Pack", status: "TODO" },
+      { zh: "聚合 Org / Case / Evidence Proof", en: "Bundle Org / Case / Evidence Proof", status: "NEXT" },
+      { zh: "生成 passportRootHash", en: "Generate passportRootHash", status: "NEXT" },
+      { zh: "钱包签名 Passport Root", en: "Wallet-sign Passport Root", status: "NEXT" },
+      { zh: "下载 Proof Pack", en: "Download Proof Pack", status: "NEXT" },
     ],
   },
   {
