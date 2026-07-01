@@ -55,11 +55,27 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
       });
       const json = await res.json();
       if (!json.ok) throw new Error(json.message || "Failed to create organization.");
+
+      const createdOrganization = json.data?.organization;
+      const createdMembership = json.data?.membership;
+      if (createdOrganization && createdMembership) {
+        setContext((previous) => ({
+          ...previous,
+          organization: createdOrganization,
+          membership: createdMembership,
+          organizations: [
+            { organization: createdOrganization, membership: createdMembership },
+            ...previous.organizations.filter((item) => item.organization.id !== createdOrganization.id),
+          ],
+        }));
+      } else {
+        await refreshContext();
+      }
+
       setMessage(label(zh, "组织已创建，并已绑定当前用户为 ADMIN。", "Organization created and current user is bound as ADMIN."));
       setName("");
       setCountry("");
       setWebsite("");
-      await refreshContext();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Failed to create organization.");
     } finally {
