@@ -76,6 +76,7 @@ function main() {
   assertIncludes(home, 'href="/login"', "homepage login CTA");
   assertIncludes(publicHeader, 'href: "/agent"', "public header Agent nav");
   assertIncludes(publicHeader, 'href: "/login"', "public header login nav");
+  assertIncludes(publicHeader, 'href: "/#pdf-to-receivable"', "public header create case nav");
 
   assertIncludes(agent, "PublicHeader", "public Agent page");
   assertNotIncludes(agent, "WorkspaceFrame", "public Agent page");
@@ -90,8 +91,9 @@ function main() {
   assertIncludes(agent, 'href="/login"', "public Agent login CTA");
   assertIncludes(agent, 'href="/api/financing-pack"', "public Agent financing pack API CTA");
 
-  assertIncludes(login, 'href="/business-ops"', "login simulated workspace entry");
-  assertIncludes(login, 'href="/dashboard"', "login simulated dashboard entry");
+  assertNotIncludes(login, 'href="/business-ops"', "login should not default to reference Agent route");
+  assertIncludes(login, 'href="/dashboard"', "login dashboard entry");
+  assertIncludes(login, 'href="/cases"', "login case list entry");
 
   assertIncludes(businessOps, "WorkspaceFrame", "operator workspace");
   assertIncludes(businessOps, "Operator workspace", "operator workspace copy");
@@ -198,7 +200,7 @@ function main() {
   assertNotIncludes(architectureFixture, "Future PostgreSQL / Object Storage / Vector Store / Indexer DB", "core technical architecture");
   assertNotIncludes(architectureView, "前端、API、Agent 服务、合约、数据库、对象存储和 CI/CD", "technical architecture copy");
 
-  console.log("Public Agent entry validation passed: /agent is public, /business-ops remains operator workspace.");
+  console.log("Public Agent entry validation passed: public CTA creates a case, login enters dashboard/cases, /agent remains public story.");
 }
 
 main();
