@@ -19,12 +19,14 @@ The first deliverables are business requirements, role definitions, registration
 
 ChainTrace is an Agent Native + Crypto Native supply-chain-finance system.
 
-It is not only a front-office intake layer. It includes exporter workflows, bank / funding-provider workflows, third-party fact-provider workflows, platform operation, and the DeFi smart-contract financial execution layer.
+It is not only a front-office intake layer. It includes exporter workflows, optional bank / funding-provider workflows, third-party fact-provider workflows, platform operation, AI Agent operation, and the DeFi smart-contract financial execution layer.
+
+Different scenarios can use different execution paths. Some scenarios require bank review. Some scenarios can be executed directly by DeFi smart contracts after Agent and rule checks. Some low-human-touch legal or operational scenarios may need only AI Agents and smart contracts, with humans handling exceptions, disputes, and high-risk authorization.
 
 The system starts from real business roles and financing outcomes:
 
 - funding demander / exporter
-- funding provider / bank / factoring institution
+- funding provider / bank / factoring institution, when the scenario requires a bank-side decision
 - inspection party
 - platform / contract operator
 - DeFi smart-contract financial execution layer
