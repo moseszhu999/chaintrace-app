@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { buildFinancingPack } from "@/lib/financing-pack-builder";
+import { safeReviewEvidenceRecord } from "@/lib/repositories/safe-chaintrace-repository";
 import {
-  reviewEvidenceRecord,
   type EvidenceReviewAction,
   type EvidenceReviewerRole,
 } from "@/lib/repositories/chaintrace-repository";
@@ -58,7 +58,7 @@ export async function POST(
   }
 
   try {
-    const { evidenceRecord, reviewReceipt } = await reviewEvidenceRecord(evidenceId, {
+    const { evidenceRecord, reviewReceipt, store } = await safeReviewEvidenceRecord(evidenceId, {
       action,
       reviewerRole,
       reviewerName: normalize(payload.reviewerName) || undefined,
@@ -75,10 +75,7 @@ export async function POST(
       readiness: financingPack.readiness,
       evidencePackHash: financingPack.evidencePackHash,
       evidencePackURI: financingPack.evidencePackURI,
-      contractBoundary: {
-        allowedAction: "EVIDENCE_REVIEW_RECEIPT_ONLY",
-        noTransaction: true,
-      },
+      evidenceStore: store,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "EVIDENCE_NOT_FOUND") {
