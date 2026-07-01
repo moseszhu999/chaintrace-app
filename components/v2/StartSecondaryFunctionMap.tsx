@@ -23,20 +23,20 @@ const functionPoints: FunctionPoint[] = [
     groupZh: "Trade Case",
     groupEn: "Trade Case",
     items: [
-      { zh: "快速创建 Case", en: "Quick-create Case", status: "NEXT" },
-      { zh: "绑定 sellerOrgProfileHash", en: "Bind sellerOrgProfileHash", status: "NEXT" },
+      { zh: "快速创建 Case", en: "Quick-create Case", status: "READY" },
+      { zh: "绑定 sellerOrgProfileHash", en: "Bind sellerOrgProfileHash", status: "READY" },
       { zh: "导入 Case Kit", en: "Import Case Kit", status: "TODO" },
-      { zh: "查看 caseRootHash", en: "View caseRootHash", status: "NEXT" },
+      { zh: "查看 caseRootHash", en: "View caseRootHash", status: "READY" },
     ],
   },
   {
     groupZh: "Evidence Hash",
     groupEn: "Evidence Hash",
     items: [
-      { zh: "选择本地文件", en: "Select local file", status: "TODO" },
-      { zh: "浏览器计算 fileSha256", en: "Compute fileSha256 in browser", status: "TODO" },
-      { zh: "生成 Evidence Kit", en: "Generate Evidence Kit", status: "TODO" },
-      { zh: "计算 evidenceRootHash", en: "Compute evidenceRootHash", status: "TODO" },
+      { zh: "选择本地文件", en: "Select local file", status: "NEXT" },
+      { zh: "浏览器计算 fileSha256", en: "Compute fileSha256 in browser", status: "NEXT" },
+      { zh: "生成 Evidence Kit", en: "Generate Evidence Kit", status: "NEXT" },
+      { zh: "计算 evidenceRootHash", en: "Compute evidenceRootHash", status: "NEXT" },
     ],
   },
   {
