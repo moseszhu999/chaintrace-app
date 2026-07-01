@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { demoRoleCookieName, demoRoleHeaderName, normalizeDemoRole } from "@/lib/demo-roles";
 import { getIsZhRequest } from "@/lib/request-locale";
-import { getCurrentV2OrganizationContext } from "@/lib/repositories/v2-organization-repository";
+import { safeGetCurrentV2OrganizationContext } from "@/lib/repositories/safe-v2-organization-repository";
 import { getWorkspaceSnapshot } from "@/lib/workspace-repository";
 
 function clean(value: string | null | undefined) {
@@ -26,7 +26,7 @@ export async function getWorkspaceRouteContext() {
     headers(),
   ]);
   const identity = resolveServerIdentity(headerStore);
-  const organizationContext = await getCurrentV2OrganizationContext(identity.email, identity.name);
+  const organizationContext = await safeGetCurrentV2OrganizationContext(identity.email, identity.name);
 
   // Transitional compatibility only: legacy workspace components still accept DemoRole.
   // v2 pages must prefer organizationContext.membership.role and organization_id scope.
