@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { apiError, apiSuccess } from "@/lib/api-response";
 import { buildFinancingPack } from "@/lib/financing-pack-builder";
+import { safeReviewEvidenceRecord } from "@/lib/repositories/safe-chaintrace-repository";
 import {
-  reviewEvidenceRecord,
   type EvidenceReviewAction,
   type EvidenceReviewerRole,
 } from "@/lib/repositories/chaintrace-repository";
@@ -43,26 +44,21 @@ export async function POST(
   const reason = normalize(payload.reason);
 
   if (!action || !reviewerRole || !reason) {
-    return NextResponse.json({
-      accepted: false,
-      error: "INVALID_EVIDENCE_REVIEW",
-      allowedActions: ["verify", "reject", "request_more_evidence"],
-      allowedReviewerRoles: ["operator", "professional"],
-      missingFields: [
-        !action ? "action" : null,
-        !reviewerRole ? "reviewerRole" : null,
-        !reason ? "reason" : null,
-      ].filter(Boolean),
-      guardrails: {
-        status: "Pre-review only",
-        blockerCode: "GATES_NOT_PASSED",
-        disbursementAllowed: false,
-      },
-    }, { status: 400 });
+    const missingFields = [
+      !action ? "action" : null,
+      !reviewerRole ? "reviewerRole" : null,
+      !reason ? "reason" : null,
+    ].filter(Boolean);
+
+    return apiError(
+      "INVALID_EVIDENCE_REVIEW",
+      `Evidence review requires action, reviewerRole, and reason. Missing/invalid: ${missingFields.join(", ") || "none"}.`,
+      { status: 400 },
+    );
   }
 
   try {
-    const { evidenceRecord, reviewReceipt } = await reviewEvidenceRecord(evidenceId, {
+    const { evidenceRecord, reviewReceipt, store } = await safeReviewEvidenceRecord(evidenceId, {
       action,
       reviewerRole,
       reviewerName: normalize(payload.reviewerName) || undefined,
@@ -70,7 +66,7 @@ export async function POST(
     });
     const financingPack = await buildFinancingPack();
 
-    return NextResponse.json({
+    return apiSuccess({
       accepted: true,
       version: "chaintrace-evidence-review-v0.1",
       reviewReceipt,
@@ -79,41 +75,17 @@ export async function POST(
       readiness: financingPack.readiness,
       evidencePackHash: financingPack.evidencePackHash,
       evidencePackURI: financingPack.evidencePackURI,
-      guardrails: {
-        status: "Pre-review only",
-        blockerCode: financingPack.readiness.blockerCode,
-        disbursementAllowed: financingPack.readiness.disbursementAllowed,
-        agentDecisionAuthority: "none",
-      },
-      contractBoundary: {
-        target: "LoanRequestRegistry.submitPreReviewRequest",
-        allowedAction: "EVIDENCE_REVIEW_RECEIPT_ONLY",
-        noTransaction: true,
-      },
+      evidenceStore: store,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "EVIDENCE_NOT_FOUND") {
-      return NextResponse.json({
-        accepted: false,
-        error: "EVIDENCE_NOT_FOUND",
-        evidenceId,
-        guardrails: {
-          status: "Pre-review only",
-          blockerCode: "GATES_NOT_PASSED",
-          disbursementAllowed: false,
-        },
-      }, { status: 404 });
+      return apiError("EVIDENCE_NOT_FOUND", `Evidence record ${evidenceId} was not found.`, { status: 404 });
     }
 
-    return NextResponse.json({
-      accepted: false,
-      error: "EVIDENCE_REVIEW_FAILED",
-      message: error instanceof Error ? error.message : "Unknown evidence review error.",
-      guardrails: {
-        status: "Pre-review only",
-        blockerCode: "GATES_NOT_PASSED",
-        disbursementAllowed: false,
-      },
-    }, { status: 500 });
+    return apiError(
+      "EVIDENCE_REVIEW_FAILED",
+      error instanceof Error ? error.message : "Unknown evidence review error.",
+      { status: 500 },
+    );
   }
 }
