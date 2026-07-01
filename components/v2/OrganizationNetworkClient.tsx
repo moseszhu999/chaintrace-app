@@ -9,6 +9,8 @@ type OrganizationNetworkClientProps = {
   initialContext: OrganizationContext;
 };
 
+const currentOrgStorageKey = "chaintrace_v2_current_org";
+
 function label(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
@@ -59,6 +61,7 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
       const createdOrganization = json.data?.organization;
       const createdMembership = json.data?.membership;
       if (createdOrganization && createdMembership) {
+        window.localStorage.setItem(currentOrgStorageKey, JSON.stringify({ organization: createdOrganization, membership: createdMembership }));
         setContext((previous) => ({
           ...previous,
           organization: createdOrganization,
