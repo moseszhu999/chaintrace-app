@@ -4,7 +4,7 @@ import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { evaluateReadiness } from "@/lib/readiness-evaluator";
 import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const trade = await getCurrentTradeCase();
