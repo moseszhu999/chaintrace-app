@@ -28,14 +28,24 @@ Off-chain stores full business data.
 On-chain stores proof commitments only.
 ```
 
-## Apply manually
+## Automatic deployment migration
 
-For Neon/Postgres development, run the schema against the target database before enabling v2.1 persistence.
+The migration script is:
 
-Example:
-
-```bash
-psql "$DATABASE_URL" -f database/schema-v2.1.sql
+```text
+scripts/apply-v2-schema.mjs
 ```
+
+The build command now runs the v2 schema step before `next build`.
+
+To disable the schema step temporarily, set:
+
+```text
+CHAINTRACE_SKIP_V2_SCHEMA_MIGRATION=true
+```
+
+## Manual migration
+
+For local development, run the schema file against the target Neon/Postgres database with your own local connection settings.
 
 Do not expose raw evidence files publicly by default.
