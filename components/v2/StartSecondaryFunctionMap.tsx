@@ -53,10 +53,10 @@ const functionPoints: FunctionPoint[] = [
     groupZh: "Verify / Share",
     groupEn: "Verify / Share",
     items: [
-      { zh: "粘贴 Proof Pack 验证", en: "Paste Proof Pack to verify", status: "NEXT" },
-      { zh: "上传原文件重验 fileSha256", en: "Upload raw file to re-verify fileSha256", status: "NEXT" },
-      { zh: "验证钱包签名", en: "Verify wallet signature", status: "NEXT" },
-      { zh: "生成对外分享结果", en: "Generate shareable verification result", status: "NEXT" },
+      { zh: "粘贴 Proof Pack 验证", en: "Paste Proof Pack to verify", status: "READY" },
+      { zh: "上传原文件重验 fileSha256", en: "Upload raw file to re-verify fileSha256", status: "READY" },
+      { zh: "验证钱包签名", en: "Verify wallet signature", status: "READY" },
+      { zh: "生成对外分享结果", en: "Generate shareable verification result", status: "READY" },
     ],
   },
 ];
