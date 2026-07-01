@@ -43,20 +43,20 @@ const functionPoints: FunctionPoint[] = [
     groupZh: "Proof Pack / Passport",
     groupEn: "Proof Pack / Passport",
     items: [
-      { zh: "聚合 Org / Case / Evidence Proof", en: "Bundle Org / Case / Evidence Proof", status: "NEXT" },
-      { zh: "生成 passportRootHash", en: "Generate passportRootHash", status: "NEXT" },
-      { zh: "钱包签名 Passport Root", en: "Wallet-sign Passport Root", status: "NEXT" },
-      { zh: "下载 Proof Pack", en: "Download Proof Pack", status: "NEXT" },
+      { zh: "聚合 Org / Case / Evidence Proof", en: "Bundle Org / Case / Evidence Proof", status: "READY" },
+      { zh: "生成 passportRootHash", en: "Generate passportRootHash", status: "READY" },
+      { zh: "钱包签名 Passport Root", en: "Wallet-sign Passport Root", status: "READY" },
+      { zh: "下载 Proof Pack", en: "Download Proof Pack", status: "READY" },
     ],
   },
   {
     groupZh: "Verify / Share",
     groupEn: "Verify / Share",
     items: [
-      { zh: "粘贴 Proof Pack 验证", en: "Paste Proof Pack to verify", status: "TODO" },
-      { zh: "上传原文件重验 fileSha256", en: "Upload raw file to re-verify fileSha256", status: "TODO" },
-      { zh: "验证钱包签名", en: "Verify wallet signature", status: "TODO" },
-      { zh: "生成对外分享结果", en: "Generate shareable verification result", status: "TODO" },
+      { zh: "粘贴 Proof Pack 验证", en: "Paste Proof Pack to verify", status: "NEXT" },
+      { zh: "上传原文件重验 fileSha256", en: "Upload raw file to re-verify fileSha256", status: "NEXT" },
+      { zh: "验证钱包签名", en: "Verify wallet signature", status: "NEXT" },
+      { zh: "生成对外分享结果", en: "Generate shareable verification result", status: "NEXT" },
     ],
   },
 ];
