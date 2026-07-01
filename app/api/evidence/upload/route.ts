@@ -173,6 +173,7 @@ export async function POST(request: NextRequest) {
     issuerPartyId: normalizeText(payload.issuer) || undefined,
     status: inferredStatus,
     hash,
+    rawDocumentStorage: "not_stored",
     noteEn: normalizeText(payload.note) || undefined,
     gateImpacts: inferGateImpacts(documentType),
   });

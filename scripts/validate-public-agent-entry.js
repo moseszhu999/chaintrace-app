@@ -103,7 +103,12 @@ function main() {
   assertIncludes(receivableConverter, "LogisticsEvidenceRegistry", "on-chain logistics registry intent");
   assertIncludes(receivableConverter, "LoanRequestRegistry.submitPreReviewRequest", "on-chain pre-review request intent");
   assertIncludes(receivableConverter, "RestrictedReceivableToken", "controlled receivable token intent");
-  assertNotIncludes(receivableConverter, 'fetch("/api', "client converter core architecture");
+  assertIncludes(receivableConverter, "Create pre-review case", "public converter case creation CTA");
+  assertIncludes(receivableConverter, 'fetch("/api/cases"', "public converter creates pre-review case");
+  assertIncludes(receivableConverter, "router.push(`/cases/${caseId}`)", "public converter redirects to created case");
+  assertIncludes(receivableConverter, "candidate preview remains visible", "public converter preserves candidate preview before creation");
+  assertIncludes(receivableConverter, "metadata-and-hash-only", "public converter no raw PDF upload boundary");
+  assertNotIncludes(receivableConverter, 'fetch("/api/evidence/upload"', "client converter must not upload raw evidence file");
   assertIncludes(receivableConverter, "AI-native", "AI-native evidence extraction preview");
   assertIncludes(receivableConverter, "agentExtractionReceipt", "AI-native extraction receipt model");
   assertIncludes(receivableConverter, "agentRunStatus: \"preview_only\"", "AI-native preview status");

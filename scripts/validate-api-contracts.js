@@ -104,6 +104,8 @@ function validateRepositoryLayer() {
     "export type EvidenceDocumentType",
     "export type GateImpact",
     "export async function getCurrentTradeCase",
+    "export async function listTradeCases",
+    "export async function createPreReviewCase",
     "export async function listEvidenceRecords",
     "export async function addEvidenceRecord",
     "export async function findEvidenceById",
@@ -115,6 +117,9 @@ function validateRepositoryLayer() {
     "DATABASE_URL",
     "neon_evidence_store",
     "runtime_evidence_store",
+    "rawDocumentStorage",
+    "caseAuditTrail",
+    "initialSnapshot",
     "seededCaseEvidence",
     "jsonb",
   ].forEach((expected) => assertIncludes(repository, expected, "chaintrace repository"));
@@ -146,6 +151,45 @@ function validateRepositoryLayer() {
     "GATES_NOT_PASSED",
     "disbursement_allowed boolean not null default false",
   ].forEach((expected) => assertIncludes(evidenceSchema, expected, "durable evidence intake schema"));
+}
+
+function validatePublicConverterCaseCreation() {
+  const casesRoute = read("app/api/cases/route.ts");
+  const repository = read("lib/repositories/chaintrace-repository.ts");
+  const safeRepository = read("lib/repositories/safe-chaintrace-repository.ts");
+  const converter = read("components/ClientReceivableConverter.tsx");
+
+  [
+    "POST",
+    "safeCreatePreReviewCase",
+    "candidateHash",
+    "documentHash",
+    "rawDocumentStorage",
+    "metadata-and-hash-only",
+    "initialSnapshot",
+    "auditTrail",
+    "disbursementAllowed: false",
+    'blockerCode: "GATES_NOT_PASSED"',
+  ].forEach((expected) => assertIncludes(casesRoute, expected, "public converter case creation API"));
+
+  [
+    "CreatePreReviewCaseInput",
+    "createPreReviewCase",
+    "caseAuditTrail",
+    "initialSnapshot",
+    "rawDocumentStorage: \"not_stored\"",
+    "evidenceRecordsByTradeId.set",
+  ].forEach((expected) => assertIncludes(repository, expected, "pre-review case repository creation"));
+
+  assertIncludes(safeRepository, "safeCreatePreReviewCase", "safe pre-review case creation");
+  assertIncludes(converter, "Create pre-review case", "public converter create case UI");
+  assertIncludes(converter, 'fetch("/api/cases"', "public converter create case API call");
+  assertIncludes(converter, "router.push(`/cases/${caseId}`)", "public converter case redirect");
+  assertIncludes(converter, "metadata-and-hash-only", "public converter metadata-only boundary");
+  assert(!converter.includes("Apply loan"), "public converter must not claim loan application");
+  assert(!converter.includes("Submit financing"), "public converter must not claim financing submission");
+  assert(!converter.includes("Get approved"), "public converter must not claim approval");
+  assert(!converter.includes("Disburse"), "public converter must not claim disbursement");
 }
 
 function validateEvidenceUploadPersistence() {
@@ -273,6 +317,7 @@ function main() {
   validateGateDecision();
   validatePreReviewDraft();
   validateRepositoryLayer();
+  validatePublicConverterCaseCreation();
   validateEvidenceUploadPersistence();
   validateEvidenceReviewTransition();
   validateFinancingPackGeneration();

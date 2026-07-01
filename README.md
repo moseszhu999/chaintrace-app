@@ -66,6 +66,7 @@ These routes are kept for the Vercel demo and regression validation. They are no
 - `GET /api/agents/gates` - 12 gate statuses; current case remains 6/12 passed
 - `GET /api/agents/gaps` - missing evidence and next actions
 - `GET /api/agents/risk-memo` - risk flags, approval conditions, financier memo
+- `POST /api/cases` - create a pre-review case from public converter metadata/hash without storing raw PDFs
 - `POST /api/evidence/upload` - mocked evidence upload classification
 - `GET /api/financing-pack` - financier-facing evidence and memo pack
 - `GET /api/professional-review` - professional exception review queue

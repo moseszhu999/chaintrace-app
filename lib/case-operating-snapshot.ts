@@ -1,11 +1,12 @@
 import { evaluateLoanGates } from "@/lib/gate-evaluator";
 import { evaluateReadiness } from "@/lib/readiness-evaluator";
 import { listEvidenceTasks, seedMissingEvidenceTasks } from "@/lib/evidence-task-store";
-import { safeGetCurrentTradeCase, safeListEvidenceRecords } from "@/lib/repositories/safe-chaintrace-repository";
+import { safeGetCurrentTradeCase, safeGetTradeCaseById, safeListEvidenceRecords } from "@/lib/repositories/safe-chaintrace-repository";
 
 export async function getCaseOperatingSnapshot(caseId?: string) {
-  const trade = await safeGetCurrentTradeCase();
-  const evidence = await safeListEvidenceRecords(caseId ?? trade.id);
+  const trade = caseId ? await safeGetTradeCaseById(caseId) : await safeGetCurrentTradeCase();
+  if (!trade) throw new Error("CASE_NOT_FOUND");
+  const evidence = await safeListEvidenceRecords(trade.id);
   seedMissingEvidenceTasks(trade.id, evidence.records);
   const evidenceTasks = await listEvidenceTasks(trade.id);
   const gates = evaluateLoanGates(evidence.records);

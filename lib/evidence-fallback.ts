@@ -50,6 +50,7 @@ function toFallbackEvidenceRecord(document: TradeDocument): EvidenceRecord {
     issuedAt: document.issuedAt,
     status: mapStatus(document.status),
     hash: document.hash,
+    rawDocumentStorage: "not_stored",
     amount: document.amount,
     noteZh: document.noteZh,
     noteEn: document.noteEn,
