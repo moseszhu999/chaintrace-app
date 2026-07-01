@@ -10,7 +10,7 @@ type CheckResult = {
 };
 
 type VerifyResult = {
-  kitType: "Organization Recovery Kit" | "Trade Case Kit" | "Evidence Kit" | "Unknown";
+  kitType: "Organization Recovery Kit" | "Trade Case Kit" | "Evidence Kit" | "Proof Pack" | "Unknown";
   status: "PASS" | "FAIL" | "WARN";
   summary: string;
   claimedHash?: string;
@@ -50,6 +50,12 @@ function statusClass(status: CheckResult["status"] | VerifyResult["status"]) {
   if (status === "PASS") return "success";
   if (status === "WARN") return "warning";
   return "danger";
+}
+
+function finalStatus(checks: CheckResult[]) {
+  const failed = checks.some((check) => check.status === "FAIL");
+  const warned = checks.some((check) => check.status === "WARN");
+  return failed ? "FAIL" : warned ? "WARN" : "PASS";
 }
 
 async function verifyOrganizationKit(input: Record<string, unknown>): Promise<VerifyResult> {
@@ -94,12 +100,11 @@ async function verifyOrganizationKit(input: Record<string, unknown>): Promise<Ve
     checks.push({ label: "Wallet signature", status: "WARN", detail: "No wallet signature was provided." });
   }
 
-  const failed = checks.some((check) => check.status === "FAIL");
-  const warned = checks.some((check) => check.status === "WARN");
+  const status = finalStatus(checks);
   return {
     kitType: "Organization Recovery Kit",
-    status: failed ? "FAIL" : warned ? "WARN" : "PASS",
-    summary: failed ? "Organization proof failed verification." : warned ? "Organization proof hash is valid, but signature is missing." : "Organization proof passed verification.",
+    status,
+    summary: status === "FAIL" ? "Organization proof failed verification." : status === "WARN" ? "Organization proof hash is valid, but signature is missing." : "Organization proof passed verification.",
     claimedHash,
     recomputedHash,
     signerAddress,
@@ -135,12 +140,11 @@ async function verifyTradeCaseKit(input: Record<string, unknown>): Promise<Verif
   checks.push({ label: "Case hash mirror", status: caseRecordHash === claimedHash ? "PASS" : "FAIL", detail: "case.caseRootHash should mirror proof.caseRootHash." });
   checks.push({ label: "Seller organization linkage", status: sellerOrgProfileHash === privateSellerHash ? "PASS" : "WARN", detail: "proof.sellerOrgProfileHash should match privateData.sellerOrgProfileHash when present." });
 
-  const failed = checks.some((check) => check.status === "FAIL");
-  const warned = checks.some((check) => check.status === "WARN");
+  const status = finalStatus(checks);
   return {
     kitType: "Trade Case Kit",
-    status: failed ? "FAIL" : warned ? "WARN" : "PASS",
-    summary: failed ? "Trade Case proof failed verification." : warned ? "Trade Case hash is valid, but seller linkage is incomplete." : "Trade Case proof passed verification.",
+    status,
+    summary: status === "FAIL" ? "Trade Case proof failed verification." : status === "WARN" ? "Trade Case hash is valid, but seller linkage is incomplete." : "Trade Case proof passed verification.",
     claimedHash,
     recomputedHash,
     signatureStatus: "NOT_PROVIDED",
@@ -175,12 +179,70 @@ async function verifyEvidenceKit(input: Record<string, unknown>): Promise<Verify
   checks.push({ label: "File SHA-256 present", status: fileSha256 ? "PASS" : "FAIL", detail: "Evidence manifest must include the original file SHA-256." });
   checks.push({ label: "Evidence root present", status: evidenceRootHash ? "PASS" : "WARN", detail: "Evidence root anchors the case-level evidence set." });
 
-  const failed = checks.some((check) => check.status === "FAIL");
-  const warned = checks.some((check) => check.status === "WARN");
+  const status = finalStatus(checks);
   return {
     kitType: "Evidence Kit",
-    status: failed ? "FAIL" : warned ? "WARN" : "PASS",
-    summary: failed ? "Evidence proof failed verification." : warned ? "Evidence hash is valid, but evidence root is incomplete." : "Evidence proof passed verification.",
+    status,
+    summary: status === "FAIL" ? "Evidence proof failed verification." : status === "WARN" ? "Evidence hash is valid, but evidence root is incomplete." : "Evidence proof passed verification.",
+    claimedHash,
+    recomputedHash,
+    signatureStatus: "NOT_PROVIDED",
+    chainCommitStatus: typeof proof.chainCommitStatus === "string" ? proof.chainCommitStatus : undefined,
+    checks,
+  };
+}
+
+async function verifyProofPack(input: Record<string, unknown>): Promise<VerifyResult> {
+  const checks: CheckResult[] = [];
+  const proof = asRecord(input.proof);
+  const caseProof = asRecord(input.caseProof);
+  const organizationProof = asRecord(input.organizationProof);
+  const evidenceProofs = Array.isArray(input.evidenceProofs) ? input.evidenceProofs : null;
+
+  if (!proof || !caseProof || !evidenceProofs) {
+    return {
+      kitType: "Proof Pack",
+      status: "FAIL",
+      summary: "Invalid proof pack shape.",
+      checks: [{ label: "Shape", status: "FAIL", detail: "proof, caseProof, and evidenceProofs are required." }],
+    };
+  }
+
+  const claimedHash = typeof proof.passportRootHash === "string" ? proof.passportRootHash : undefined;
+  const orgProfileHash = typeof proof.orgProfileHash === "string" ? proof.orgProfileHash : null;
+  const caseRootHash = typeof proof.caseRootHash === "string" ? proof.caseRootHash : undefined;
+  const claimedEvidenceRootHash = typeof proof.evidenceRootHash === "string" ? proof.evidenceRootHash : undefined;
+  const caseProofProof = asRecord(caseProof.proof);
+  const caseProofHash = typeof caseProofProof?.caseRootHash === "string" ? caseProofProof.caseRootHash : undefined;
+  const orgProofProof = asRecord(organizationProof?.proof);
+  const orgProofHash = typeof orgProofProof?.orgProfileHash === "string" ? orgProofProof.orgProfileHash : null;
+
+  const evidenceHashes = evidenceProofs
+    .map((item) => asRecord(item))
+    .map((item) => asRecord(item?.proof)?.evidenceHash)
+    .filter((hash): hash is string => typeof hash === "string")
+    .sort();
+
+  const recomputedEvidenceRootHash = await sha256Hex(stableStringify({ caseRootHash, evidenceHashes }));
+  const recomputedHash = await sha256Hex(stableStringify({
+    version: "chaintrace-local-proof-pack-v1",
+    orgProfileHash,
+    caseRootHash,
+    evidenceRootHash: recomputedEvidenceRootHash,
+    evidenceHashes,
+  }));
+
+  checks.push({ label: "Passport root hash", status: claimedHash === recomputedHash ? "PASS" : "FAIL", detail: "passportRootHash must match the recomputed passport root." });
+  checks.push({ label: "Evidence root hash", status: claimedEvidenceRootHash === recomputedEvidenceRootHash ? "PASS" : "FAIL", detail: "evidenceRootHash must match the sorted evidence hash set." });
+  checks.push({ label: "Case root binding", status: caseRootHash === caseProofHash ? "PASS" : "FAIL", detail: "proof.caseRootHash should match caseProof.proof.caseRootHash." });
+  checks.push({ label: "Organization binding", status: !organizationProof || orgProfileHash === orgProofHash ? "PASS" : "FAIL", detail: "proof.orgProfileHash should match organizationProof.proof.orgProfileHash when organizationProof exists." });
+  checks.push({ label: "Evidence count", status: evidenceHashes.length === evidenceProofs.length ? "PASS" : "FAIL", detail: "Every evidence proof must include proof.evidenceHash." });
+
+  const status = finalStatus(checks);
+  return {
+    kitType: "Proof Pack",
+    status,
+    summary: status === "FAIL" ? "Proof Pack failed verification." : status === "WARN" ? "Proof Pack has warnings." : "Proof Pack passed verification.",
     claimedHash,
     recomputedHash,
     signatureStatus: "NOT_PROVIDED",
@@ -204,6 +266,7 @@ async function verifyKit(raw: string): Promise<VerifyResult> {
   if (input.version === "chaintrace-local-org-proof-v1") return verifyOrganizationKit(input);
   if (input.version === "chaintrace-local-trade-case-v1") return verifyTradeCaseKit(input);
   if (input.version === "chaintrace-local-evidence-bundle-v1") return verifyEvidenceKit(input);
+  if (input.version === "chaintrace-local-proof-pack-v1") return verifyProofPack(input);
 
   return {
     kitType: "Unknown",
@@ -241,14 +304,14 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
           <span>{label(zh, "Proof-safe Verify", "Proof-safe Verify")}</span>
-          <h2>{label(zh, "本地验证 Recovery / Case / Evidence Kit", "Locally verify a Recovery / Case / Evidence Kit")}</h2>
+          <h2>{label(zh, "本地验证 Recovery / Case / Evidence / Proof Pack", "Locally verify a Recovery / Case / Evidence / Proof Pack")}</h2>
           <p>{label(zh, "把 JSON 粘贴到这里。验证在浏览器本地完成，不上传服务器，不写数据库。", "Paste JSON here. Verification runs in your browser only; nothing is uploaded or stored.")}</p>
         </div>
         <textarea
           value={raw}
           onChange={(event) => setRaw(event.target.value)}
           rows={14}
-          placeholder={label(zh, "粘贴 chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 JSON", "Paste chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 JSON")}
+          placeholder={label(zh, "粘贴 chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 / chaintrace-local-proof-pack-v1 JSON", "Paste chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 / chaintrace-local-proof-pack-v1 JSON")}
         />
         <button className="primary-button" type="button" onClick={runVerification} disabled={!raw.trim() || busy}>
           {busy ? label(zh, "验证中…", "Verifying…") : label(zh, "本地验证 Proof", "Verify Proof Locally")}
