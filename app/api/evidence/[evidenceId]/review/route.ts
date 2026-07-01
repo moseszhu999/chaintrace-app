@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { buildFinancingPack } from "@/lib/financing-pack-builder";
+import { syncEvidenceReviewTask } from "@/lib/evidence-task-store";
 import { safeReviewEvidenceRecord } from "@/lib/repositories/safe-chaintrace-repository";
 import {
   type EvidenceReviewAction,
@@ -44,17 +45,7 @@ export async function POST(
   const reason = normalize(payload.reason);
 
   if (!action || !reviewerRole || !reason) {
-    const missingFields = [
-      !action ? "action" : null,
-      !reviewerRole ? "reviewerRole" : null,
-      !reason ? "reason" : null,
-    ].filter(Boolean);
-
-    return apiError(
-      "INVALID_EVIDENCE_REVIEW",
-      `Evidence review requires action, reviewerRole, and reason. Missing/invalid: ${missingFields.join(", ") || "none"}.`,
-      { status: 400 },
-    );
+    return apiError("INVALID_EVIDENCE_REVIEW", "Evidence review requires action, reviewerRole, and reason.", { status: 400 });
   }
 
   try {
@@ -64,6 +55,7 @@ export async function POST(
       reviewerName: normalize(payload.reviewerName) || undefined,
       reason,
     });
+    const linkedTask = await syncEvidenceReviewTask(evidenceRecord, reviewReceipt);
     const financingPack = await buildFinancingPack();
 
     return apiSuccess({
@@ -71,6 +63,7 @@ export async function POST(
       version: "chaintrace-evidence-review-v0.1",
       reviewReceipt,
       evidenceRecord,
+      linkedTask,
       gateSummary: financingPack.gates.summary,
       readiness: financingPack.readiness,
       evidencePackHash: financingPack.evidencePackHash,
