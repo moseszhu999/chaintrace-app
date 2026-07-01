@@ -224,6 +224,9 @@ async function verifyProofPack(input: Record<string, unknown>, rawFileHash?: str
   const orgProfileHash = typeof proof.orgProfileHash === "string" ? proof.orgProfileHash : null;
   const caseRootHash = typeof proof.caseRootHash === "string" ? proof.caseRootHash : undefined;
   const claimedEvidenceRootHash = typeof proof.evidenceRootHash === "string" ? proof.evidenceRootHash : undefined;
+  const signerAddress = typeof proof.signerAddress === "string" ? proof.signerAddress : undefined;
+  const signature = typeof proof.signature === "string" ? proof.signature : undefined;
+  const signedMessage = typeof proof.signedMessage === "string" ? proof.signedMessage : undefined;
   const caseProofProof = asRecord(caseProof.proof);
   const caseProofHash = typeof caseProofProof?.caseRootHash === "string" ? caseProofProof.caseRootHash : undefined;
   const orgProofProof = asRecord(organizationProof?.proof);
@@ -256,6 +259,22 @@ async function verifyProofPack(input: Record<string, unknown>, rawFileHash?: str
     ? { label: "Raw file appears in pack", status: fileHashes.includes(rawFileHash) ? "PASS" : "FAIL", detail: fileHashes.includes(rawFileHash) ? "Uploaded raw file matches one evidence.fileSha256 in this Proof Pack." : "Uploaded raw file does not match any evidence.fileSha256 in this Proof Pack." }
     : { label: "Raw file appears in pack", status: "INFO", detail: "No raw file was provided for byte-level re-verification." });
 
+  let signatureStatus: VerifyResult["signatureStatus"] = "NOT_PROVIDED";
+  if (signerAddress && signature && signedMessage) {
+    const messageContainsHash = claimedHash ? signedMessage.includes(claimedHash) : false;
+    checks.push({ label: "Passport signed message binding", status: messageContainsHash ? "PASS" : "FAIL", detail: "signedMessage must include passportRootHash." });
+    try {
+      const verified = await verifyMessage({ address: signerAddress as `0x${string}`, message: signedMessage, signature: signature as `0x${string}` });
+      signatureStatus = verified ? "VERIFIED" : "FAILED";
+      checks.push({ label: "Passport wallet signature", status: verified ? "PASS" : "FAIL", detail: verified ? "Signature recovers the claimed signer address." : "Signature does not recover the claimed signer address." });
+    } catch (error) {
+      signatureStatus = "FAILED";
+      checks.push({ label: "Passport wallet signature", status: "FAIL", detail: error instanceof Error ? error.message : "Signature verification failed." });
+    }
+  } else {
+    checks.push({ label: "Passport wallet signature", status: "WARN", detail: "No passportRootHash wallet signature was provided." });
+  }
+
   const status = finalStatus(checks);
   return {
     kitType: "Proof Pack",
@@ -264,7 +283,8 @@ async function verifyProofPack(input: Record<string, unknown>, rawFileHash?: str
     claimedHash,
     recomputedHash,
     rawFileHash,
-    signatureStatus: "NOT_PROVIDED",
+    signerAddress,
+    signatureStatus,
     chainCommitStatus: typeof proof.chainCommitStatus === "string" ? proof.chainCommitStatus : undefined,
     checks,
   };
@@ -362,9 +382,9 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
               <small>{result.recomputedHash ?? label(zh, "未计算", "Not computed")}</small>
             </article>
             <article className="metric-card">
-              <span>{label(zh, "Raw File Hash", "Raw File Hash")}</span>
-              <strong>{result.rawFileHash ? result.rawFileHash.slice(0, 16) + "…" : "—"}</strong>
-              <small>{result.rawFileHash ?? label(zh, "未提供原始文件", "No raw file provided")}</small>
+              <span>{label(zh, "Signature", "Signature")}</span>
+              <strong>{result.signatureStatus ?? "—"}</strong>
+              <small>{result.signerAddress ?? label(zh, "未提供 signer", "No signer provided")}</small>
             </article>
           </div>
 
