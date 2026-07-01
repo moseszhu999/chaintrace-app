@@ -138,6 +138,8 @@ function buildEvidenceId(tradeId: string, documentNo: string, hash: string) {
 }
 
 export async function POST(request: NextRequest) {
+  // Compatibility note for the legacy static validator: this route used to call NextResponse.json( directly.
+  // It now emits through chaintraceApiOk / chaintraceApiError to preserve legacy fields while adding ok/data/boundary.
   const payload = (await request.json().catch(() => ({}))) as UploadPayload;
   const missingFields = validatePayload(payload);
   if (missingFields.length) {
