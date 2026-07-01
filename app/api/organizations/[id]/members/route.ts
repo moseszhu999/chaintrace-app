@@ -1,5 +1,5 @@
 import { apiError, apiSuccess, apiUnknownError } from "@/lib/api-response";
-import { inviteV2OrganizationMember, listV2OrganizationMembers } from "@/lib/repositories/v2-organization-repository";
+import { safeInviteV2OrganizationMember, safeListV2OrganizationMembers } from "@/lib/repositories/safe-v2-organization-repository";
 import { resolveRequestIdentity } from "@/lib/v2/request-identity";
 import { isMemberRole } from "@/lib/v2/organization-types";
 
@@ -24,7 +24,7 @@ function clean(value: unknown) {
 export async function GET(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const members = await listV2OrganizationMembers(id);
+    const members = await safeListV2OrganizationMembers(id);
     return apiSuccess({ mode: "v2_organization_network", organizationId: id, members });
   } catch (error) {
     return apiUnknownError(error, "Failed to list organization members.");
@@ -42,7 +42,7 @@ export async function POST(request: Request, context: RouteContext) {
     if (!email) return apiError("INVALID_MEMBER_INVITE", "Member email is required.", { status: 400 });
     if (!isMemberRole(role)) return apiError("INVALID_MEMBER_ROLE", "A valid member role is required.", { status: 400 });
 
-    const member = await inviteV2OrganizationMember({
+    const member = await safeInviteV2OrganizationMember({
       organizationId: id,
       email,
       name: clean(payload.name) || undefined,
