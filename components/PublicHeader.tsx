@@ -5,10 +5,10 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function PublicHeader({ zh }: { zh: boolean }) {
   const navItems = [
-    { href: "/#product", label: zh ? "产品" : "Product", primary: false },
-    { href: "/agent", label: zh ? "Agent 体验" : "Agent in action", primary: true },
+    { href: "/#pdf-to-receivable", label: zh ? "创建预审 Case" : "Create case", primary: true },
     { href: "/#workflow", label: zh ? "流程" : "Workflow", primary: false },
     { href: "/#security", label: zh ? "边界" : "Guardrails", primary: false },
+    { href: "/agent", label: zh ? "Agent 故事" : "Agent story", primary: false },
     { href: "/login", label: zh ? "登录" : "Login", primary: false },
   ];
 
