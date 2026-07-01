@@ -7,6 +7,7 @@ import { StartOrganizationProofMiniForm } from "@/components/v2/StartOrganizatio
 import { StartProofPackMiniForm } from "@/components/v2/StartProofPackMiniForm";
 import { StartSecondaryFunctionMap } from "@/components/v2/StartSecondaryFunctionMap";
 import { StartTradeCaseMiniForm } from "@/components/v2/StartTradeCaseMiniForm";
+import { StartVerifyShareMiniPanel } from "@/components/v2/StartVerifyShareMiniPanel";
 
 type StartProofPackFlowSkeletonProps = {
   zh: boolean;
@@ -184,6 +185,8 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
       <StartEvidenceMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
 
       <StartProofPackMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
+
+      <StartVerifyShareMiniPanel zh={zh} />
 
       <section className="proof-flow-card">
         <div className="section-heading compact-heading">
