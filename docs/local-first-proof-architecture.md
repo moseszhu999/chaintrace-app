@@ -10,7 +10,7 @@ Organization details stay local by default.
 Browser-local organization profile
 → canonical JSON
 → SHA-256 profile hash
-→ optional wallet signature
+→ wallet signature
 → optional chain commitment
 ```
 
@@ -37,6 +37,8 @@ Only proof-safe fields are exposed:
 - proof algorithm
 - DID hint
 - signer address, when wallet signature is enabled
+- wallet signature
+- signed message
 - timestamp
 - chain commitment tx, when enabled
 
@@ -52,6 +54,39 @@ Trust:
 - counterparty confirmations
 - audit hash chains
 - chain commitments
+
+## Wallet signature
+
+The wallet signature binds a signer address to an organization profile hash without publishing the full organization profile.
+
+The signed message includes:
+
+```text
+ChainTrace Organization Proof
+Organization
+Organization Type
+Org Profile Hash
+DID Hint
+Created At
+control statement
+```
+
+The Recovery Kit stores:
+
+```text
+proof.signerAddress
+proof.signature
+proof.signedMessage
+proof.signedAt
+```
+
+Verification later should check:
+
+```text
+1. SHA-256(canonical privateProfile) == proof.orgProfileHash
+2. recoverAddress(proof.signedMessage, proof.signature) == proof.signerAddress
+3. chain commitment, if present, matches proof.orgProfileHash and signer
+```
 
 ## Recovery model
 
@@ -77,6 +112,10 @@ membership
 privateProfile
 proof.orgProfileHash
 proof.algorithm
+proof.signerAddress
+proof.signature
+proof.signedMessage
+proof.signedAt
 proof.chainCommitStatus
 ```
 
@@ -98,8 +137,8 @@ The current organization flow is:
 Create local organization profile
 → store private details in browser localStorage
 → generate org profile hash
+→ sign proof with wallet
 → download Recovery Kit
-→ optionally sign proof with wallet
 → optionally commit hash on-chain
 ```
 
