@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { StartOrganizationProofMiniForm } from "@/components/v2/StartOrganizationProofMiniForm";
+import { StartSecondaryFunctionMap } from "@/components/v2/StartSecondaryFunctionMap";
 
 type StartProofPackFlowSkeletonProps = {
   zh: boolean;
@@ -140,7 +141,7 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
         <div className="section-heading compact-heading">
           <span>{t(zh, "Small Entry", "Small Entry")}</span>
           <h2>{t(zh, "一键生成可验证贸易证据护照", "Generate a verifiable Trade Evidence Passport")}</h2>
-          <p>{t(zh, "这个页面先作为总入口：先内嵌 Step 1 组织 Proof，后面逐步内嵌 Case、Evidence、Proof Pack。", "This page is the entry: Step 1 Organization Proof is embedded first; Case, Evidence, and Proof Pack will be embedded gradually.")}</p>
+          <p>{t(zh, "这个页面先作为总入口：先铺出二级功能点，再一点点把表单、上传、签名动作填进去。", "This page is the entry: lay out secondary functions first, then gradually embed forms, upload, and signature actions.")}</p>
         </div>
         <div className="hero-actions">
           <Link className="primary-button" href="/organization-network">{t(zh, "完整组织工作台", "Full Organization Workspace")}</Link>
@@ -170,6 +171,8 @@ export function StartProofPackFlowSkeleton({ zh }: StartProofPackFlowSkeletonPro
           <small>{t(zh, "Trade Evidence Passport", "Trade Evidence Passport")}</small>
         </article>
       </div>
+
+      <StartSecondaryFunctionMap zh={zh} />
 
       <StartOrganizationProofMiniForm zh={zh} onDone={() => setStatus(readStatus())} />
 
