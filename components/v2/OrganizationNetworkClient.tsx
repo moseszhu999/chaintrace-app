@@ -9,6 +9,10 @@ type OrganizationNetworkClientProps = {
   initialContext: OrganizationContext;
 };
 
+type EthereumProvider = {
+  request(args: { method: string; params?: unknown[] }): Promise<unknown>;
+};
+
 type LocalOrganizationProfile = {
   name: string;
   orgType: OrganizationType;
@@ -29,6 +33,10 @@ type LocalOrganizationProofBundle = {
     orgProfileHash: string;
     chainCommitStatus: "NOT_COMMITTED" | "COMMITTED";
     rawProfileStored: "BROWSER_LOCAL_ONLY";
+    signerAddress?: string;
+    signature?: string;
+    signedMessage?: string;
+    signedAt?: string;
   };
 };
 
@@ -72,9 +80,28 @@ function readLocalBundle(): LocalOrganizationProofBundle | null {
   }
 }
 
+function getEthereumProvider() {
+  return (window as Window & { ethereum?: EthereumProvider }).ethereum;
+}
+
+function walletMessage(bundle: LocalOrganizationProofBundle) {
+  return [
+    "ChainTrace Organization Proof",
+    "",
+    `Organization: ${bundle.organization.name}`,
+    `Organization Type: ${bundle.organization.orgType}`,
+    `Org Profile Hash: ${bundle.proof.orgProfileHash}`,
+    `DID Hint: ${bundle.organization.orgDid ?? "N/A"}`,
+    `Created At: ${bundle.privateProfile.createdAt}`,
+    "",
+    "I control this organization profile hash and request to bind it to my wallet signer.",
+  ].join("\n");
+}
+
 export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNetworkClientProps) {
   const [context, setContext] = useState(initialContext);
   const [bundle, setBundle] = useState<LocalOrganizationProofBundle | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [orgType, setOrgType] = useState<OrganizationType>("EXPORTER");
   const [country, setCountry] = useState("");
@@ -104,6 +131,7 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
     const restored = readLocalBundle();
     if (restored) {
       setBundle(restored);
+      if (restored.proof.signerAddress) setWalletAddress(restored.proof.signerAddress);
       setContext((previous) => ({
         ...previous,
         organization: restored.organization,
@@ -167,7 +195,7 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
         },
       };
       applyBundle(nextBundle);
-      setMessage(label(zh, "组织详情已保存在本地。请立即下载 Recovery Kit。", "Organization details are local-only. Download the Recovery Kit now."));
+      setMessage(label(zh, "组织详情已保存在本地。请下载 Recovery Kit，并用钱包签名。", "Organization details are local-only. Download the Recovery Kit and sign with wallet."));
       setName("");
       setCountry("");
       setWebsite("");
@@ -205,6 +233,68 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
     setMessage(label(zh, "Org profile hash 已复制。", "Org profile hash copied."));
   }
 
+  async function connectWallet() {
+    const provider = getEthereumProvider();
+    if (!provider) {
+      setMessage(label(zh, "未检测到钱包。请安装 MetaMask 或兼容钱包。", "No wallet detected. Install MetaMask or a compatible wallet."));
+      return;
+    }
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    const account = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : null;
+    if (!account) throw new Error("No wallet account returned.");
+    setWalletAddress(account);
+    setMessage(label(zh, "钱包已连接。", "Wallet connected."));
+  }
+
+  async function signOrganizationProof() {
+    if (!bundle) {
+      setMessage(label(zh, "请先生成本地组织 proof。", "Generate a local organization proof first."));
+      return;
+    }
+    setBusy(true);
+    setMessage(null);
+    try {
+      const provider = getEthereumProvider();
+      if (!provider) throw new Error("No wallet detected.");
+      let signer = walletAddress;
+      if (!signer) {
+        const accounts = await provider.request({ method: "eth_requestAccounts" });
+        signer = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : null;
+      }
+      if (!signer) throw new Error("No wallet signer available.");
+      const signedMessage = walletMessage(bundle);
+      const signature = await provider.request({ method: "personal_sign", params: [signedMessage, signer] });
+      if (typeof signature !== "string") throw new Error("Wallet did not return a signature.");
+      const nextBundle: LocalOrganizationProofBundle = {
+        ...bundle,
+        proof: {
+          ...bundle.proof,
+          signerAddress: signer,
+          signature,
+          signedMessage,
+          signedAt: new Date().toISOString(),
+        },
+      };
+      setWalletAddress(signer);
+      applyBundle(nextBundle);
+      setMessage(label(zh, "组织 proof 已由钱包签名。请重新下载 Recovery Kit。", "Organization proof signed by wallet. Download the Recovery Kit again."));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to sign organization proof.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copySignature() {
+    const signature = bundle?.proof.signature;
+    if (!signature) {
+      setMessage(label(zh, "还没有钱包签名。", "No wallet signature yet."));
+      return;
+    }
+    await navigator.clipboard.writeText(signature);
+    setMessage(label(zh, "钱包签名已复制。", "Wallet signature copied."));
+  }
+
   async function importRecoveryKit(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -234,6 +324,7 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
         },
       };
       applyBundle(repairedBundle);
+      if (repairedBundle.proof.signerAddress) setWalletAddress(repairedBundle.proof.signerAddress);
       setMessage(label(zh, "Recovery Kit 已导入并通过 hash 校验。", "Recovery Kit imported and hash-verified."));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Failed to import Recovery Kit.");
@@ -293,6 +384,30 @@ export function OrganizationNetworkClient({ zh, initialContext }: OrganizationNe
           </button>
           {message ? <p className="form-note">{message}</p> : null}
         </form>
+      </section>
+
+      <section className="proof-flow-card">
+        <div className="section-heading compact-heading">
+          <span>{label(zh, "Wallet Signature", "Wallet Signature")}</span>
+          <h2>{label(zh, "用钱包签名组织 proof", "Sign organization proof with wallet")}</h2>
+          <p>{label(zh, "钱包签名不泄露组织明文，只声明该 signer 控制这个 org profile hash。", "The wallet signature does not reveal private organization details; it binds a signer to the org profile hash.")}</p>
+        </div>
+        <div className="proof-flow-grid">
+          <button className="secondary-button" type="button" onClick={connectWallet}>
+            {walletAddress ? label(zh, "钱包已连接", "Wallet connected") : label(zh, "连接钱包", "Connect Wallet")}
+          </button>
+          <button className="secondary-button" type="button" onClick={signOrganizationProof} disabled={!bundle || busy}>
+            {label(zh, "签名 Org Profile Hash", "Sign Org Profile Hash")}
+          </button>
+          <button className="secondary-button" type="button" onClick={copySignature} disabled={!bundle?.proof.signature}>
+            {label(zh, "复制签名", "Copy Signature")}
+          </button>
+        </div>
+        <p className="form-note">
+          {bundle?.proof.signature
+            ? label(zh, `已签名：${bundle.proof.signerAddress ?? "unknown"}`, `Signed by: ${bundle.proof.signerAddress ?? "unknown"}`)
+            : label(zh, "尚未签名。", "Not signed yet.")}
+        </p>
       </section>
 
       <section className="proof-flow-card">
