@@ -2,7 +2,7 @@
 
 ChainTrace turns cross-border trade PDFs into browser-hashed, wallet-signed, on-chain receivable financing candidates.
 
-It is a frontend + blockchain trade-finance protocol demo. The browser hashes purchase orders, invoices, bills of lading, permits, warehouse receipts, quality reports, signatures, and payment conditions locally, then wallet signatures bind those facts into contract registries and a pre-review LoanRequestRegistry draft. It does not promise financing eligibility; incomplete gates remain blocked until evidence and professional approval are complete.
+It is now moving from a presentation demo toward a case-centered working site. The public converter creates a pre-review case from metadata/hash-only evidence, the workspace reviews evidence and tasks under that case, and professional review/handoff reads the same operating state. It does not promise financing eligibility; incomplete gates remain blocked until evidence and professional approval are complete.
 
 ## Current Demo Case
 
@@ -40,45 +40,76 @@ Select trade PDF in browser
         ↓
 Browser calculates SHA-256 and creates ReceivableCandidate JSON/hash
         ↓
-Wallet signatures attest responsible facts to TradeSigningRegistry / LogisticsEvidenceRegistry
+Create pre-review case without storing raw PDF
         ↓
-LoanRequestRegistry records a pre-review request and evidence-pack hash
+Operator reviews metadata/hash evidence and generates review receipts
         ↓
-Professional review decides blocked / approved / rejected from the same gate state
+Evidence tasks, gates, readiness, dashboard, and handoff read the same case state
+        ↓
+Professional review decides blocked / approved / rejected outside automated execution
         ↓
 ReceivableLoan conversion is possible only after approval and complete gates
 ```
 
-## Key App Routes
+## Primary Working-Site Routes
 
-- `/business-architecture` - consulting-grade business and architecture blueprint
-- `/business-ops` - Agent workbench for evidence operations
-- `/business-readiness` - financier readiness view and pre-review handoff
-- `/business-professional-review` - bank, law-firm, and exception review queue
-- `/business-contracts` - smart contract console and LoanRequestRegistry lifecycle
+Use these as the main path when testing or demoing the product as a working site:
 
-## Demo Mock API Routes
+- `/` - public converter and case creation entry
+- `/login` - demo role selection and working-site entry
+- `/cases` - case list / active case entry
+- `/cases/[caseId]` - case overview
+- `/cases/[caseId]/evidence` - case-scoped evidence review
+- `/cases/[caseId]/tasks` - case-scoped task queue
+- `/cases/[caseId]/review` - case-scoped professional review surface
+- `/cases/[caseId]/handoff` - case-scoped handoff / Trust Pack JSON preview
+- `/dashboard` - active case command center from `getCaseOperatingSnapshot(caseId)`
+- `/evidence` and `/tasks` - legacy-compatible shortcuts into the active case workflow
 
-These routes are kept for the Vercel demo and regression validation. They are not the recommended production core architecture; the product direction is frontend-local proof creation plus smart-contract state.
+## Reference / Demo Routes
 
-- `GET /api/agents/run` - aggregate Agent pipeline output
-- `GET /api/agents/evidence` - evidence metadata and open/verified counts
-- `GET /api/agents/gates` - 12 gate statuses; current case remains 6/12 passed
-- `GET /api/agents/gaps` - missing evidence and next actions
-- `GET /api/agents/risk-memo` - risk flags, approval conditions, financier memo
+These are still useful for explanation and regression checks, but they are not the primary user path:
+
+- `/agent` - public story page
+- `/business-ops` - Agent reference workbench
+- `/business-architecture` - consulting-grade architecture reference
+- `/business-flows` - four-flow reference view
+- `/business-readiness` - readiness reference view
+- `/business-professional-review` - legacy-compatible professional review shortcut
+- `/business-contracts` - smart contract reference console
+- `/business-wallet` - wallet reference view
+- `/proof-packs` - proof pack reference view
+
+## API Routes
+
+Working-site APIs:
+
 - `POST /api/cases` - create a pre-review case from public converter metadata/hash without storing raw PDFs
-- `POST /api/evidence/upload` - mocked evidence upload classification
-- `GET /api/financing-pack` - financier-facing evidence and memo pack
-- `GET /api/professional-review` - professional exception review queue
+- `GET /api/cases` - list cases / active case
+- `GET /api/cases/[caseId]` - read case state
+- `GET /api/cases/[caseId]/evidence` - read case evidence
+- `POST /api/cases/[caseId]/evidence` - add metadata/hash evidence
+- `POST /api/evidence/[evidenceId]/review` - Operator/Admin evidence review transition
+- `GET /api/cases/[caseId]/tasks` - read case-scoped evidence tasks
+- `POST /api/tasks/[taskId]/transition` - Operator/Admin evidence-linked task transition
+- `GET /api/cases/[caseId]/operating-snapshot` - dashboard operating snapshot
 - `GET /api/cases/[caseId]/handoff` - professional review handoff pack from the operating snapshot
 - `GET /api/cases/[caseId]/review-summary` - lightweight professional review summary from the same handoff pack
-- `POST /api/evidence/[evidenceId]/review` - Operator/Admin evidence review transition
-- `POST /api/tasks/[taskId]/transition` - Operator/Admin evidence-linked task transition
-- `POST /api/operator-tasks/[taskId]/transition` - Operator/Admin workflow task transition
 - `POST /api/cases/[caseId]/professional-review` - Professional reviewer/Admin note and exception status action
 - `POST /api/admin/reset-demo` - Admin-only runtime demo reset
-- `GET /api/loan-requests/pre-review` - pre-review request draft
-- `POST /api/loan-requests/pre-review` - mocked pre-review request creation
+
+Legacy/demo mock APIs kept for regression and reference:
+
+- `GET /api/agents/run`
+- `GET /api/agents/evidence`
+- `GET /api/agents/gates`
+- `GET /api/agents/gaps`
+- `GET /api/agents/risk-memo`
+- `POST /api/evidence/upload` - mocked evidence upload classification
+- `GET /api/financing-pack` - fixture-style financier evidence pack
+- `GET /api/professional-review` - professional exception review queue fixture
+- `GET /api/loan-requests/pre-review`
+- `POST /api/loan-requests/pre-review`
 
 ## Demo Roles
 
@@ -102,28 +133,15 @@ Denied role transitions return structured JSON with `error=ROLE_NOT_ALLOWED` and
 - `RestrictedReceivableToken` - controlled RWA or receivable token representation.
 - `MockStablecoin` - test stablecoin for local and CI flows.
 
-## Consulting Architecture Flow
-
-ChainTrace should be explained from business value down to technology:
-
-```text
-BLM including value chain
-  -> business architecture / business process
-  -> application architecture
-  -> data architecture
-  -> technical architecture
-```
-
-The system does not remove banks, law firms, or factors. It moves them from repetitive document checking to underwriting, compliance, legal structure, dispute handling, and material exception review.
-
 ## Architecture Direction
 
-The recommended core architecture is frontend + blockchain:
+The recommended core architecture is frontend + blockchain plus a case-centered operating read model:
 
-- Frontend: local PDF hashing, ReceivableCandidate JSON/hash, wallet signature, contract read/write.
+- Frontend: local PDF hashing, ReceivableCandidate JSON/hash, wallet signature, case workspace.
+- Case workspace: evidence metadata/hash, review receipts, task queue, dashboard snapshot, professional handoff.
 - Blockchain: `TradeSigningRegistry`, `LogisticsEvidenceRegistry`, `LoanRequestRegistry`, `ReceivableLoan`, and `RestrictedReceivableToken`.
-- Read model: frontend reads contract state and events through wallet/RPC providers.
-- Demo mocks: existing API routes remain fixtures only, not a production backend requirement.
+- Read model: frontend reads contract state/events and case state through guarded APIs.
+- Demo mocks: older API routes remain fixtures only, not the primary product path.
 
 ## Run Locally
 
