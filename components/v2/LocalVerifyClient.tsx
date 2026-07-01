@@ -15,6 +15,7 @@ type VerifyResult = {
   summary: string;
   claimedHash?: string;
   recomputedHash?: string;
+  rawFileHash?: string;
   signerAddress?: string;
   signatureStatus?: "VERIFIED" | "FAILED" | "NOT_PROVIDED";
   chainCommitStatus?: string;
@@ -36,10 +37,17 @@ function stableStringify(value: unknown): string {
   return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`).join(",")}}`;
 }
 
+function hexFromDigest(digest: ArrayBuffer) {
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 async function sha256Hex(text: string) {
   const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return hexFromDigest(await crypto.subtle.digest("SHA-256", data));
+}
+
+async function sha256File(file: File) {
+  return hexFromDigest(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()));
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -153,7 +161,7 @@ async function verifyTradeCaseKit(input: Record<string, unknown>): Promise<Verif
   };
 }
 
-async function verifyEvidenceKit(input: Record<string, unknown>): Promise<VerifyResult> {
+async function verifyEvidenceKit(input: Record<string, unknown>, rawFileHash?: string): Promise<VerifyResult> {
   const checks: CheckResult[] = [];
   const evidence = asRecord(input.evidence);
   const proof = asRecord(input.proof);
@@ -178,6 +186,9 @@ async function verifyEvidenceKit(input: Record<string, unknown>): Promise<Verify
   checks.push({ label: "Case root binding", status: caseRootHash === evidenceCaseRootHash ? "PASS" : "FAIL", detail: "proof.caseRootHash should match evidence.caseRootHash." });
   checks.push({ label: "File SHA-256 present", status: fileSha256 ? "PASS" : "FAIL", detail: "Evidence manifest must include the original file SHA-256." });
   checks.push({ label: "Evidence root present", status: evidenceRootHash ? "PASS" : "WARN", detail: "Evidence root anchors the case-level evidence set." });
+  checks.push(rawFileHash
+    ? { label: "Raw file re-verify", status: rawFileHash === fileSha256 ? "PASS" : "FAIL", detail: rawFileHash === fileSha256 ? "Uploaded raw file matches evidence.fileSha256." : "Uploaded raw file does not match evidence.fileSha256." }
+    : { label: "Raw file re-verify", status: "INFO", detail: "No raw file was provided for byte-level re-verification." });
 
   const status = finalStatus(checks);
   return {
@@ -186,13 +197,14 @@ async function verifyEvidenceKit(input: Record<string, unknown>): Promise<Verify
     summary: status === "FAIL" ? "Evidence proof failed verification." : status === "WARN" ? "Evidence hash is valid, but evidence root is incomplete." : "Evidence proof passed verification.",
     claimedHash,
     recomputedHash,
+    rawFileHash,
     signatureStatus: "NOT_PROVIDED",
     chainCommitStatus: typeof proof.chainCommitStatus === "string" ? proof.chainCommitStatus : undefined,
     checks,
   };
 }
 
-async function verifyProofPack(input: Record<string, unknown>): Promise<VerifyResult> {
+async function verifyProofPack(input: Record<string, unknown>, rawFileHash?: string): Promise<VerifyResult> {
   const checks: CheckResult[] = [];
   const proof = asRecord(input.proof);
   const caseProof = asRecord(input.caseProof);
@@ -217,11 +229,14 @@ async function verifyProofPack(input: Record<string, unknown>): Promise<VerifyRe
   const orgProofProof = asRecord(organizationProof?.proof);
   const orgProofHash = typeof orgProofProof?.orgProfileHash === "string" ? orgProofProof.orgProfileHash : null;
 
-  const evidenceHashes = evidenceProofs
-    .map((item) => asRecord(item))
+  const evidenceRecords = evidenceProofs.map((item) => asRecord(item));
+  const evidenceHashes = evidenceRecords
     .map((item) => asRecord(item?.proof)?.evidenceHash)
     .filter((hash): hash is string => typeof hash === "string")
     .sort();
+  const fileHashes = evidenceRecords
+    .map((item) => asRecord(item?.evidence)?.fileSha256)
+    .filter((hash): hash is string => typeof hash === "string");
 
   const recomputedEvidenceRootHash = await sha256Hex(stableStringify({ caseRootHash, evidenceHashes }));
   const recomputedHash = await sha256Hex(stableStringify({
@@ -237,6 +252,9 @@ async function verifyProofPack(input: Record<string, unknown>): Promise<VerifyRe
   checks.push({ label: "Case root binding", status: caseRootHash === caseProofHash ? "PASS" : "FAIL", detail: "proof.caseRootHash should match caseProof.proof.caseRootHash." });
   checks.push({ label: "Organization binding", status: !organizationProof || orgProfileHash === orgProofHash ? "PASS" : "FAIL", detail: "proof.orgProfileHash should match organizationProof.proof.orgProfileHash when organizationProof exists." });
   checks.push({ label: "Evidence count", status: evidenceHashes.length === evidenceProofs.length ? "PASS" : "FAIL", detail: "Every evidence proof must include proof.evidenceHash." });
+  checks.push(rawFileHash
+    ? { label: "Raw file appears in pack", status: fileHashes.includes(rawFileHash) ? "PASS" : "FAIL", detail: fileHashes.includes(rawFileHash) ? "Uploaded raw file matches one evidence.fileSha256 in this Proof Pack." : "Uploaded raw file does not match any evidence.fileSha256 in this Proof Pack." }
+    : { label: "Raw file appears in pack", status: "INFO", detail: "No raw file was provided for byte-level re-verification." });
 
   const status = finalStatus(checks);
   return {
@@ -245,13 +263,14 @@ async function verifyProofPack(input: Record<string, unknown>): Promise<VerifyRe
     summary: status === "FAIL" ? "Proof Pack failed verification." : status === "WARN" ? "Proof Pack has warnings." : "Proof Pack passed verification.",
     claimedHash,
     recomputedHash,
+    rawFileHash,
     signatureStatus: "NOT_PROVIDED",
     chainCommitStatus: typeof proof.chainCommitStatus === "string" ? proof.chainCommitStatus : undefined,
     checks,
   };
 }
 
-async function verifyKit(raw: string): Promise<VerifyResult> {
+async function verifyKit(raw: string, rawFileHash?: string): Promise<VerifyResult> {
   const parsed = JSON.parse(raw) as unknown;
   const input = asRecord(parsed);
   if (!input) {
@@ -265,8 +284,8 @@ async function verifyKit(raw: string): Promise<VerifyResult> {
 
   if (input.version === "chaintrace-local-org-proof-v1") return verifyOrganizationKit(input);
   if (input.version === "chaintrace-local-trade-case-v1") return verifyTradeCaseKit(input);
-  if (input.version === "chaintrace-local-evidence-bundle-v1") return verifyEvidenceKit(input);
-  if (input.version === "chaintrace-local-proof-pack-v1") return verifyProofPack(input);
+  if (input.version === "chaintrace-local-evidence-bundle-v1") return verifyEvidenceKit(input, rawFileHash);
+  if (input.version === "chaintrace-local-proof-pack-v1") return verifyProofPack(input, rawFileHash);
 
   return {
     kitType: "Unknown",
@@ -278,6 +297,7 @@ async function verifyKit(raw: string): Promise<VerifyResult> {
 
 export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
   const [raw, setRaw] = useState("");
+  const [rawFile, setRawFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<VerifyResult | null>(null);
 
@@ -285,7 +305,8 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
     setBusy(true);
     setResult(null);
     try {
-      const nextResult = await verifyKit(raw);
+      const rawFileHash = rawFile ? await sha256File(rawFile) : undefined;
+      const nextResult = await verifyKit(raw, rawFileHash);
       setResult(nextResult);
     } catch (error) {
       setResult({
@@ -305,7 +326,7 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
         <div className="section-heading compact-heading">
           <span>{label(zh, "Proof-safe Verify", "Proof-safe Verify")}</span>
           <h2>{label(zh, "本地验证 Recovery / Case / Evidence / Proof Pack", "Locally verify a Recovery / Case / Evidence / Proof Pack")}</h2>
-          <p>{label(zh, "把 JSON 粘贴到这里。验证在浏览器本地完成，不上传服务器，不写数据库。", "Paste JSON here. Verification runs in your browser only; nothing is uploaded or stored.")}</p>
+          <p>{label(zh, "把 JSON 粘贴到这里。验证在浏览器本地完成，不上传服务器，不写数据库。可选上传原始文件，浏览器会本地重算 file SHA-256。", "Paste JSON here. Verification runs in your browser only; nothing is uploaded or stored. Optionally attach the raw file to recompute file SHA-256 locally.")}</p>
         </div>
         <textarea
           value={raw}
@@ -313,6 +334,9 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
           rows={14}
           placeholder={label(zh, "粘贴 chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 / chaintrace-local-proof-pack-v1 JSON", "Paste chaintrace-local-org-proof-v1 / chaintrace-local-trade-case-v1 / chaintrace-local-evidence-bundle-v1 / chaintrace-local-proof-pack-v1 JSON")}
         />
+        <label>{label(zh, "可选：原始文件重验证", "Optional: raw file re-verify")}
+          <input type="file" onChange={(event) => setRawFile(event.target.files?.[0] ?? null)} />
+        </label>
         <button className="primary-button" type="button" onClick={runVerification} disabled={!raw.trim() || busy}>
           {busy ? label(zh, "验证中…", "Verifying…") : label(zh, "本地验证 Proof", "Verify Proof Locally")}
         </button>
@@ -338,9 +362,9 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
               <small>{result.recomputedHash ?? label(zh, "未计算", "Not computed")}</small>
             </article>
             <article className="metric-card">
-              <span>{label(zh, "Signature", "Signature")}</span>
-              <strong>{result.signatureStatus ?? "—"}</strong>
-              <small>{result.signerAddress ?? label(zh, "未提供 signer", "No signer provided")}</small>
+              <span>{label(zh, "Raw File Hash", "Raw File Hash")}</span>
+              <strong>{result.rawFileHash ? result.rawFileHash.slice(0, 16) + "…" : "—"}</strong>
+              <small>{result.rawFileHash ?? label(zh, "未提供原始文件", "No raw file provided")}</small>
             </article>
           </div>
 
@@ -363,7 +387,7 @@ export function LocalVerifyClient({ zh }: LocalVerifyClientProps) {
 
       <section className="empty-state-card">
         <strong>{label(zh, "边界", "Boundary")}</strong>
-        <p>{label(zh, "这个页面只能证明 bundle 内部 hash / 签名一致，不能证明公司法律身份、贸易真实性、信用质量或融资资格。", "This page only verifies internal hash/signature consistency. It does not verify legal identity, trade truth, credit quality, or financing eligibility.")}</p>
+        <p>{label(zh, "这个页面只能证明 bundle 内部 hash / 签名一致，以及可选原始文件是否匹配 fileSha256；不能证明公司法律身份、贸易真实性、信用质量或融资资格。", "This page only verifies internal hash/signature consistency and, optionally, whether a raw file matches fileSha256. It does not verify legal identity, trade truth, credit quality, or financing eligibility.")}</p>
       </section>
     </div>
   );
