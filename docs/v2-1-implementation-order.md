@@ -8,6 +8,21 @@ Parent epic: #95
 v2-real-platform
 ```
 
+## Branch status
+
+This branch is now ahead of `main` with the initial v2.1 foundation commits.
+
+Added:
+
+- `docs/chaintrace-product-architecture-v2.md`
+- `docs/v2-1-implementation-order.md`
+- `database/schema-v2.1.sql`
+- `database/README.md`
+
+Updated:
+
+- `package.json` product description to v2 real-platform positioning
+
 ## Development order
 
 1. #96 schema foundation
