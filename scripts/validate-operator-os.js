@@ -19,6 +19,8 @@ function assertIncludes(source, expected, label) {
 
 function main() {
   const dashboard = read("components/workspace/DashboardView.tsx");
+  const evidenceView = read("components/workspace/EvidenceView.tsx");
+  const evidenceRoute = read("app/evidence/page.tsx");
   const tasksView = read("components/workspace/TasksView.tsx");
   const tasksRoute = read("app/tasks/page.tsx");
   const styles = read("components/workspace/WorkspaceViews.module.css");
@@ -159,6 +161,30 @@ function main() {
     "disbursementAllowed=false",
   ]) {
     assertIncludes(tasksView + read("components/workspace/OperatorTaskWorkflowClient.tsx"), expected, "tasks real agent workflow");
+  }
+
+  for (const expected of [
+    "initialEvidenceRecords",
+    "reviewEvidence",
+    "/api/evidence/",
+    "/review",
+    "Verify evidence",
+    "Reject evidence",
+    "Request more evidence",
+    "reviewReceipt",
+    "evidencePackHash",
+    "GATES_NOT_PASSED",
+    "disbursementAllowed=false",
+  ]) {
+    assertIncludes(evidenceView, expected, "evidence page real review transition");
+  }
+
+  for (const expected of [
+    "listEvidenceRecords",
+    "getCurrentTradeCase",
+    "initialEvidenceRecords",
+  ]) {
+    assertIncludes(evidenceRoute, expected, "evidence route durable records");
   }
 
   console.log("Operator OS validation passed: dashboard exposes status strip, workflow console, decision rail, queues, intake mirror, decision receipt preview, real agent workflow tasks, and responsibility boundaries.");

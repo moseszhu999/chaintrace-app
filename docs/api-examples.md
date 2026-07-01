@@ -53,6 +53,47 @@ Expected response fields:
 
 The returned `evidenceId` is deterministic for the submitted `tradeId`, `documentNo`, and `hash`.
 
+## Review Evidence Metadata
+
+This records a human or professional review receipt for an evidence record. It can move an uploaded evidence item to `verified`, `rejected`, or `needs_agent_review`. It does not store raw PDFs, sign a wallet message, send a transaction, or allow disbursement.
+
+```bash
+curl -sS -X POST http://localhost:3000/api/evidence/evidence_trade_vn_coffee_sg_2026_0007_wr_2026_031_0x7f5a8e1c3d2b9/review \
+  -H "content-type: application/json" \
+  -d '{
+    "action": "verify",
+    "reviewerRole": "operator",
+    "reviewerName": "ChainTrace Operator",
+    "reason": "Warehouse receipt metadata matches the case and can support the warehouse_receipt gate."
+  }'
+```
+
+Expected response fields:
+
+```json
+{
+  "accepted": true,
+  "reviewReceipt": {
+    "action": "verify",
+    "reviewerRole": "operator",
+    "beforeStatus": "needs_agent_review",
+    "afterStatus": "verified",
+    "agentDecisionAuthority": "none"
+  },
+  "gateSummary": {
+    "blockerCode": "GATES_NOT_PASSED",
+    "disbursementAllowed": false
+  },
+  "guardrails": {
+    "status": "Pre-review only",
+    "blockerCode": "GATES_NOT_PASSED",
+    "disbursementAllowed": false
+  }
+}
+```
+
+Supported actions are `verify`, `reject`, and `request_more_evidence`. Supported reviewer roles are `operator` and `professional`.
+
 ## Upload Arrival QC Report Metadata
 
 This records arrival quality inspection metadata. It does not automatically resolve the moisture dispute or pass the arrival QC gate.

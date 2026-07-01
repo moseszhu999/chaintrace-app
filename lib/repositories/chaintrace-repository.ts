@@ -29,6 +29,25 @@ export type GateImpact = {
   noteEn: string;
 };
 
+export type EvidenceReviewAction = "verify" | "reject" | "request_more_evidence";
+
+export type EvidenceReviewerRole = "operator" | "professional";
+
+export type EvidenceReviewReceipt = {
+  id: string;
+  evidenceId: string;
+  action: EvidenceReviewAction;
+  reviewerRole: EvidenceReviewerRole;
+  reviewerName?: string;
+  reason: string;
+  beforeStatus: EvidenceStatus;
+  afterStatus: EvidenceStatus;
+  reviewedAt: string;
+  blockerCode: "GATES_NOT_PASSED";
+  disbursementAllowed: false;
+  agentDecisionAuthority: "none";
+};
+
 export type TradeCaseRecord = {
   id: string;
   titleZh: string;
@@ -58,17 +77,27 @@ export type EvidenceRecord = {
   noteZh?: string;
   noteEn?: string;
   gateImpacts: GateImpact[];
+  reviewReceipts: EvidenceReviewReceipt[];
   createdAt: string;
   updatedAt: string;
 };
 
-export type AddEvidenceRecordInput = Omit<EvidenceRecord, "id" | "createdAt" | "updatedAt"> & {
+export type AddEvidenceRecordInput = Omit<EvidenceRecord, "id" | "createdAt" | "updatedAt" | "reviewReceipts"> & {
   id?: string;
   createdAt?: string;
   updatedAt?: string;
+  reviewReceipts?: EvidenceReviewReceipt[];
 };
 
 export type EvidencePersistenceMode = "runtime_evidence_store" | "neon_evidence_store";
+
+export type ReviewEvidenceRecordInput = {
+  action: EvidenceReviewAction;
+  reviewerRole: EvidenceReviewerRole;
+  reason: string;
+  reviewerName?: string;
+  reviewedAt?: string;
+};
 
 const currentTradeCase: TradeCaseRecord = {
   id: concreteTradeCase.id,
@@ -138,6 +167,7 @@ function toEvidenceRecord(document: TradeDocument): EvidenceRecord {
     noteZh: document.noteZh,
     noteEn: document.noteEn,
     gateImpacts: gateImpactsByDocumentId[document.id] ?? [],
+    reviewReceipts: [],
     createdAt: document.issuedAt,
     updatedAt: document.issuedAt,
   };
@@ -153,6 +183,7 @@ function cloneEvidenceRecord(record: EvidenceRecord): EvidenceRecord {
   return {
     ...record,
     gateImpacts: record.gateImpacts.map((impact) => ({ ...impact })),
+    reviewReceipts: (record.reviewReceipts ?? []).map((receipt) => ({ ...receipt })),
   };
 }
 
@@ -169,6 +200,7 @@ type EvidenceRepository = {
   listEvidenceRecords(tradeId: string): Promise<EvidenceRecord[]>;
   findEvidenceById(evidenceId: string): Promise<EvidenceRecord | null>;
   addEvidenceRecord(input: AddEvidenceRecordInput): Promise<EvidenceRecord>;
+  reviewEvidenceRecord(evidenceId: string, input: ReviewEvidenceRecordInput): Promise<{ evidenceRecord: EvidenceRecord; reviewReceipt: EvidenceReviewReceipt }>;
 };
 
 export function getEvidencePersistenceMode(): EvidencePersistenceMode {
@@ -195,13 +227,87 @@ function createRuntimeEvidenceRepository(): EvidenceRepository {
         createdAt: input.createdAt ?? now,
         updatedAt: input.updatedAt ?? now,
         gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
+        reviewReceipts: input.reviewReceipts ?? [],
       };
       const records = evidenceRecordsByTradeId.get(input.tradeId) ?? [];
       const nextRecords = [record, ...records.filter((item) => item.id !== record.id)];
       evidenceRecordsByTradeId.set(input.tradeId, nextRecords);
       return cloneEvidenceRecord(record);
     },
+    async reviewEvidenceRecord(evidenceId, input) {
+      const existing = await this.findEvidenceById(evidenceId);
+      if (!existing) throw new Error("EVIDENCE_NOT_FOUND");
+      const { evidenceRecord, reviewReceipt } = applyEvidenceReview(existing, input);
+      const records = evidenceRecordsByTradeId.get(evidenceRecord.tradeId) ?? [];
+      const nextRecords = [evidenceRecord, ...records.filter((item) => item.id !== evidenceRecord.id)];
+      evidenceRecordsByTradeId.set(evidenceRecord.tradeId, nextRecords);
+      return { evidenceRecord: cloneEvidenceRecord(evidenceRecord), reviewReceipt: { ...reviewReceipt } };
+    },
   };
+}
+
+function statusAfterReviewAction(action: EvidenceReviewAction): EvidenceStatus {
+  if (action === "verify") return "verified";
+  if (action === "reject") return "rejected";
+  return "needs_agent_review";
+}
+
+function gateImpactAfterReviewAction(impact: GateImpact, action: EvidenceReviewAction): GateImpact {
+  if (impact.gateId === "unmapped_evidence") return { ...impact };
+  if (action === "verify") {
+    return {
+      ...impact,
+      status: "supports_passed_gate",
+      noteZh: "人工或专业审查已确认该证据可支持 gate。",
+      noteEn: "Human or professional review confirmed this evidence supports the gate.",
+    };
+  }
+  if (action === "request_more_evidence") {
+    return {
+      ...impact,
+      status: "candidate_pending_gate",
+      noteZh: "审查要求补充证据，gate 仍处于待确认状态。",
+      noteEn: "Review requested more evidence; the gate remains pending.",
+    };
+  }
+  return {
+    ...impact,
+    status: "blocking_gap",
+    noteZh: "审查拒绝该证据，gate 仍被阻断。",
+    noteEn: "Review rejected this evidence; the gate remains blocked.",
+  };
+}
+
+function reviewReceiptId(evidenceId: string, reviewedAt: string, action: EvidenceReviewAction) {
+  return `review_${evidenceId}_${action}_${reviewedAt.replace(/[^0-9a-z]/gi, "").slice(0, 20)}`;
+}
+
+function applyEvidenceReview(record: EvidenceRecord, input: ReviewEvidenceRecordInput) {
+  const reviewedAt = input.reviewedAt ?? new Date().toISOString();
+  const beforeStatus = record.status;
+  const afterStatus = statusAfterReviewAction(input.action);
+  const reviewReceipt: EvidenceReviewReceipt = {
+    id: reviewReceiptId(record.id, reviewedAt, input.action),
+    evidenceId: record.id,
+    action: input.action,
+    reviewerRole: input.reviewerRole,
+    reviewerName: input.reviewerName,
+    reason: input.reason,
+    beforeStatus,
+    afterStatus,
+    reviewedAt,
+    blockerCode: "GATES_NOT_PASSED",
+    disbursementAllowed: false,
+    agentDecisionAuthority: "none",
+  };
+  const evidenceRecord: EvidenceRecord = {
+    ...record,
+    status: afterStatus,
+    updatedAt: reviewedAt,
+    gateImpacts: record.gateImpacts.map((impact) => gateImpactAfterReviewAction(impact, input.action)),
+    reviewReceipts: [reviewReceipt, ...(record.reviewReceipts ?? [])],
+  };
+  return { evidenceRecord, reviewReceipt };
 }
 
 function getDatabaseUrl() {
@@ -212,6 +318,47 @@ function getDatabaseUrl() {
 
 function createNeonEvidenceRepository(): EvidenceRepository {
   const sql = neon(getDatabaseUrl());
+
+  async function persistEvidenceRecord(record: EvidenceRecord) {
+    await sql`
+      insert into evidence_records (
+        id,
+        trade_id,
+        document_type,
+        evidence_status,
+        file_name,
+        document_no,
+        file_hash,
+        raw_document_storage,
+        blocker_code,
+        disbursement_allowed,
+        created_at,
+        updated_at,
+        evidence_payload
+      ) values (
+        ${record.id},
+        ${record.tradeId},
+        ${record.documentType},
+        ${record.status},
+        ${record.fileName},
+        ${record.documentNo},
+        ${record.hash ?? null},
+        ${"not_stored"},
+        ${"GATES_NOT_PASSED"},
+        ${false},
+        ${record.createdAt},
+        ${record.updatedAt},
+        ${JSON.stringify(record)}::jsonb
+      )
+      on conflict (id) do update set
+        evidence_status = excluded.evidence_status,
+        file_name = excluded.file_name,
+        document_no = excluded.document_no,
+        file_hash = excluded.file_hash,
+        updated_at = excluded.updated_at,
+        evidence_payload = excluded.evidence_payload;
+    `;
+  }
 
   return {
     async listEvidenceRecords(tradeId) {
@@ -247,46 +394,17 @@ function createNeonEvidenceRepository(): EvidenceRepository {
         createdAt: input.createdAt ?? now,
         updatedAt: input.updatedAt ?? now,
         gateImpacts: input.gateImpacts.map((impact) => ({ ...impact })),
+        reviewReceipts: input.reviewReceipts ?? [],
       };
-      await sql`
-        insert into evidence_records (
-          id,
-          trade_id,
-          document_type,
-          evidence_status,
-          file_name,
-          document_no,
-          file_hash,
-          raw_document_storage,
-          blocker_code,
-          disbursement_allowed,
-          created_at,
-          updated_at,
-          evidence_payload
-        ) values (
-          ${record.id},
-          ${record.tradeId},
-          ${record.documentType},
-          ${record.status},
-          ${record.fileName},
-          ${record.documentNo},
-          ${record.hash ?? null},
-          ${"not_stored"},
-          ${"GATES_NOT_PASSED"},
-          ${false},
-          ${record.createdAt},
-          ${record.updatedAt},
-          ${JSON.stringify(record)}::jsonb
-        )
-        on conflict (id) do update set
-          evidence_status = excluded.evidence_status,
-          file_name = excluded.file_name,
-          document_no = excluded.document_no,
-          file_hash = excluded.file_hash,
-          updated_at = excluded.updated_at,
-          evidence_payload = excluded.evidence_payload;
-      `;
+      await persistEvidenceRecord(record);
       return cloneEvidenceRecord(record);
+    },
+    async reviewEvidenceRecord(evidenceId, input) {
+      const existing = await this.findEvidenceById(evidenceId);
+      if (!existing) throw new Error("EVIDENCE_NOT_FOUND");
+      const { evidenceRecord, reviewReceipt } = applyEvidenceReview(existing, input);
+      await persistEvidenceRecord(evidenceRecord);
+      return { evidenceRecord: cloneEvidenceRecord(evidenceRecord), reviewReceipt: { ...reviewReceipt } };
     },
   };
 }
@@ -316,4 +434,8 @@ export async function findEvidenceById(evidenceId: string): Promise<EvidenceReco
 
 export async function addEvidenceRecord(input: AddEvidenceRecordInput): Promise<EvidenceRecord> {
   return createEvidenceRepository().addEvidenceRecord(input);
+}
+
+export async function reviewEvidenceRecord(evidenceId: string, input: ReviewEvidenceRecordInput): Promise<{ evidenceRecord: EvidenceRecord; reviewReceipt: EvidenceReviewReceipt }> {
+  return createEvidenceRepository().reviewEvidenceRecord(evidenceId, input);
 }

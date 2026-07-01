@@ -166,6 +166,43 @@ function validateEvidenceUploadPersistence() {
   assertIncludes(uploadRoute, 'blockerCode: "GATES_NOT_PASSED"', "evidence upload guardrail");
 }
 
+function validateEvidenceReviewTransition() {
+  const repository = read("lib/repositories/chaintrace-repository.ts");
+  const reviewRoute = read("app/api/evidence/[evidenceId]/review/route.ts");
+
+  [
+    "export type EvidenceReviewAction",
+    "export type EvidenceReviewReceipt",
+    "export async function reviewEvidenceRecord",
+    "reviewReceipts",
+    "beforeStatus",
+    "afterStatus",
+    "reviewerRole",
+    "supports_passed_gate",
+    "GATES_NOT_PASSED",
+    "disbursementAllowed: false",
+  ].forEach((expected) => assertIncludes(repository, expected, "evidence review repository transition"));
+
+  [
+    'dynamic = "force-dynamic"',
+    "reviewEvidenceRecord",
+    "buildFinancingPack",
+    "reviewReceipt",
+    "evidenceRecord",
+    "gateSummary",
+    "readiness",
+    "evidencePackHash",
+    "verify",
+    "reject",
+    "request_more_evidence",
+    "operator",
+    "professional",
+    "disbursementAllowed: financingPack.readiness.disbursementAllowed",
+    'blockerCode: financingPack.readiness.blockerCode',
+    "Pre-review only",
+  ].forEach((expected) => assertIncludes(reviewRoute, expected, "evidence review route"));
+}
+
 function validateFinancingPackGeneration() {
   const builder = read("lib/financing-pack-builder.ts");
   const financingPackRoute = read("app/api/financing-pack/route.ts");
@@ -195,6 +232,7 @@ function main() {
   validatePreReviewDraft();
   validateRepositoryLayer();
   validateEvidenceUploadPersistence();
+  validateEvidenceReviewTransition();
   validateFinancingPackGeneration();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
