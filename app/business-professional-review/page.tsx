@@ -1,9 +1,14 @@
 import { ProfessionalReviewView } from "@/components/workspace/ProfessionalReviewView";
 import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
 import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
+import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
+
+export const dynamic = "force-dynamic";
 
 export default async function BusinessProfessionalReviewPage() {
   const { zh, workspace } = await getWorkspaceRouteContext();
+  const trade = await getCurrentTradeCase();
+  const evidenceRecords = await listEvidenceRecords(trade.id);
 
   return (
     <WorkspaceFrame
@@ -20,7 +25,7 @@ export default async function BusinessProfessionalReviewPage() {
       }}
       action={{ href: "/business-ops", labelZh: "Agent 工作台", labelEn: "Agent workbench" }}
     >
-      <ProfessionalReviewView zh={zh} workspace={workspace} />
+      <ProfessionalReviewView zh={zh} workspace={workspace} evidenceRecords={evidenceRecords} />
     </WorkspaceFrame>
   );
 }

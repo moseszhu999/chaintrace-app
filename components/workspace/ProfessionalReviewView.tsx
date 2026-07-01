@@ -1,4 +1,5 @@
 import { professionalReviewItems, professionalReviewMetrics, type ProfessionalReviewStatus } from "@/lib/professional-review-fixture";
+import type { EvidenceRecord } from "@/lib/repositories/chaintrace-repository";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 import { DecisionPanel, MetricCard, MetricGrid, StatusList, WorkspaceHero } from "./WorkspacePrimitives";
 import styles from "./WorkspaceViews.module.css";
@@ -16,8 +17,43 @@ function statusClass(status: ProfessionalReviewStatus) {
   return `${styles.statusChip} ${map[status]}`;
 }
 
-export function ProfessionalReviewView({ zh, workspace }: { zh: boolean; workspace: WorkspaceSnapshot }) {
+function evidenceStatusClass(status: EvidenceRecord["status"]) {
+  const map: Record<EvidenceRecord["status"], string> = {
+    verified: styles.statusVerified,
+    uploaded_pending_verification: styles.statusOpen,
+    missing: styles.statusMissing,
+    needs_agent_review: styles.statusMedium,
+    rejected: styles.statusRejected,
+  };
+  return `${styles.statusChip} ${map[status]}`;
+}
+
+function documentLabel(record: EvidenceRecord) {
+  return record.documentType.replace(/_/g, " ");
+}
+
+function gateImpactSummary(record: EvidenceRecord) {
+  if (!record.gateImpacts.length) return "gateImpact=unmapped";
+  return record.gateImpacts.map((impact) => `${impact.gateId}:${impact.status}`).join(" · ");
+}
+
+function buildReviewReceiptItems(records: EvidenceRecord[]) {
+  return records
+    .flatMap((record) => (record.reviewReceipts ?? []).map((receipt) => ({ record, receipt })))
+    .sort((a, b) => b.receipt.reviewedAt.localeCompare(a.receipt.reviewedAt));
+}
+
+export function ProfessionalReviewView({
+  zh,
+  workspace,
+  evidenceRecords,
+}: {
+  zh: boolean;
+  workspace: WorkspaceSnapshot;
+  evidenceRecords: EvidenceRecord[];
+}) {
   const { activeTrade } = workspace;
+  const reviewReceiptItems = buildReviewReceiptItems(evidenceRecords);
 
   return (
     <section className="workspace">
@@ -54,6 +90,44 @@ export function ProfessionalReviewView({ zh, workspace }: { zh: boolean; workspa
             status: item.status,
             statusClassName: statusClass(item.status),
           }))}
+        />
+      </DecisionPanel>
+
+      <DecisionPanel
+        eyebrow={t(zh, "Review receipt handoff", "Review receipt handoff")}
+        title={t(zh, "专业审查可以直接看到已持久化的人工证据审查轨迹。", "Professional review can see the persisted human evidence-review trail directly.")}
+        subtitle="Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false"
+        actions={[{ href: "/evidence", label: t(zh, "打开证据审计时间线", "Open evidence audit timeline") }]}
+      >
+        <StatusList
+          items={
+            reviewReceiptItems.length
+              ? reviewReceiptItems.map(({ record, receipt }) => ({
+                  id: receipt.id,
+                  title: `${receipt.action} · ${documentLabel(record)} · ${record.documentNo}`,
+                  meta: [
+                    `reviewReceipt=${receipt.id}`,
+                    `evidenceId=${receipt.evidenceId} · file=${record.fileName}`,
+                    `${receipt.beforeStatus} -> ${receipt.afterStatus}`,
+                    `reviewerRole=${receipt.reviewerRole} · reviewer=${receipt.reviewerName ?? "unknown"} · reviewedAt=${receipt.reviewedAt}`,
+                    `gateImpact=${gateImpactSummary(record)}`,
+                    `reason=${receipt.reason}`,
+                    `${receipt.blockerCode} · disbursementAllowed=false · agentDecisionAuthority=${receipt.agentDecisionAuthority}`,
+                  ],
+                  status: receipt.afterStatus,
+                  statusClassName: evidenceStatusClass(receipt.afterStatus),
+                }))
+              : [{
+                  id: "no-review-receipts",
+                  title: t(zh, "还没有人工证据审查 receipt", "No human evidence-review receipt yet"),
+                  meta: [
+                    t(zh, "先在 /evidence 对一份证据执行 Verify / Reject / Request more evidence。", "Run Verify / Reject / Request more evidence on /evidence first."),
+                    "Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false",
+                  ],
+                  status: "not_started",
+                  statusClassName: `${styles.statusChip} ${styles.statusOpen}`,
+                }]
+          }
         />
       </DecisionPanel>
 
