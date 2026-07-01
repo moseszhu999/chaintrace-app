@@ -8,6 +8,10 @@ type LocalProofPackClientProps = {
   zh: boolean;
 };
 
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+};
+
 type LocalOrganizationProofBundle = {
   version: "chaintrace-local-org-proof-v1";
   organization: OrganizationContext["organization"];
@@ -82,6 +86,10 @@ type LocalProofPackBundle = {
     evidenceCount: number;
     chainCommitStatus: "NOT_COMMITTED" | "COMMITTED";
     rawFilesIncluded: false;
+    signerAddress?: string;
+    signature?: string;
+    signedMessage?: string;
+    signedAt?: string;
   };
 };
 
@@ -126,9 +134,29 @@ function writeProofPacks(packs: LocalProofPackBundle[]) {
   window.localStorage.setItem(localProofPacksKey, JSON.stringify(packs));
 }
 
+function getEthereumProvider(): EthereumProvider | null {
+  if (typeof window === "undefined") return null;
+  return (window as Window & { ethereum?: EthereumProvider }).ethereum ?? null;
+}
+
 async function computeEvidenceRootHash(caseRootHash: string, evidenceProofs: LocalEvidenceBundle[]) {
   const evidenceHashes = evidenceProofs.map((bundle) => bundle.proof.evidenceHash).sort();
   return sha256Hex(stableStringify({ caseRootHash, evidenceHashes }));
+}
+
+function passportWalletMessage(pack: LocalProofPackBundle) {
+  return [
+    "ChainTrace Trade Evidence Passport",
+    "",
+    `Case: ${pack.caseProof.case.caseName}`,
+    `Passport Root Hash: ${pack.proof.passportRootHash}`,
+    `Case Root Hash: ${pack.proof.caseRootHash}`,
+    `Evidence Root Hash: ${pack.proof.evidenceRootHash}`,
+    `Evidence Count: ${pack.proof.evidenceCount}`,
+    `Generated At: ${pack.generatedAt}`,
+    "",
+    "I control and sign this trade evidence passport root hash.",
+  ].join("\n");
 }
 
 export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
@@ -137,6 +165,7 @@ export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
   const [evidenceBundles, setEvidenceBundles] = useState<LocalEvidenceBundle[]>([]);
   const [proofPacks, setProofPacks] = useState<LocalProofPackBundle[]>([]);
   const [selectedCaseId, setSelectedCaseId] = useState("");
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -203,6 +232,52 @@ export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
     }
   }
 
+  async function connectWallet() {
+    const provider = getEthereumProvider();
+    if (!provider) {
+      setMessage(t(zh, "未检测到钱包。请安装 MetaMask 或兼容钱包。", "No wallet detected. Install MetaMask or a compatible wallet."));
+      return null;
+    }
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    const account = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : null;
+    if (!account) throw new Error("No wallet account returned.");
+    setWalletAddress(account);
+    setMessage(t(zh, "钱包已连接。", "Wallet connected."));
+    return account;
+  }
+
+  async function signProofPack(pack: LocalProofPackBundle) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const provider = getEthereumProvider();
+      if (!provider) throw new Error(t(zh, "未检测到钱包。", "No wallet detected."));
+      const signer = walletAddress ?? await connectWallet();
+      if (!signer) throw new Error("No wallet signer available.");
+      const signedMessage = passportWalletMessage(pack);
+      const signature = await provider.request({ method: "personal_sign", params: [signedMessage, signer] });
+      if (typeof signature !== "string") throw new Error("Wallet did not return a signature.");
+      const signedPack: LocalProofPackBundle = {
+        ...pack,
+        proof: {
+          ...pack.proof,
+          signerAddress: signer,
+          signature,
+          signedMessage,
+          signedAt: new Date().toISOString(),
+        },
+      };
+      const nextPacks = [signedPack, ...proofPacks.filter((item) => item.proof.passportRootHash !== pack.proof.passportRootHash)];
+      writeProofPacks(nextPacks);
+      setProofPacks(nextPacks);
+      setMessage(t(zh, "Passport Root 已由钱包签名。", "Passport Root signed by wallet."));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to sign Passport Root.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function downloadProofPack(pack: LocalProofPackBundle) {
     const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -235,9 +310,9 @@ export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
           <small>{t(zh, "从 localStorage 读取。", "Loaded from localStorage.")}</small>
         </article>
         <article className="metric-card">
-          <span>{t(zh, "本地 Evidence", "Local Evidence")}</span>
-          <strong>{evidenceBundles.length}</strong>
-          <small>{t(zh, "只包含 hash 和 metadata。", "Hash and metadata only.")}</small>
+          <span>{t(zh, "钱包", "Wallet")}</span>
+          <strong>{walletAddress ? walletAddress.slice(0, 10) + "…" : "—"}</strong>
+          <small>{t(zh, "用于签名 Passport Root。", "Used to sign Passport Root.")}</small>
         </article>
       </div>
 
@@ -245,7 +320,7 @@ export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
         <div className="section-heading compact-heading">
           <span>{t(zh, "Proof Pack", "Proof Pack")}</span>
           <h2>{t(zh, "生成 Trade Evidence Passport", "Generate Trade Evidence Passport")}</h2>
-          <p>{t(zh, "把组织、Case、Evidence 的 proof 合成一个可交付 JSON。raw file 不包含在包里。", "Bundle organization, case, and evidence proofs into a deliverable JSON. Raw files are not included.")}</p>
+          <p>{t(zh, "把组织、Case、Evidence 的 proof 合成一个可交付 JSON。生成后可用钱包签名 passportRootHash。", "Bundle organization, case, and evidence proofs into a deliverable JSON. After generation, sign passportRootHash with a wallet.")}</p>
         </div>
 
         {caseBundles.length ? (
@@ -262,6 +337,9 @@ export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
             </div>
             <button className="primary-button" type="button" onClick={generateProofPack} disabled={!selectedCase || busy}>
               {busy ? t(zh, "生成中…", "Generating…") : t(zh, "生成 Proof Pack", "Generate Proof Pack")}
+            </button>
+            <button className="secondary-button" type="button" onClick={connectWallet} disabled={busy}>
+              {walletAddress ? t(zh, "钱包已连接", "Wallet connected") : t(zh, "连接钱包", "Connect Wallet")}
             </button>
             {message ? <p className="form-note">{message}</p> : null}
           </div>
@@ -283,7 +361,10 @@ export function LocalProofPackClient({ zh }: LocalProofPackClientProps) {
               <span>case: {pack.proof.caseRootHash.slice(0, 24)}…</span>
               <span>evidence root: {pack.proof.evidenceRootHash.slice(0, 24)}…</span>
               <span>{t(zh, "Evidence 数", "Evidence count")}: {pack.proof.evidenceCount}</span>
+              <span>{t(zh, "签名", "Signature")}: {pack.proof.signature ? "SIGNED" : "NOT_SIGNED"}</span>
+              <span>{pack.proof.signerAddress ?? t(zh, "未绑定 signer", "No signer bound")}</span>
               <button className="secondary-button" type="button" onClick={() => copyHash(pack.proof.passportRootHash)}>Passport Root</button>
+              <button className="secondary-button" type="button" onClick={() => signProofPack(pack)} disabled={busy}>{t(zh, "签名 Passport Root", "Sign Passport Root")}</button>
               <button className="secondary-button" type="button" onClick={() => downloadProofPack(pack)}>{t(zh, "下载 Proof Pack", "Download Proof Pack")}</button>
             </article>
           )) : (
