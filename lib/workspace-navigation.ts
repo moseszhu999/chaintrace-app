@@ -16,6 +16,7 @@ export const workspaceNavGroups: WorkspaceNavGroup[] = [
     en: "v2 real foundation",
     items: [
       { key: "organization", href: "/organization-network", zh: "组织网络", en: "Organization", tier: "primary" },
+      { key: "cases", href: "/trade-cases", zh: "Trade Case", en: "Trade Cases", tier: "primary" },
     ],
   },
   {
@@ -24,7 +25,6 @@ export const workspaceNavGroups: WorkspaceNavGroup[] = [
     en: "Working path",
     items: [
       { key: "dashboard", href: "/dashboard", zh: "操作台", en: "Command center", tier: "primary" },
-      { key: "cases", href: "/cases", zh: "Case", en: "Cases", tier: "primary" },
       { key: "evidence", href: "/evidence", zh: "证据", en: "Evidence", tier: "primary" },
       { key: "tasks", href: "/tasks", zh: "任务", en: "Tasks", tier: "primary" },
     ],
