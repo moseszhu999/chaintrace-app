@@ -1,14 +1,24 @@
 import { ProfessionalReviewView } from "@/components/workspace/ProfessionalReviewView";
 import { WorkspaceFrame } from "@/components/workspace/WorkspaceFrame";
+import { getFallbackEvidenceRecords } from "@/lib/evidence-fallback";
 import { getWorkspaceRouteContext } from "@/lib/workspace-route-context";
 import { getCurrentTradeCase, listEvidenceRecords } from "@/lib/repositories/chaintrace-repository";
 
 export const dynamic = "force-dynamic";
 
+async function getProfessionalReviewEvidenceRecords() {
+  try {
+    const trade = await getCurrentTradeCase();
+    return await listEvidenceRecords(trade.id);
+  } catch (error) {
+    console.error("Falling back to seeded evidence records for professional review", error);
+    return getFallbackEvidenceRecords();
+  }
+}
+
 export default async function BusinessProfessionalReviewPage() {
   const { zh, workspace } = await getWorkspaceRouteContext();
-  const trade = await getCurrentTradeCase();
-  const evidenceRecords = await listEvidenceRecords(trade.id);
+  const evidenceRecords = await getProfessionalReviewEvidenceRecords();
 
   return (
     <WorkspaceFrame
