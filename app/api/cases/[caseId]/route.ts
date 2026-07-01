@@ -1,5 +1,9 @@
+import { apiSuccess } from "@/lib/api-response";
+import { safeGetCurrentTradeCase } from "@/lib/repositories/safe-chaintrace-repository";
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return Response.json({ ok: true });
+  const trade = await safeGetCurrentTradeCase();
+  return apiSuccess({ case: trade });
 }
