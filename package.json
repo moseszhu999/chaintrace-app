@@ -5,10 +5,9 @@
   "description": "AI-native Trade Evidence Passport platform for real multi-organization trade evidence workflows.",
   "scripts": {
     "dev": "next dev",
-    "build": "npm run db:migrate:v2 && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:migrate:v2": "node scripts/apply-v2-schema.mjs",
     "api:validate": "node scripts/validate-api-contracts.js",
     "ux:validate": "node scripts/validate-public-agent-entry.js",
     "agent:validate": "node scripts/validate-agent-workflow.js",
