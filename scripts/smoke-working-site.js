@@ -3,7 +3,12 @@ const scenario = process.argv[2] || "case";
 const scenarios = {
   evidence: ["/evidence", "/api/health"],
   case: ["/", "/dashboard", "/tasks", "/health", "/api/health"],
-  handoff: ["/business-professional-review", "/api/health"],
+  handoff: [
+    "/business-professional-review",
+    "/api/cases/trade_vn_coffee_sg_2026_0007/handoff",
+    "/api/cases/trade_vn_coffee_sg_2026_0007/review-summary",
+    "/api/health",
+  ],
   "production-fallback": ["/health", "/api/health", "/__chaintrace_smoke_missing_route__"],
 };
 

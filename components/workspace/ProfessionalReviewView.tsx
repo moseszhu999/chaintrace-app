@@ -1,5 +1,4 @@
-import { professionalReviewItems, professionalReviewMetrics, type ProfessionalReviewStatus } from "@/lib/professional-review-fixture";
-import type { EvidenceRecord } from "@/lib/repositories/chaintrace-repository";
+import type { CaseReviewHandoffPack } from "@/lib/case-review-handoff";
 import type { WorkspaceSnapshot } from "@/lib/workspace-repository";
 import { DecisionPanel, MetricCard, MetricGrid, StatusList, WorkspaceHero } from "./WorkspacePrimitives";
 import styles from "./WorkspaceViews.module.css";
@@ -8,84 +7,135 @@ function t(zh: boolean, cn: string, en: string) {
   return zh ? cn : en;
 }
 
-function statusClass(status: ProfessionalReviewStatus) {
-  const map: Record<ProfessionalReviewStatus, string> = {
-    "auto-cleared": styles.statusVerified,
-    "needs-review": styles.statusOpen,
-    blocked: styles.statusRejected,
-  };
-  return `${styles.statusChip} ${map[status]}`;
+function statusClass(status: string) {
+  if (["passed", "verified", "resolved"].includes(status)) return `${styles.statusChip} ${styles.statusVerified}`;
+  if (["pending", "uploaded_pending_verification", "needs_agent_review", "open", "waiting_counterparty"].includes(status)) {
+    return `${styles.statusChip} ${styles.statusMedium}`;
+  }
+  if (["blocked", "missing", "rejected"].includes(status)) return `${styles.statusChip} ${styles.statusRejected}`;
+  return `${styles.statusChip} ${styles.statusOpen}`;
 }
 
-function evidenceStatusClass(status: EvidenceRecord["status"]) {
-  const map: Record<EvidenceRecord["status"], string> = {
-    verified: styles.statusVerified,
-    uploaded_pending_verification: styles.statusOpen,
-    missing: styles.statusMissing,
-    needs_agent_review: styles.statusMedium,
-    rejected: styles.statusRejected,
-  };
-  return `${styles.statusChip} ${map[status]}`;
-}
-
-function documentLabel(record: EvidenceRecord) {
-  return record.documentType.replace(/_/g, " ");
-}
-
-function gateImpactSummary(record: EvidenceRecord) {
-  if (!record.gateImpacts.length) return "gateImpact=unmapped";
-  return record.gateImpacts.map((impact) => `${impact.gateId}:${impact.status}`).join(" · ");
-}
-
-function buildReviewReceiptItems(records: EvidenceRecord[]) {
-  return records
-    .flatMap((record) => (record.reviewReceipts ?? []).map((receipt) => ({ record, receipt })))
-    .sort((a, b) => b.receipt.reviewedAt.localeCompare(a.receipt.reviewedAt));
+function documentLabel(value: string) {
+  return value.replaceAll("_", " ");
 }
 
 export function ProfessionalReviewView({
   zh,
   workspace,
-  evidenceRecords,
+  handoffPack,
 }: {
   zh: boolean;
   workspace: WorkspaceSnapshot;
-  evidenceRecords: EvidenceRecord[];
+  handoffPack: CaseReviewHandoffPack;
 }) {
-  const { activeTrade } = workspace;
-  const reviewReceiptItems = buildReviewReceiptItems(evidenceRecords);
+  const caseSummary = handoffPack.caseSummary;
+  const latestReceipt = handoffPack.reviewReceiptTimeline[0];
 
   return (
     <section className="workspace">
       <WorkspaceHero
-        eyebrow={t(zh, "专业审查视图", "Professional review view")}
-        title={t(zh, "银行和律所不再从零翻材料，而是审查 Agent + 合约工作流筛出的例外。", "Banks and law firms no longer start from raw materials; they review exceptions surfaced by agent + contract workflows.")}
-        subtitle={`${t(zh, activeTrade.titleZh, activeTrade.titleEn)} · ${activeTrade.poNo} · ${activeTrade.invoiceNo}`}
+        eyebrow={t(zh, "专业审查 Handoff Pack", "Professional review handoff pack")}
+        title={t(zh, "银行、律所和保理方读取同一个 case snapshot，而不是 fixture 队列。", "Banks, law firms, and factors read the same case snapshot instead of a fixture queue.")}
+        subtitle={`${t(zh, caseSummary.titleZh, caseSummary.titleEn)} · ${caseSummary.poNo} · ${caseSummary.invoiceNo}`}
+        actions={[
+          { href: `/api/cases/${caseSummary.id}/handoff`, label: "Open JSON", primary: true },
+          { href: `/api/cases/${caseSummary.id}/review-summary`, label: "Review summary" },
+        ]}
       >
         <MetricGrid>
-          {professionalReviewMetrics.map((metric) => (
-            <MetricCard
-              key={metric.labelEn}
-              label={t(zh, metric.labelZh, metric.labelEn)}
-              value={t(zh, metric.valueZh, metric.valueEn)}
-              note={t(zh, metric.noteZh, metric.noteEn)}
-            />
-          ))}
+          <MetricCard
+            label={t(zh, "Readiness", "Readiness")}
+            value={`${handoffPack.readiness.readinessScore}/${handoffPack.readiness.maxScore}`}
+            note={`${handoffPack.readiness.blockerCode} · disbursementAllowed=false`}
+          />
+          <MetricCard
+            label={t(zh, "Gates", "Gates")}
+            value={`${handoffPack.gateStatus.summary.passed}/${handoffPack.gateStatus.summary.total}`}
+            note={`blocked ${handoffPack.gateStatus.summary.blocked} · pending ${handoffPack.gateStatus.summary.pending}`}
+          />
+          <MetricCard
+            label={t(zh, "Evidence", "Evidence")}
+            value={`${handoffPack.evidenceSummary.verified}/${handoffPack.evidenceSummary.total}`}
+            note={`missingOrRejected ${handoffPack.evidenceSummary.missingOrRejected}`}
+          />
+          <MetricCard
+            label={t(zh, "Receipts", "Receipts")}
+            value={`${handoffPack.reviewReceiptTimeline.length}`}
+            note={latestReceipt ? `${latestReceipt.action} · ${latestReceipt.evidenceId}` : "No review receipt yet"}
+          />
         </MetricGrid>
       </WorkspaceHero>
 
       <DecisionPanel
-        eyebrow={t(zh, "例外审查队列", "Exception review queue")}
-        title={t(zh, "中介机构的数量级弱化，不是消失；它们从重复核验退到高价值判断节点。", "Order-of-magnitude intermediary compression does not mean disappearance; intermediaries move from repetitive verification to high-value judgment points.")}
+        eyebrow={t(zh, "Boundary statement", "Boundary statement")}
+        title={t(zh, "这个包只用于专业预审交接，不形成批准结论。", "This pack is only for professional pre-review handoff and does not create an approval decision.")}
+        subtitle={handoffPack.boundary.statement}
+      >
+        <div className="typed-data-status ai-boundary-status">
+          <strong>mode={handoffPack.boundary.mode}</strong>
+          <span>blockerCode={handoffPack.boundary.blockerCode}</span>
+          <span>disbursementAllowed={String(handoffPack.boundary.disbursementAllowed)}</span>
+          <span>not a legal opinion · not a credit approval</span>
+        </div>
+      </DecisionPanel>
+
+      <DecisionPanel
+        eyebrow={t(zh, "Blocked gates and exceptions", "Blocked gates and exceptions")}
+        title={t(zh, "专业机构先看阻断原因、缺失证据和开放例外。", "Professional reviewers start from blocked reasons, missing evidence, and open exceptions.")}
       >
         <StatusList
-          items={professionalReviewItems.map((item) => ({
-            id: item.id,
-            title: `${t(zh, item.areaZh, item.areaEn)} · ${t(zh, item.ownerZh, item.ownerEn)}`,
+          items={handoffPack.blockedReasons.map((reason) => ({
+            id: reason.gateId,
+            title: `${t(zh, reason.labelZh, reason.labelEn)} · gate=${reason.gateId}`,
             meta: [
-              `${t(zh, "Agent 初筛：", "Agent pre-check: ")}${t(zh, item.agentPrecheckZh, item.agentPrecheckEn)}`,
-              `${t(zh, "专业机构职责：", "Professional role: ")}${t(zh, item.professionalRoleZh, item.professionalRoleEn)}`,
-              `${t(zh, "例外/风险：", "Exception/risk: ")}${t(zh, item.exceptionZh, item.exceptionEn)}`,
+              `evidenceId=${reason.evidenceId} · sourceEvidence=${reason.sourceEvidenceIds.join(", ") || "none"}`,
+              t(zh, reason.reasonZh, reason.reasonEn),
+              "Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false",
+            ],
+            status: "blocked",
+            statusClassName: statusClass("blocked"),
+          }))}
+        />
+      </DecisionPanel>
+
+      <DecisionPanel
+        eyebrow={t(zh, "Missing evidence", "Missing evidence")}
+        title={t(zh, "缺口直接来自 evidence records 和 linked tasks。", "Gaps come directly from evidence records and linked tasks.")}
+      >
+        <StatusList
+          items={
+            handoffPack.missingEvidence.length
+              ? handoffPack.missingEvidence.map((item) => ({
+                  id: item.evidenceId,
+                  title: `${documentLabel(item.documentType)} · ${item.documentNo}`,
+                  meta: [`gate=${item.gateId}`, t(zh, item.reasonZh, item.reasonEn)],
+                  status: item.status,
+                  statusClassName: statusClass(item.status),
+                }))
+              : [{
+                  id: "missing-evidence-empty",
+                  title: t(zh, "没有缺失证据", "No missing evidence"),
+                  meta: ["Snapshot currently has no missing evidence record."],
+                  status: "verified",
+                  statusClassName: statusClass("verified"),
+                }]
+          }
+        />
+      </DecisionPanel>
+
+      <DecisionPanel
+        eyebrow={t(zh, "Open exceptions", "Open exceptions")}
+        title={t(zh, "未闭合例外保留给专业机构判断。", "Open exceptions remain for professional reviewers to judge.")}
+      >
+        <StatusList
+          items={handoffPack.openExceptions.map((item) => ({
+            id: item.id,
+            title: item.title,
+            meta: [
+              `evidenceId=${item.evidenceId} · gate=${item.gateId}`,
+              t(zh, item.reasonZh, item.reasonEn),
+              "not a legal opinion · not lending approval · not a credit approval",
             ],
             status: item.status,
             statusClassName: statusClass(item.status),
@@ -94,28 +144,24 @@ export function ProfessionalReviewView({
       </DecisionPanel>
 
       <DecisionPanel
-        eyebrow={t(zh, "Review receipt handoff", "Review receipt handoff")}
-        title={t(zh, "专业审查可以直接看到已持久化的人工证据审查轨迹。", "Professional review can see the persisted human evidence-review trail directly.")}
-        subtitle="Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false"
-        actions={[{ href: "/evidence", label: t(zh, "打开证据审计时间线", "Open evidence audit timeline") }]}
+        eyebrow={t(zh, "Review receipt timeline", "Review receipt timeline")}
+        title={t(zh, "页面显示完整人工审查 receipt 历史。", "The page shows the full human review receipt history.")}
       >
         <StatusList
           items={
-            reviewReceiptItems.length
-              ? reviewReceiptItems.map(({ record, receipt }) => ({
+            handoffPack.reviewReceiptTimeline.length
+              ? handoffPack.reviewReceiptTimeline.map((receipt) => ({
                   id: receipt.id,
-                  title: `${receipt.action} · ${documentLabel(record)} · ${record.documentNo}`,
+                  title: `${receipt.action} · ${documentLabel(receipt.documentType)} · ${receipt.documentNo}`,
                   meta: [
                     `reviewReceipt=${receipt.id}`,
-                    `evidenceId=${receipt.evidenceId} · file=${record.fileName}`,
-                    `${receipt.beforeStatus} -> ${receipt.afterStatus}`,
-                    `reviewerRole=${receipt.reviewerRole} · reviewer=${receipt.reviewerName ?? "unknown"} · reviewedAt=${receipt.reviewedAt}`,
-                    `gateImpact=${gateImpactSummary(record)}`,
-                    `reason=${receipt.reason}`,
+                    `${receipt.beforeStatus} -> ${receipt.afterStatus} · reviewedAt=${receipt.reviewedAt}`,
+                    `reviewerRole=${receipt.reviewerRole} · reviewer=${receipt.reviewerName ?? "unknown"}`,
                     `${receipt.blockerCode} · disbursementAllowed=false · agentDecisionAuthority=${receipt.agentDecisionAuthority}`,
+                    `file=${receipt.fileName} · reason=${receipt.reason}`,
                   ],
                   status: receipt.afterStatus,
-                  statusClassName: evidenceStatusClass(receipt.afterStatus),
+                  statusClassName: statusClass(receipt.afterStatus),
                 }))
               : [{
                   id: "no-review-receipts",
@@ -124,22 +170,38 @@ export function ProfessionalReviewView({
                     t(zh, "先在 /evidence 对一份证据执行 Verify / Reject / Request more evidence。", "Run Verify / Reject / Request more evidence on /evidence first."),
                     "Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false",
                   ],
-                  status: "not_started",
-                  statusClassName: `${styles.statusChip} ${styles.statusOpen}`,
+                  status: "open",
+                  statusClassName: statusClass("open"),
                 }]
           }
         />
       </DecisionPanel>
 
       <DecisionPanel
-        eyebrow={t(zh, "前端层定位", "Frontend-layer positioning")}
-        title={t(zh, "Next.js / React / TypeScript 前端层现在覆盖：业务工作台、融资评分、Agent 工作台、合约控制台、资金方视图、专业审查视图。", "The Next.js / React / TypeScript frontend layer now covers: business workspace, readiness score, agent workbench, contract console, financier view, and professional review view.")}
-        actions={[
-          { href: "/business-ops", label: t(zh, "查看 Agent 工作台", "View Agent workbench"), primary: true },
-          { href: "/business-readiness", label: t(zh, "查看融资评分", "View readiness score") },
-          { href: "/business-architecture", label: t(zh, "查看业务架构", "View business architecture") },
-        ]}
-      />
+        eyebrow={t(zh, "Recommended next actions", "Recommended next actions")}
+        title={t(zh, "下一步动作来自 evidence-linked tasks 和 blocked gates。", "Next actions come from evidence-linked tasks and blocked gates.")}
+      >
+        <StatusList
+          items={handoffPack.recommendedNextActions.map((action) => ({
+            id: action.id,
+            title: action.title,
+            meta: [
+              `ownerRole=${action.ownerRole} · evidenceId=${action.evidenceId}`,
+              `gate=${action.gateId}`,
+              action.reason,
+            ],
+            status: "open",
+            statusClassName: statusClass("open"),
+          }))}
+        />
+      </DecisionPanel>
+
+      <div className="typed-data-status ai-boundary-status">
+        <strong>caseId={caseSummary.id}</strong>
+        <span>workspace={workspace.organization.name}</span>
+        <span>generatedAt={handoffPack.generatedAt}</span>
+        <span>allowedAction={handoffPack.boundary.allowedAction}</span>
+      </div>
     </section>
   );
 }

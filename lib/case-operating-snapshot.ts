@@ -19,6 +19,7 @@ export async function getCaseOperatingSnapshot(caseId?: string) {
     generatedAt: new Date().toISOString(),
     case: trade,
     evidenceStore: evidence.store,
+    evidenceRecords: evidence.records,
     evidenceSummary: {
       total: evidence.records.length,
       verified: evidence.records.filter((record) => record.status === "verified").length,

@@ -1,29 +1,37 @@
 import { NextResponse } from "next/server";
-import { professionalReviewItems, professionalReviewMetrics } from "@/lib/professional-review-fixture";
-import { receivableReadinessReport } from "@/lib/receivable-readiness-fixture";
+import { getCaseReviewHandoffPack } from "@/lib/case-review-handoff";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export function GET() {
-  const blocked = professionalReviewItems.filter((item) => item.status === "blocked");
-  const needsReview = professionalReviewItems.filter((item) => item.status === "needs-review");
+export async function GET() {
+  const handoffPack = await getCaseReviewHandoffPack();
+  const blocked = handoffPack.openExceptions.filter((item) => item.status === "missing" || item.status === "rejected");
+  const needsReview = handoffPack.openExceptions.filter((item) => item.status === "uploaded_pending_verification" || item.status === "needs_agent_review");
 
   return NextResponse.json({
-    generatedAt: new Date().toISOString(),
-    version: "chaintrace-professional-review-v0.1",
-    tradeId: receivableReadinessReport.tradeId,
-    metrics: professionalReviewMetrics,
+    generatedAt: handoffPack.generatedAt,
+    version: "chaintrace-professional-review-v0.2",
+    tradeId: handoffPack.caseSummary.id,
+    metrics: [
+      { labelEn: "Readiness", valueEn: `${handoffPack.readiness.readinessScore}/${handoffPack.readiness.maxScore}` },
+      { labelEn: "Gates", valueEn: `${handoffPack.gateStatus.summary.passed}/${handoffPack.gateStatus.summary.total}` },
+      { labelEn: "Receipts", valueEn: `${handoffPack.reviewReceiptTimeline.length}` },
+    ],
     queueSummary: {
-      totalItems: professionalReviewItems.length,
+      totalItems: handoffPack.openExceptions.length,
       blocked: blocked.length,
       needsReview: needsReview.length,
-      autoCleared: professionalReviewItems.filter((item) => item.status === "auto-cleared").length,
+      autoCleared: handoffPack.evidenceSummary.verified,
       recommendedOperatingModel: "Agent pre-check + professional exception review",
     },
-    items: professionalReviewItems,
+    items: handoffPack.openExceptions,
+    handoffPack,
     decisionBoundary: {
-      bankAndFinancier: "Underwriting, compliance, final gate review, and disbursement authorization.",
-      lawFirm: "Receivable assignment, buyer-defense clauses, dispute handling, and material exceptions.",
+      statement: handoffPack.boundary.statement,
+      mode: handoffPack.boundary.mode,
+      disbursementAllowed: handoffPack.boundary.disbursementAllowed,
+      bankAndFinancier: "Underwriting, compliance, and final gate review. No lending approval or disbursement authorization is created here.",
+      lawFirm: "Receivable assignment, buyer-defense clauses, dispute handling, and material exceptions. This is not a legal opinion.",
       chaintraceAgent: "Evidence triage, gap detection, gate mapping, memo draft, and follow-up task generation.",
       smartContracts: "Gate-based execution control; current formal disbursement remains blocked.",
     },

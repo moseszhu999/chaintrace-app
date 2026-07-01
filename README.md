@@ -69,6 +69,8 @@ These routes are kept for the Vercel demo and regression validation. They are no
 - `POST /api/evidence/upload` - mocked evidence upload classification
 - `GET /api/financing-pack` - financier-facing evidence and memo pack
 - `GET /api/professional-review` - professional exception review queue
+- `GET /api/cases/[caseId]/handoff` - professional review handoff pack from the operating snapshot
+- `GET /api/cases/[caseId]/review-summary` - lightweight professional review summary from the same handoff pack
 - `GET /api/loan-requests/pre-review` - pre-review request draft
 - `POST /api/loan-requests/pre-review` - mocked pre-review request creation
 

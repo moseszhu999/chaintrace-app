@@ -185,8 +185,9 @@ function validateEvidenceReviewTransition() {
 
   [
     'dynamic = "force-dynamic"',
-    "reviewEvidenceRecord",
+    "safeReviewEvidenceRecord",
     "buildFinancingPack",
+    "linkedTask",
     "reviewReceipt",
     "evidenceRecord",
     "gateSummary",
@@ -197,9 +198,7 @@ function validateEvidenceReviewTransition() {
     "request_more_evidence",
     "operator",
     "professional",
-    "disbursementAllowed: financingPack.readiness.disbursementAllowed",
-    'blockerCode: financingPack.readiness.blockerCode',
-    "Pre-review only",
+    "readiness: financingPack.readiness",
   ].forEach((expected) => assertIncludes(reviewRoute, expected, "evidence review route"));
 }
 
@@ -226,6 +225,49 @@ function validateFinancingPackGeneration() {
   assertIncludes(financingPackRoute, "disbursementAllowed: financingPack.readiness.disbursementAllowed", "financing pack route");
 }
 
+function validateProfessionalReviewHandoffPack() {
+  const handoffBuilder = read("lib/case-review-handoff.ts");
+  const handoffRoute = read("app/api/cases/[caseId]/handoff/route.ts");
+  const reviewSummaryRoute = read("app/api/cases/[caseId]/review-summary/route.ts");
+  const reviewPage = read("app/business-professional-review/page.tsx");
+  const reviewView = read("components/workspace/ProfessionalReviewView.tsx");
+  const legacyReviewRoute = read("app/api/professional-review/route.ts");
+  const caseHandoffPage = read("app/cases/[caseId]/handoff/page.tsx");
+  const caseReviewPage = read("app/cases/[caseId]/review/page.tsx");
+
+  [
+    "export async function getCaseReviewHandoffPack",
+    "export async function getCaseReviewSummary",
+    "getCaseOperatingSnapshot",
+    "caseSummary",
+    "evidenceSummary",
+    "reviewReceiptTimeline",
+    "gateStatus",
+    "blockedReasons",
+    "missingEvidence",
+    "openExceptions",
+    "recommendedNextActions",
+    "boundary",
+    'mode: "pre_review_only"',
+    "disbursementAllowed: false",
+  ].forEach((expected) => assertIncludes(handoffBuilder, expected, "professional review handoff builder"));
+
+  assertIncludes(handoffRoute, "getCaseReviewHandoffPack", "case handoff API");
+  assertIncludes(handoffRoute, "handoffPack", "case handoff API");
+  assertIncludes(reviewSummaryRoute, "getCaseReviewSummary", "case review summary API");
+  assertIncludes(reviewSummaryRoute, "reviewSummary", "case review summary API");
+  assertIncludes(reviewPage, "getCaseReviewHandoffPack", "business professional review page");
+  assertIncludes(reviewPage, "handoffPack", "business professional review page");
+  assertIncludes(reviewView, "handoffPack", "professional review view");
+  assertIncludes(reviewView, "handoffPack.openExceptions", "professional review view");
+  assertIncludes(reviewView, "/api/cases/", "professional review open JSON action");
+  assert(!reviewView.includes("professional-review-fixture"), "professional review view must not import fixture queue");
+  assertIncludes(legacyReviewRoute, "getCaseReviewHandoffPack", "legacy professional review API");
+  assert(!legacyReviewRoute.includes("professional-review-fixture"), "legacy professional review API must not import fixture queue");
+  assertIncludes(caseHandoffPage, "getCaseReviewHandoffPack", "case handoff page");
+  assertIncludes(caseReviewPage, "getCaseReviewSummary", "case review page");
+}
+
 function main() {
   validateAgentPipeline();
   validateGateDecision();
@@ -234,6 +276,7 @@ function main() {
   validateEvidenceUploadPersistence();
   validateEvidenceReviewTransition();
   validateFinancingPackGeneration();
+  validateProfessionalReviewHandoffPack();
   console.log("API contract validation passed: ChainTrace remains pre-review only, 62/100, 6/12, GATES_NOT_PASSED.");
 }
 

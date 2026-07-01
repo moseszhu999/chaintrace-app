@@ -137,7 +137,8 @@ export function OperatorTaskWorkflowClient({ zh }: { zh: boolean }) {
 
       <div className="typed-data-status ai-boundary-status" style={{ marginTop: 16 }}>
         <strong>agentDecisionAuthority=none</strong>
-        <span>Pre-review only · GATES_NOT_PASSED</span>
+        <span>modelExecutionMode=deterministic_no_llm_call</span>
+        <span>Pre-review only · GATES_NOT_PASSED · disbursementAllowed=false</span>
       </div>
 
       {error && <div className="error" style={{ marginTop: 16 }}>{error}</div>}
