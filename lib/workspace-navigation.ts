@@ -1,4 +1,4 @@
-export type WorkspaceNavKey = "cases" | "flows" | "architecture" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "professionalReview" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
+export type WorkspaceNavKey = "organization" | "cases" | "flows" | "architecture" | "logistics" | "readiness" | "signing" | "loan" | "contracts" | "professionalReview" | "dashboard" | "business" | "funds" | "wallet" | "proofPacks" | "evidence" | "tasks" | "assistant" | "approvals";
 
 export type WorkspaceNavItem = { key: WorkspaceNavKey; href: string; zh: string; en: string; tier?: "primary" | "reference" };
 
@@ -10,6 +10,14 @@ export type WorkspaceNavGroup = {
 };
 
 export const workspaceNavGroups: WorkspaceNavGroup[] = [
+  {
+    id: "v2foundation",
+    zh: "v2 真实底座",
+    en: "v2 real foundation",
+    items: [
+      { key: "organization", href: "/organization-network", zh: "组织网络", en: "Organization", tier: "primary" },
+    ],
+  },
   {
     id: "operating",
     zh: "工作台主路径",
