@@ -15,7 +15,9 @@
     "smoke:evidence": "node scripts/smoke-working-site.js evidence",
     "smoke:case": "node scripts/smoke-working-site.js case",
     "smoke:handoff": "node scripts/smoke-working-site.js handoff",
-    "smoke:production-fallback": "node scripts/smoke-working-site.js production-fallback"
+    "smoke:production-fallback": "node scripts/smoke-working-site.js production-fallback",
+    "contracts:compile": "hardhat compile",
+    "contracts:test": "hardhat test"
   },
   "dependencies": {
     "@neondatabase/serverless": "latest",
