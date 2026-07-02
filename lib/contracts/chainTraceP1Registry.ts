@@ -1,10 +1,10 @@
-import { createPublicClient, createWalletClient, custom, http } from "viem";
+import { createPublicClient, createWalletClient, custom, http, type Abi } from "viem";
 import { hardhat, mainnet, sepolia } from "viem/chains";
 
 import chainTraceP1RegistryAbi from "@/lib/contracts/abi/ChainTraceP1Registry.json";
 import { P1RawRegistryEvent, projectRawRegistryEvents } from "@/lib/contracts/p1-event-read-model";
 
-export const CHAINTRACE_P1_REGISTRY_ABI = chainTraceP1RegistryAbi;
+export const CHAINTRACE_P1_REGISTRY_ABI = chainTraceP1RegistryAbi as Abi;
 
 interface BrowserProvider {
   request(args: { method: string; params?: unknown[] }): Promise<unknown>;
