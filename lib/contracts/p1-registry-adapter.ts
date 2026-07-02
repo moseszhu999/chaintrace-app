@@ -15,7 +15,10 @@ import {
   RegisterMockUserInput,
   signInExistingWallet
 } from "@/lib/p1-client-store";
+import { buildDocumentProofPayload } from "@/lib/contracts/proof-payload";
+import { DOCUMENT_KIND_TO_CONTRACT_VALUE, ROLE_TO_CONTRACT_VALUE } from "@/lib/contracts/p1-contract-values";
 import { getChainTraceMode, getConfiguredRegistryAddress, isLocalChainConfigured } from "@/lib/contracts/p1-local-chain-mode";
+import { waitForTransactionReceipt, writeContract } from "@/lib/contracts/chainTraceP1Registry";
 import { Hex32 } from "@/lib/contracts/types";
 import { Role } from "@/lib/p1-domain";
 
@@ -75,41 +78,63 @@ export function createMockRegistryAdapter(): P1RegistryAdapter {
 }
 
 export function createLocalChainAdapter(): P1RegistryAdapter {
-  const mockFallback = createMockRegistryAdapter();
+  const displayCache = createMockRegistryAdapter();
 
   return {
     mode: "local-chain",
     async connectWallet(walletAddress = "0xEXporter001") {
       assertLocalChainConfigured();
-      return mockFallback.connectWallet(walletAddress);
+      return displayCache.connectWallet(walletAddress);
     },
     async getCurrentWallet() {
       assertLocalChainConfigured();
-      return mockFallback.getCurrentWallet();
+      return displayCache.getCurrentWallet();
     },
     async getRole(walletAddress) {
       assertLocalChainConfigured();
-      return mockFallback.getRole(walletAddress);
+      return displayCache.getRole(walletAddress);
     },
     async registerRole(input) {
       assertLocalChainConfigured();
-      return mockFallback.registerRole(input);
+      const hash = await writeContract("registerRole", [ROLE_TO_CONTRACT_VALUE[input.role]]);
+      await waitForTransactionReceipt(hash);
+      return displayCache.registerRole(input);
     },
     async createCase(walletAddress, input) {
       assertLocalChainConfigured();
-      return mockFallback.createCase(walletAddress, input);
+      const financingCase = await displayCache.createCase(walletAddress, input);
+      const hash = await writeContract("createCase", [financingCase.caseCommitment]);
+      await waitForTransactionReceipt(hash);
+      return financingCase;
     },
     async addDocumentProof(walletAddress, caseId, input) {
       assertLocalChainConfigured();
-      return mockFallback.addDocumentProof(walletAddress, caseId, input);
+      const rawBytes = new TextEncoder().encode(input.textSummary);
+      const payload = await buildDocumentProofPayload({
+        rawBytes,
+        metadata: {
+          fileName: input.fileName,
+          fileType: input.fileType,
+          fileSize: input.fileSize,
+          documentKind: input.kind
+        }
+      });
+      const hash = await writeContract("addDocumentProof", [
+        caseId,
+        payload.documentHash,
+        payload.metadataHash,
+        DOCUMENT_KIND_TO_CONTRACT_VALUE[input.kind]
+      ]);
+      await waitForTransactionReceipt(hash);
+      return displayCache.addDocumentProof(walletAddress, caseId, input);
     },
     async getVisibleCases(walletAddress, role) {
       assertLocalChainConfigured();
-      return mockFallback.getVisibleCases(walletAddress, role);
+      return displayCache.getVisibleCases(walletAddress, role);
     },
     async getCaseDetail(caseId) {
       assertLocalChainConfigured();
-      return mockFallback.getCaseDetail(caseId);
+      return displayCache.getCaseDetail(caseId);
     }
   };
 }
