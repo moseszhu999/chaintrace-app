@@ -133,14 +133,23 @@ addDocumentProof  -> ChainTraceP1Registry.addDocumentProof
 
 Each local-chain write uses browser wallet transaction submission and waits for the transaction receipt before updating display cache.
 
+Implemented local-chain reads:
+
+```text
+getContractEvents reads RoleRegistered / CaseCreated / DocumentProofAdded / GateEvaluated / CaseStateTransitioned
+projectRawRegistryEvents converts raw contract logs into ChainTrace typed events
+buildCaseSummariesFromEvents rebuilds the case list from CaseCreated events
+buildOnChainCaseReadModel rebuilds proof graph, gate checklist, state machine, and audit log from contract events
+local-chain adapter getVisibleCases now uses CaseCreated event summaries
+local-chain adapter getCaseDetail now uses the on-chain event read model
+```
+
 Still pending in the next slice:
 
 ```text
-read role from roles(wallet)
-rebuild case list from CaseCreated events
-rebuild document list from DocumentProofAdded events
-rebuild audit log from all contract events
-replace remaining display-cache reads with contract record/event projections
+read role directly from roles(wallet)
+wire pages directly to P1RegistryAdapter instead of direct p1-client-store calls
+replace remaining display-cache reads where contract records/events are available
 ```
 
 ## Verification
