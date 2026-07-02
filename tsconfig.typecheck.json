@@ -6,6 +6,7 @@
     "components/**/*.ts",
     "components/**/*.tsx",
     "lib/**/*.ts",
+    "scripts/**/*.ts",
     "tests/**/*.ts",
     "next.config.ts",
     "vitest.config.ts"
