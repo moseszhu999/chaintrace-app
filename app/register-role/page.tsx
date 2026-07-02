@@ -1,4 +1,4 @@
-import { RegisterRolePage } from "@/components/p1-pages";
+import { AdapterRegisterRolePage } from "@/components/p1-adapter-pages";
 
 export default async function Page({
   searchParams
@@ -6,5 +6,5 @@ export default async function Page({
   searchParams: Promise<{ wallet?: string }>;
 }) {
   const resolvedSearchParams = await searchParams;
-  return <RegisterRolePage initialWallet={resolvedSearchParams.wallet} />;
+  return <AdapterRegisterRolePage initialWallet={resolvedSearchParams.wallet} />;
 }
