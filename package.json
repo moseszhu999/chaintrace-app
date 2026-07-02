@@ -9,6 +9,7 @@
     "vercel-build": "node scripts/prepare-vercel-static.cjs && next build",
     "contracts:compile": "hardhat compile",
     "contracts:test": "hardhat test",
+    "contracts:deploy:local": "hardhat run scripts/deploy-p1-registry.ts --network localhost",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --project tsconfig.typecheck.json"
   },
