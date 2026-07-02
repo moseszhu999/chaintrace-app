@@ -1,7 +1,8 @@
-import { createPublicClient, createWalletClient, custom, http, parseAbiItem } from "viem";
+import { createPublicClient, createWalletClient, custom, http } from "viem";
 import { hardhat, mainnet, sepolia } from "viem/chains";
 
 import chainTraceP1RegistryAbi from "@/lib/contracts/abi/ChainTraceP1Registry.json";
+import { P1RawRegistryEvent, projectRawRegistryEvents } from "@/lib/contracts/p1-event-read-model";
 
 export const CHAINTRACE_P1_REGISTRY_ABI = chainTraceP1RegistryAbi;
 
@@ -72,14 +73,35 @@ export async function getContractEvents(fromBlock: bigint = 0n) {
     return [];
   }
   const client = createChainTracePublicClient();
-  return client.getLogs({
-    address,
-    event: parseAbiItem(
-      "event DocumentProofAdded(bytes32 indexed caseId, bytes32 documentHash, bytes32 metadataHash, uint8 kind)"
-    ),
-    fromBlock,
-    toBlock: "latest"
-  });
+  const eventNames = [
+    "RoleRegistered",
+    "CaseCreated",
+    "DocumentProofAdded",
+    "GateEvaluated",
+    "CaseStateTransitioned"
+  ] as const;
+
+  const rawEvents = (
+    await Promise.all(
+      eventNames.map(async (eventName) => {
+        const logs = await client.getContractEvents({
+          address,
+          abi: CHAINTRACE_P1_REGISTRY_ABI,
+          eventName,
+          fromBlock,
+          toBlock: "latest"
+        });
+        return logs.map((log) => ({
+          eventName,
+          blockNumber: log.blockNumber ?? 0n,
+          transactionHash: log.transactionHash ?? "0xmissing",
+          args: log.args as Record<string, unknown>
+        }));
+      })
+    )
+  ).flat() satisfies P1RawRegistryEvent[];
+
+  return projectRawRegistryEvents(rawEvents);
 }
 
 export async function writeContract(functionName: string, args: unknown[] = []) {
