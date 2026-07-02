@@ -120,10 +120,28 @@ Current adapter modes:
 
 ```text
 mock        -> Vercel-safe cache-backed preview
-local-chain -> requires registry configuration and is prepared for real chain reads/writes
+local-chain -> requires registry configuration and browser wallet transaction support
 ```
 
-The next implementation slice should replace the local-chain adapter fallback methods with direct viem `readContract`, `writeContract`, and `getContractEvents` calls.
+Implemented local-chain writes:
+
+```text
+registerRole      -> ChainTraceP1Registry.registerRole
+createCase        -> ChainTraceP1Registry.createCase
+addDocumentProof  -> ChainTraceP1Registry.addDocumentProof
+```
+
+Each local-chain write uses browser wallet transaction submission and waits for the transaction receipt before updating display cache.
+
+Still pending in the next slice:
+
+```text
+read role from roles(wallet)
+rebuild case list from CaseCreated events
+rebuild document list from DocumentProofAdded events
+rebuild audit log from all contract events
+replace remaining display-cache reads with contract record/event projections
+```
 
 ## Verification
 
