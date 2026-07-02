@@ -49,6 +49,8 @@
     add("p0physicalcrypto", "assets/p0-physical-crypto-rail.js?v=physicalcrypto1");
     add("p0legalrail", "assets/p0-legal-rail.js?v=legalrail1");
     add("p0legalcrypto", "assets/p0-legal-crypto-rail.js?v=legalcrypto1");
+    add("p0proofgraphrail", "assets/p0-proof-graph-rail.js?v=proofgraphrail1");
+    add("p0proofgraphcrypto", "assets/p0-proof-graph-crypto-rail.js?v=proofgraphcrypto1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
