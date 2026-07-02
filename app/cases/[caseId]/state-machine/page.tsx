@@ -1,11 +1,11 @@
-import { StateMachinePage } from "@/components/p1-pages";
+import { AdapterStateMachinePage } from "@/components/p1-adapter-pages";
 import { P1Shell } from "@/components/p1-shell";
 
 export default async function Page({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params;
   return (
     <P1Shell>
-      <StateMachinePage caseId={caseId} />
+      <AdapterStateMachinePage caseId={caseId} />
     </P1Shell>
   );
 }
