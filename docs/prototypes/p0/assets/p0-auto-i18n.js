@@ -20,6 +20,7 @@
   }
 
   function load() {
+    add("p0c", "assets/p0-contrast-fix.js?v=20260702c1");
     add("p0b", "assets/p0-business-i18n.js?v=20260702b3", apply);
     add("p0p", "assets/p0-profile-ui-i18n.js?v=20260702p2", apply);
     add("p0f", "assets/p0-final-i18n.js?v=20260702f1", apply);
