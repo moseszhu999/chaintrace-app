@@ -41,6 +41,8 @@
     add("p0insurerrail", "assets/p0-insurer-rail.js?v=insurerrail1");
     add("p0investorrail", "assets/p0-investor-rail.js?v=investorrail1");
     add("p0investorcrypto", "assets/p0-investor-crypto-rail.js?v=investorcrypto1");
+    add("p0kybrail", "assets/p0-kyb-rail.js?v=kybrail1");
+    add("p0kybcrypto", "assets/p0-kyb-crypto-rail.js?v=kybcrypto1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
