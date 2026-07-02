@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChainTrace P0 Control Tower Prototype</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #172033;
+      --card: #1f2937;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --strong: #ffffff;
+      --line: #334155;
+      --blue: #38bdf8;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #fb7185;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --shadow: 0 18px 45px rgba(0,0,0,.28);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(56,189,248,.14), transparent 30%), var(--bg);
+      color: var(--text);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(148,163,184,.18);
+      background: rgba(15,23,42,.92);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar-inner {
+      display: grid;
+      grid-template-columns: 260px 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 16px 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148,163,184,.22);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--text);
+      background: rgba(15,23,42,.55);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill strong { color: var(--strong); font-weight: 700; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .green { background: var(--green); }
+    .amber { background: var(--amber); }
+    .red { background: var(--red); }
+    .blue { background: var(--blue); }
+    .purple { background: var(--purple); }
+
+    .prototype-note {
+      color: var(--muted);
+      font-size: 12px;
+      max-width: 280px;
+      text-align: right;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 72px);
+    }
+
+    aside {
+      position: sticky;
+      top: 72px;
+      align-self: start;
+      height: calc(100vh - 72px);
+      overflow-y: auto;
+      border-right: 1px solid rgba(148,163,184,.16);
+      background: rgba(15,23,42,.46);
+      padding: 22px 16px;
+    }
+
+    .nav-title {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin: 10px 10px 12px;
+    }
+
+    .nav-link {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      padding: 11px 12px;
+      border-radius: 12px;
+      margin: 4px 0;
+      font-size: 14px;
+      border: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      background: rgba(56,189,248,.12);
+      border-color: rgba(56,189,248,.28);
+    }
+
+    main { padding: 28px; }
+
+    .hero {
+      border: 1px solid rgba(148,163,184,.18);
+      border-radius: 28px;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(56,189,248,.16), rgba(167,139,250,.08)), rgba(15,23,42,.76);
+      box-shadow: var(--shadow);
+      margin-bottom: 26px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 1040px;
+      line-height: 1.7;
+    }
+
+    .section {
+      scroll-margin-top: 100px;
+      margin: 26px 0;
+      border: 1px solid rgba(148,163,184,.18);
+      border-radius: 26px;
+      background: rgba(17,24,39,.76);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid rgba(148,163,184,.16);
+      background: rgba(30,41,59,.72);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .section-kicker {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 8px;
+    }
+
+    .section h2 { margin: 0; font-size: 24px; letter-spacing: -.03em; }
+    .section-subtitle { margin: 8px 0 0; color: var(--muted); max-width: 820px; line-height: 1.55; }
+
+    .content { padding: 24px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .main-grid { display: grid; grid-template-columns: 1.5fr .8fr; gap: 18px; }
+
+    .card {
+      border: 1px solid rgba(148,163,184,.18);
+      border-radius: var(--radius);
+      background: rgba(31,41,55,.74);
+      padding: 18px;
+    }
+
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 750;
+      color: var(--strong);
+    }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; line-height: 1.55; }
+    .label { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+    .value { font-size: 18px; font-weight: 760; color: var(--strong); }
+
+    .metric {
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(15,23,42,.42);
+      padding: 14px;
+      border-radius: 15px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .step {
+      position: relative;
+      min-height: 118px;
+      border: 1px solid rgba(148,163,184,.18);
+      border-radius: 16px;
+      background: rgba(15,23,42,.48);
+      padding: 14px;
+    }
+
+    .step.active { border-color: rgba(56,189,248,.72); background: rgba(56,189,248,.12); }
+    .step.done { border-color: rgba(52,211,153,.52); background: rgba(52,211,153,.08); }
+    .step.blocked { border-color: rgba(251,191,36,.56); background: rgba(251,191,36,.08); }
+    .step h4 { margin: 8px 0 6px; font-size: 13px; }
+    .step p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(15,23,42,.5);
+      white-space: nowrap;
+    }
+
+    .badge.ok { color: var(--green); border-color: rgba(52,211,153,.36); }
+    .badge.warn { color: var(--amber); border-color: rgba(251,191,36,.36); }
+    .badge.bad { color: var(--red); border-color: rgba(251,113,133,.36); }
+    .badge.info { color: var(--blue); border-color: rgba(56,189,248,.36); }
+    .badge.agent { color: var(--purple); border-color: rgba(167,139,250,.36); }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li {
+      border: 1px solid rgba(148,163,184,.14);
+      border-radius: 13px;
+      padding: 11px 12px;
+      background: rgba(15,23,42,.36);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .flow-note {
+      margin-top: 14px;
+      border-left: 3px solid var(--blue);
+      padding: 12px 14px;
+      background: rgba(56,189,248,.08);
+      border-radius: 0 14px 14px 0;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .decision-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .button-like {
+      border: 1px solid rgba(148,163,184,.24);
+      background: rgba(15,23,42,.44);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .button-like.primary { border-color: rgba(56,189,248,.52); color: var(--blue); }
+    .button-like.danger { border-color: rgba(251,113,133,.52); color: var(--red); }
+    .button-like.good { border-color: rgba(52,211,153,.52); color: var(--green); }
+
+    .exception {
+      border: 1px solid rgba(251,191,36,.35);
+      background: rgba(251,191,36,.08);
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .exception strong { color: var(--amber); }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+      font-size: 13px;
+    }
+
+    .table th, .table td {
+      border-bottom: 1px solid rgba(148,163,184,.14);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table th { color: var(--muted); font-size: 12px; background: rgba(15,23,42,.42); }
+    .table tr:last-child td { border-bottom: none; }
+
+    .story {
+      counter-reset: story;
+      display: grid;
+      gap: 10px;
+    }
+
+    .story div {
+      counter-increment: story;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid rgba(148,163,184,.16);
+      border-radius: 14px;
+      background: rgba(15,23,42,.34);
+      padding: 10px;
+    }
+
+    .story div::before {
+      content: counter(story);
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(56,189,248,.16);
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 30px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1180px) {
+      .topbar-inner { grid-template-columns: 1fr; }
+      .prototype-note { text-align: left; max-width: none; }
+      .layout { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; border-right: none; border-bottom: 1px solid rgba(148,163,184,.16); }
+      .grid-2, .grid-3, .grid-4, .main-grid { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      main { padding: 16px; }
+      .hero h1 { font-size: 26px; }
+      .section-header { display: block; }
+      .timeline { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">CT</div>
+        <div>
+          <div>ChainTrace P0</div>
+          <div class="small muted">Agent Native Supply Chain Finance</div>
+        </div>
+      </div>
+      <div class="status-row" aria-label="Prototype status bar">
+        <span class="pill"><span class="dot green"></span>Wallet <strong>0xA7...42F1</strong></span>
+        <span class="pill"><span class="dot blue"></span>Role <strong>Exporter</strong></span>
+        <span class="pill"><span class="dot green"></span>Account <strong>Active</strong></span>
+        <span class="pill"><span class="dot purple"></span>Agent Mode <strong>Semi-auto</strong></span>
+        <span class="pill"><span class="dot amber"></span>Path <strong>Bank-assisted + DeFi check</strong></span>
+      </div>
+      <div class="prototype-note">Static HTML prototype. No API, no wallet connection, no Solidity, no production logic.</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div class="nav-title">Screens</div>
+      <a class="nav-link" href="#s01">S01 Entry and Role Gate</a>
+      <a class="nav-link" href="#s02">S02 Exporter Control Tower</a>
+      <a class="nav-link" href="#s03">S03 Material and Agent Gap</a>
+      <a class="nav-link" href="#s04">S04 Inspection Fact View</a>
+      <a class="nav-link" href="#s05">S05 Funder Review Workspace</a>
+      <a class="nav-link" href="#s06">S06 Contract and DeFi State</a>
+      <a class="nav-link" href="#s07">S07 Agent Assist Layer</a>
+      <a class="nav-link" href="#s08">S08 Platform Operation Console</a>
+      <a class="nav-link" href="#s09">S09 Funding Result States</a>
+      <a class="nav-link" href="#s10">S10 P0 Acceptance Storyboard</a>
+      <div class="nav-title">Hard Boundaries</div>
+      <div class="card small muted">This prototype centers on financing control tower. It must not become a proof/hash demo, generic dashboard, chat-only AI page, or platform approval backend.</div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <h1>P0 Control Tower Prototype</h1>
+        <p>
+          A single-page static prototype showing how ChainTrace turns a cross-border trade financing case into a role-based control tower: exporter financing intent, trade materials, Agent gaps, inspection facts, funder review, DeFi/contract state, platform exceptions, and final funding result.
+        </p>
+      </section>
+
+      <section id="s01" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S01</div>
+            <h2>Entry and Role Gate</h2>
+            <p class="section-subtitle">Wallet is only the entry. Business account, single-role binding, account state, and Agent mode decide which workspace can be entered.</p>
+          </div>
+          <span class="badge info">Identity Foundation</span>
+        </div>
+        <div class="content grid-3">
+          <div class="card">
+            <div class="card-title">Wallet Identity <span class="badge ok">Connected</span></div>
+            <div class="metric"><div class="label">Wallet</div><div class="value">0xA7...42F1</div></div>
+            <p class="small muted">Connected wallet is recognized, but wallet alone is not a business role.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Business Role <span class="badge ok">Bound</span></div>
+            <div class="metric"><div class="label">Single role binding</div><div class="value">Exporter</div></div>
+            <p class="small muted">This wallet cannot freely switch to funder, inspector, or platform operator.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Agent Mode <span class="badge agent">Semi-auto</span></div>
+            <div class="metric"><div class="label">Automation boundary</div><div class="value">Assist only</div></div>
+            <p class="small muted">Agent mode changes automation level, not role permissions.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="s02" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S02</div>
+            <h2>Exporter Control Tower</h2>
+            <p class="section-subtitle">The core P0 view: exporter can understand the financing case, current node, missing evidence, inspection fact, funding decision, contract state, and funding result.</p>
+          </div>
+          <span class="badge ok">Primary Screen</span>
+        </div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="card-title">Case CT-P0-2026-0007 <span class="badge info">Under execution check</span></div>
+            <div class="grid-4">
+              <div class="metric"><div class="label">Exporter</div><div class="value">Pacific Export LLC</div></div>
+              <div class="metric"><div class="label">Buyer</div><div class="value">Northstar Retail GmbH</div></div>
+              <div class="metric"><div class="label">Invoice</div><div class="value">USD 128,000</div></div>
+              <div class="metric"><div class="label">Requested</div><div class="value">USD 96,000</div></div>
+            </div>
+            <div class="timeline">
+              <div class="step done"><span class="badge ok">Done</span><h4>Intent</h4><p>Exporter created receivable financing intent.</p></div>
+              <div class="step done"><span class="badge ok">Done</span><h4>Materials</h4><p>Contract, PO, invoice, packing list complete.</p></div>
+              <div class="step done"><span class="badge agent">Agent</span><h4>Gap Check</h4><p>Invoice mismatch explained and closed.</p></div>
+              <div class="step done"><span class="badge ok">Pass</span><h4>Inspection</h4><p>Inspection provider submitted Pass.</p></div>
+              <div class="step done"><span class="badge ok">Allowed</span><h4>Funder</h4><p>Funder allowed USD 92,000.</p></div>
+              <div class="step active"><span class="badge info">Allowed</span><h4>Contract</h4><p>Rule active, pool available, no pause.</p></div>
+              <div class="step blocked"><span class="badge warn">Pending</span><h4>Result</h4><p>Waiting for execution completion.</p></div>
+            </div>
+            <div class="flow-note"><strong>Business interpretation:</strong> The funder has allowed financing, but the case is not completed until contract/rule/pool execution reaches Completed.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Funding Result <span class="badge warn">Allowed, not completed</span></div>
+            <div class="metric"><div class="label">Approved amount</div><div class="value">USD 92,000</div></div>
+            <ul class="list" style="margin-top: 12px;">
+              <li><span>Rule state</span><span class="badge ok">Active</span></li>
+              <li><span>Pool state</span><span class="badge ok">Available</span></li>
+              <li><span>Platform pause</span><span class="badge ok">None</span></li>
+              <li><span>Execution</span><span class="badge warn">Pending</span></li>
+            </ul>
+            <div class="exception"><strong>Next step:</strong> wait for execution confirmation. If execution fails, platform owner must handle the failure.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s03" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S03</div>
+            <h2>Material and Agent Gap</h2>
+            <p class="section-subtitle">Materials are business evidence, not a file list. Agent highlights gaps, conflicts, responsible party, and next action.</p>
+          </div>
+          <span class="badge agent">Agent Gap</span>
+        </div>
+        <div class="content grid-2">
+          <div class="card">
+            <div class="card-title">Material Checklist <span class="badge ok">Complete</span></div>
+            <ul class="list">
+              <li><span>Contract Material</span><span class="badge ok">Complete</span></li>
+              <li><span>Purchase Order</span><span class="badge ok">Complete</span></li>
+              <li><span>Invoice</span><span class="badge ok">Conflict resolved</span></li>
+              <li><span>Packing List</span><span class="badge ok">Complete</span></li>
+              <li><span>Supplemental Explanation</span><span class="badge info">Attached</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">Agent Findings <span class="badge agent">Not facts</span></div>
+            <table class="table">
+              <thead><tr><th>Finding</th><th>Responsible</th><th>Next Step</th></tr></thead>
+              <tbody>
+                <tr><td>Invoice amount mismatch</td><td>Exporter</td><td>Explanation submitted</td></tr>
+                <tr><td>Packing list quantity cross-check</td><td>Inspector</td><td>Confirmed during inspection</td></tr>
+                <tr><td>Material version history</td><td>System</td><td>Original evidence locked for review</td></tr>
+              </tbody>
+            </table>
+            <div class="flow-note">Agent can find a gap, but cannot create or overwrite trade materials.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s04" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S04</div>
+            <h2>Inspection Fact View</h2>
+            <p class="section-subtitle">Inspection is the first external fact node. Conclusion source must remain the inspection provider.</p>
+          </div>
+          <span class="badge ok">Pass</span>
+        </div>
+        <div class="content grid-3">
+          <div class="card">
+            <div class="card-title">Inspection Task <span class="badge ok">Closed</span></div>
+            <p class="small muted">Smart wearable shipment, 4 pallets, 2,000 units, packaging and quantity checked.</p>
+            <div class="metric"><div class="label">Assigned to</div><div class="value">Atlas Inspection Co.</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Evidence Status <span class="badge ok">Submitted</span></div>
+            <ul class="list">
+              <li><span>Inspection report</span><span class="badge ok">Submitted</span></li>
+              <li><span>Photos</span><span class="badge ok">Submitted</span></li>
+              <li><span>Quantity note</span><span class="badge ok">Matched</span></li>
+              <li><span>Packaging note</span><span class="badge ok">Accepted</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">Conclusion <span class="badge ok">Pass</span></div>
+            <p class="small muted">Conclusion submitted by Inspection Provider. Agent, funder, platform, and contract cannot generate Pass/Fail/Dispute.</p>
+            <div class="flow-note"><strong>Impact:</strong> Pass supports funding review, but is not financing approval.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s05" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S05</div>
+            <h2>Funder Review Workspace</h2>
+            <p class="section-subtitle">Funder reviews authorized cases, sees evidence completeness and Agent risk hints, then decides. Decision is not execution.</p>
+          </div>
+          <span class="badge info">Bank-assisted Path</span>
+        </div>
+        <div class="content grid-2">
+          <div class="card">
+            <div class="card-title">Review Summary <span class="badge ok">Evidence ready</span></div>
+            <table class="table">
+              <tbody>
+                <tr><th>Exporter</th><td>Pacific Export LLC</td></tr>
+                <tr><th>Buyer</th><td>Northstar Retail GmbH</td></tr>
+                <tr><th>Requested</th><td>USD 96,000</td></tr>
+                <tr><th>Inspection</th><td><span class="badge ok">Pass</span></td></tr>
+                <tr><th>Agent risk hint</th><td>Invoice mismatch resolved; buyer concentration moderate.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">Decision Actions <span class="badge warn">Human confirmed</span></div>
+            <div class="decision-row">
+              <span class="button-like">Need materials</span>
+              <span class="button-like good">Allow financing</span>
+              <span class="button-like danger">Reject</span>
+              <span class="button-like">Reduce amount</span>
+              <span class="button-like primary">Manual review</span>
+            </div>
+            <div class="exception"><strong>Decision:</strong> Allow financing for USD 92,000. Execution still requires contract/rule/pool check.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s06" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S06</div>
+            <h2>Contract and DeFi State</h2>
+            <p class="section-subtitle">Crypto Native means execution conditions are visible: rule state, pool state, pause state, and output. It does not mean unconstrained automatic funding.</p>
+          </div>
+          <span class="badge info">Contract State Facade</span>
+        </div>
+        <div class="content grid-3">
+          <div class="card">
+            <div class="card-title">Execution Conditions <span class="badge ok">Satisfied</span></div>
+            <ul class="list">
+              <li><span>Materials</span><span class="badge ok">Complete</span></li>
+              <li><span>Inspection</span><span class="badge ok">Pass</span></li>
+              <li><span>Funder decision</span><span class="badge ok">Allowed</span></li>
+              <li><span>Blocking exception</span><span class="badge ok">None</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">Rule and Pool <span class="badge ok">Ready</span></div>
+            <ul class="list">
+              <li><span>Rule</span><span class="badge ok">Active</span></li>
+              <li><span>Pool</span><span class="badge ok">Available</span></li>
+              <li><span>Currency</span><span class="badge ok">USDC supported</span></li>
+              <li><span>Platform pause</span><span class="badge ok">None</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">Contract Output <span class="badge info">Allowed</span></div>
+            <p class="small muted">Allowed means conditions are satisfied. It is not the same as Completed.</p>
+            <div class="decision-row">
+              <span class="badge info">Allowed</span>
+              <span class="badge warn">Waiting</span>
+              <span class="badge bad">Rule blocked</span>
+              <span class="badge bad">Pool insufficient</span>
+              <span class="badge ok">Completed</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s07" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S07</div>
+            <h2>Agent Assist Layer</h2>
+            <p class="section-subtitle">Agent appears as summary, gaps, tasks, explanations, automation records, and escalation records. It is not a super-user or hidden approver.</p>
+          </div>
+          <span class="badge agent">Agent Native</span>
+        </div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="card-title">Agent Output Feed <span class="badge agent">Exporter Agent</span></div>
+            <ul class="list">
+              <li><span><strong>Summary:</strong> Case is in execution check after funder approval.</span><span class="badge agent">Agent</span></li>
+              <li><span><strong>Gap:</strong> Invoice mismatch was resolved by supplemental explanation.</span><span class="badge ok">Closed</span></li>
+              <li><span><strong>Task:</strong> Wait for execution completion; no exporter action now.</span><span class="badge info">Next</span></li>
+              <li><span><strong>Explanation:</strong> Allowed is not Completed; funding is not yet settled.</span><span class="badge agent">Explain</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">Automation Boundary <span class="badge warn">Controlled</span></div>
+            <table class="table">
+              <tbody>
+                <tr><th>Can do</th><td>Summarize, detect gaps, create tasks, explain states, request low-risk next step.</td></tr>
+                <tr><th>Cannot do</th><td>Forge materials, submit inspection conclusion, approve funding, override contract, bypass pause.</td></tr>
+                <tr><th>Stop reason</th><td>Dispute, Rule blocked, Pool insufficient, Platform paused, Low confidence.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="s08" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S08</div>
+            <h2>Platform Operation Console</h2>
+            <p class="section-subtitle">Platform operates system state: pool, rule, execution, Agent automation, exception queue, pause and restore. It does not approve loans or forge facts.</p>
+          </div>
+          <span class="badge info">Operation Basics</span>
+        </div>
+        <div class="content grid-2">
+          <div class="card">
+            <div class="card-title">Operation Overview <span class="badge warn">2 exceptions</span></div>
+            <div class="grid-3">
+              <div class="metric"><div class="label">Cases</div><div class="value">18</div></div>
+              <div class="metric"><div class="label">Blocked</div><div class="value">3</div></div>
+              <div class="metric"><div class="label">Completed</div><div class="value">7</div></div>
+            </div>
+            <ul class="list" style="margin-top: 12px;">
+              <li><span>Capital pool</span><span class="badge ok">Available</span></li>
+              <li><span>Rule state</span><span class="badge ok">Active</span></li>
+              <li><span>Agent automation</span><span class="badge warn">1 stopped</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">Exception Queue <span class="badge warn">Actionable</span></div>
+            <table class="table">
+              <thead><tr><th>Exception</th><th>Owner</th><th>Next step</th></tr></thead>
+              <tbody>
+                <tr><td>Pool insufficient</td><td>Platform / Funder</td><td>Restore pool or keep waiting</td></tr>
+                <tr><td>Inspection Dispute</td><td>Inspector / Funder</td><td>Manual review</td></tr>
+                <tr><td>Agent stopped by rule</td><td>Platform</td><td>Check rule state</td></tr>
+              </tbody>
+            </table>
+            <div class="flow-note">Platform can pause/restore operational objects, but cannot replace funder decision or inspection conclusion.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s09" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S09</div>
+            <h2>Funding Result and Exception States</h2>
+            <p class="section-subtitle">Funding result must be explicit. Waiting, Allowed, Reduced, Rejected, Blocked, Failed, and Completed are different business states.</p>
+          </div>
+          <span class="badge warn">Result Semantics</span>
+        </div>
+        <div class="content">
+          <table class="table">
+            <thead><tr><th>State</th><th>Business meaning</th><th>Must not be confused with</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge warn">Waiting for materials</span></td><td>Exporter must supplement evidence.</td><td>Funding rejection.</td></tr>
+              <tr><td><span class="badge info">Allowed</span></td><td>Conditions or funder decision allow next step.</td><td>Completed settlement.</td></tr>
+              <tr><td><span class="badge warn">Reduced</span></td><td>Funder adjusted financing amount.</td><td>Failure.</td></tr>
+              <tr><td><span class="badge bad">Rejected</span></td><td>Funder declined with reason.</td><td>Rule blocked or pool issue.</td></tr>
+              <tr><td><span class="badge bad">Pool insufficient</span></td><td>Pool cannot execute now.</td><td>Trade fraud or funder rejection.</td></tr>
+              <tr><td><span class="badge bad">Execution failed</span></td><td>Execution action failed and needs handling.</td><td>Completed.</td></tr>
+              <tr><td><span class="badge ok">Completed</span></td><td>Funding execution is complete.</td><td>Allowed or approved only.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s10" class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">S10</div>
+            <h2>P0 Acceptance Storyboard</h2>
+            <p class="section-subtitle">A compact walkthrough for demo and manual acceptance: normal closure plus alternative exception routes.</p>
+          </div>
+          <span class="badge ok">Acceptance Ready</span>
+        </div>
+        <div class="content grid-2">
+          <div class="card">
+            <div class="card-title">Normal Flow</div>
+            <div class="story">
+              <div>Exporter connects wallet and enters Exporter workspace.</div>
+              <div>Exporter creates financing intent and case CT-P0-2026-0007.</div>
+              <div>Exporter submits contract, PO, invoice and packing list.</div>
+              <div>Agent detects invoice mismatch and creates a todo.</div>
+              <div>Exporter submits supplemental explanation.</div>
+              <div>Inspector submits Pass.</div>
+              <div>Funder allows USD 92,000.</div>
+              <div>Contract state checks rule, pool and pause.</div>
+              <div>Funding result becomes Completed.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Exception Routes</div>
+            <ul class="list">
+              <li><span>Material conflict</span><span class="badge warn">Exporter explanation</span></li>
+              <li><span>Inspection Dispute</span><span class="badge bad">Human escalation</span></li>
+              <li><span>Funder reduces amount</span><span class="badge warn">Adjusted result</span></li>
+              <li><span>Pool insufficient</span><span class="badge bad">Platform handles pool</span></li>
+              <li><span>Rule blocked</span><span class="badge bad">Rule reason visible</span></li>
+              <li><span>Platform paused</span><span class="badge bad">Automation stops</span></li>
+            </ul>
+            <div class="exception"><strong>Acceptance rule:</strong> every exception must have reason, owner, impact, recovery condition, and next action.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Prototype Boundary</div>
+            <h2>What this prototype intentionally does not do</h2>
+            <p class="section-subtitle">This HTML is the first visual skeleton for discussion and validation. It avoids implementation details and protects the product narrative.</p>
+          </div>
+          <span class="badge bad">No old demo fallback</span>
+        </div>
+        <div class="content grid-3">
+          <div class="card"><div class="card-title">No proof/hash main page</div><p class="small muted">Proof and hash can become later evidence tools, but they are not the P0 product center.</p></div>
+          <div class="card"><div class="card-title">No generic dashboard</div><p class="small muted">The center is the financing control tower and funding result, not a card wall.</p></div>
+          <div class="card"><div class="card-title">No chat-only AI</div><p class="small muted">Agent appears as task, gap, explanation, summary, escalation, and controlled automation.</p></div>
+        </div>
+      </section>
+
+      <div class="footer">ChainTrace P0 static prototype · branch: agent-native-waterfall-clean · no API / no wallet / no Solidity / no database</div>
+    </main>
+  </div>
+</body>
+</html>
