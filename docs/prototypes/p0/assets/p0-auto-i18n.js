@@ -29,6 +29,7 @@
     add("p0x2", "assets/p0-force-i18n.js?v=x2", apply);
     add("p0i1", "assets/p0-intent-i18n.js?v=i1", apply);
     add("p0inspection", "assets/p0-inspection-i18n.js?v=inspection1", apply);
+    add("p0agentrail", "assets/p0-agent-rail.js?v=agentrail1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
