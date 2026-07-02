@@ -1,0 +1,9 @@
+{
+  "name": "chaintrace-static-prototype",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/prepare-vercel-static.js",
+    "vercel-build": "node scripts/prepare-vercel-static.js"
+  }
+}
