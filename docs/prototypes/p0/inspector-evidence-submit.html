@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Inspection Evidence Submit</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="inspector-evidence-submit">
+  <header class="topbar">
+    <a class="brand" href="inspector-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Inspection evidence submit</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Inspection provider</span></span><span class="chip">Task <span class="strong">INSP-P0-001</span></span><span class="chip">Mode <span class="strong">fact entry</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="inspector-dashboard.html">队列</a><a class="mode-btn" href="inspector-task-detail.html">任务详情</a><a class="mode-btn active" href="inspector-evidence-submit.html">提交事实</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side"><div class="side-title">INSPECTION FLOW</div><a class="step-link" href="inspector-dashboard.html"><span class="step-index">0</span><span>质检任务队列</span></a><a class="step-link" href="inspector-task-detail.html"><span class="step-index">1</span><span>任务详情</span></a><a class="step-link active" href="inspector-evidence-submit.html"><span class="step-index">2</span><span>提交质检事实</span></a><a class="step-link" href="inspector-result.html"><span class="step-index">3</span><span>质检结论结果</span></a></aside>
+    <main class="main">
+      <section class="hero"><h1>质检事实要结构化提交，不能只写一句“通过”。</h1><p>质检方提交数量、包装、照片占位和结论说明。P0 只展示表单状态，不上传真实图片。</p></section>
+      <section class="section"><div class="section-head"><div><h2>Inspection fact entry</h2><p class="section-sub">质检结论会被出口商和银行看到，但原始操作仍归质检方负责。</p></div><span class="badge warn">draft</span></div><div class="content main-grid"><div class="card"><div class="flow-form"><div class="field"><label>Observed goods</label><input class="input" value="Smart wearable devices" /></div><div class="field"><label>Observed quantity</label><input class="input" value="2,000 units" /></div><div class="field"><label>Packaging status</label><select class="select"><option>Packaging acceptable</option><option>Packaging damaged</option><option>Need re-check</option></select></div><div class="field"><label>Photo evidence</label><select class="select"><option>Photo placeholders attached</option><option>Photo missing</option></select></div><div class="field"><label>Quantity match</label><select class="select"><option>Matched</option><option>Minor difference</option><option>Major difference</option></select></div><div class="field"><label>Conclusion</label><select class="select"><option>Pass</option><option>Pass with note</option><option>Dispute</option></select></div></div><div class="field" style="margin-top:12px"><label>Inspector note</label><textarea class="textarea">Goods category and quantity match the task information. Packaging is acceptable for review.</textarea></div><div class="action-row"><a class="action" href="inspector-task-detail.html">Back to task</a><a class="action primary" href="inspector-result.html">Submit inspection fact</a></div></div><div class="card"><div class="card-title">Fact boundary <span class="badge info">important</span></div><ul class="list"><li><span>Can confirm goods fact</span><span class="badge ok">yes</span></li><li><span>Can approve financing</span><span class="badge bad">no</span></li><li><span>Can edit exporter invoice</span><span class="badge bad">no</span></li><li><span>Can create bank decision</span><span class="badge bad">no</span></li></ul><p class="notice" style="margin-top:12px">质检方输出的是独立货物事实，不是融资意见。</p></div></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>
