@@ -25,3 +25,54 @@ export const CASE_STATE_TO_CONTRACT_VALUE: Record<ContractCaseState, number> = {
   PROOF_COLLECTED: 2,
   GATES_NOT_PASSED: 3
 };
+
+export function contractValueToRole(value: number | bigint): ContractRole | null {
+  switch (Number(value)) {
+    case 1:
+      return "EXPORTER";
+    case 2:
+      return "BUYER";
+    case 3:
+      return "LOGISTICS";
+    case 4:
+      return "INSPECTOR";
+    case 5:
+      return "BANK";
+    case 6:
+      return "OPERATOR";
+    case 7:
+      return "AUDITOR";
+    default:
+      return null;
+  }
+}
+
+export function contractValueToDocumentKind(value: number | bigint): ContractDocumentKind {
+  switch (Number(value)) {
+    case 0:
+      return "PO";
+    case 1:
+      return "INVOICE";
+    case 2:
+      return "PACKING_LIST";
+    case 3:
+      return "BILL_OF_LADING";
+    case 4:
+      return "INSPECTION_REPORT";
+    default:
+      return "OTHER";
+  }
+}
+
+export function contractValueToCaseState(value: number | bigint): ContractCaseState {
+  switch (Number(value)) {
+    case 1:
+      return "PRE_REVIEW";
+    case 2:
+      return "PROOF_COLLECTED";
+    case 3:
+      return "GATES_NOT_PASSED";
+    default:
+      return "DRAFT_INTENT";
+  }
+}
