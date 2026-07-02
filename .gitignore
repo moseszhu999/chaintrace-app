@@ -1,4 +1,11 @@
 public/
 .vercel/
 node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
 .DS_Store
