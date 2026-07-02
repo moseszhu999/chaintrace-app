@@ -1,20 +1,22 @@
 (function () {
   var page = document.body ? document.body.dataset.page : "";
-  var enabled = { dashboard:true, new:true, materials:true, gap:true, inspection:true, funding:true, execution:true, result:true, "bank-dashboard":true, "bank-case-review":true, "bank-risk-decision":true, "bank-decision-result":true, "inspector-dashboard":true, "inspector-task-detail":true, "inspector-evidence-submit":true, "inspector-result":true, "funder-pool-dashboard":true, "funder-contract-console":true, "funder-tx-result":true };
+  var enabled = { dashboard:true, new:true, materials:true, gap:true, inspection:true, funding:true, execution:true, result:true, "bank-dashboard":true, "bank-case-review":true, "bank-risk-decision":true, "bank-decision-result":true, "inspector-dashboard":true, "inspector-task-detail":true, "inspector-evidence-submit":true, "inspector-result":true, "logistics-dashboard":true, "logistics-shipment-detail":true, "logistics-proof-submit":true, "logistics-result":true, "funder-pool-dashboard":true, "funder-contract-console":true, "funder-tx-result":true };
   if (!enabled[page] || document.getElementById("p0-crypto-rail")) return;
 
   var isFunder = page.indexOf("funder-") === 0;
+  var isLogistics = page.indexOf("logistics-") === 0;
   var common = {
-    wallet: isFunder ? [["LP wallet", "0xLP...9A1", "ok"], ["Pool role", "Funder / LP", "ok"], ["Signature", "preview only", "warn"]] : [["Exporter wallet", "0x8F...21A", "ok"], ["Role-bound account", "Exporter", "ok"], ["Signature", "ready in P0", "warn"]],
-    proof: [["PO SHA-256", "0xpo...84c", "ok"], ["Invoice SHA-256", "0xinv...2ab", "ok"], ["Evidence root", "0xroot...91e", "ok"]],
+    wallet: isFunder ? [["LP wallet", "0xLP...9A1", "ok"], ["Pool role", "Funder / LP", "ok"], ["Signature", "preview only", "warn"]] : isLogistics ? [["Logistics wallet", "0xLOG...73C", "ok"], ["Role-bound account", "Logistics", "ok"], ["Proof signature", "ready in P0", "warn"]] : [["Exporter wallet", "0x8F...21A", "ok"], ["Role-bound account", "Exporter", "ok"], ["Signature", "ready in P0", "warn"]],
+    proof: isLogistics ? [["BL SHA-256", "0xbl...778", "ok"], ["Transport proof", "0xship...4d2", "ok"], ["Logistics root", "0xlogroot...8e", "ok"]] : [["PO SHA-256", "0xpo...84c", "ok"], ["Invoice SHA-256", "0xinv...2ab", "ok"], ["Evidence root", "0xroot...91e", "ok"]],
     candidate: [["Candidate ID", "RFC-P0-001", "ok"], ["Candidate hash", "0xcand...77f", "ok"], ["Registry status", "not submitted", "warn"]],
-    execution: isFunder ? [["Pool contract", "0xPool...42", "ok"], ["Write action", "preview only", "warn"], ["Token transfer", "disabled in P0", "bad"]] : [["Settlement rail", "USD / USDC", "ok"], ["Chain action", "disabled in P0", "bad"], ["Disbursement", "false in P0", "bad"]]
+    execution: isFunder ? [["Pool contract", "0xPool...42", "ok"], ["Write action", "preview only", "warn"], ["Token transfer", "disabled in P0", "bad"]] : isLogistics ? [["Proof link", "candidate input", "ok"], ["API call", "disabled in P0", "bad"], ["Chain write", "disabled in P0", "bad"]] : [["Settlement rail", "USD / USDC", "ok"], ["Chain action", "disabled in P0", "bad"], ["Disbursement", "false in P0", "bad"]]
   };
 
   var pageNotes = {
     dashboard:"控制塔展示的是一个 crypto-native 融资候选对象，而不是普通表单。", new:"融资意图被准备成可签名对象，P0 只展示 signature-ready 状态。", materials:"贸易材料会形成证据哈希和 evidence root，P0 不上传真实链上记录。", gap:"缺口说明会更新候选对象状态，但不会伪造签名或事实。", inspection:"质检结论会被链接到证据根，形成可验证事实节点。", funding:"银行或 DeFi 路径读取候选对象摘要，不直接读取原始文件夹。", execution:"执行检查展示链上准备状态，但 P0 不发起交易。", result:"结果页展示业务完成状态和候选对象最终摘要。",
     "bank-dashboard":"银行看到的是可验证的候选案件队列，不是普通附件列表。", "bank-case-review":"银行核验证据哈希、事实摘要和候选对象状态。", "bank-risk-decision":"银行决策写入业务摘要，不替代链上执行。", "bank-decision-result":"银行结果会影响候选对象状态，但 P0 不提交 registry。",
     "inspector-dashboard":"质检任务与候选对象关联，但质检方不拥有融资对象。", "inspector-task-detail":"质检方查看任务上下文，不操作钱包签名或融资候选对象。", "inspector-evidence-submit":"质检事实会形成可链接的 proof input。", "inspector-result":"质检结论成为候选对象中的独立事实节点。",
+    "logistics-dashboard":"物流任务与候选对象关联，运输证明会成为 proof input。", "logistics-shipment-detail":"物流方查看运输上下文，不操作融资审批或资金池。", "logistics-proof-submit":"提单和运输状态被整理成可验证物流证明。", "logistics-result":"物流证明成为候选对象中的运输事实节点。",
     "funder-pool-dashboard":"资金方像 LP 一样查看资金池、候选资产和 proof root。", "funder-contract-console":"资金方可以读取合约状态并准备写入动作，P0 只做交易预览。", "funder-tx-result":"模拟交易结果展示 contract-native 状态流，但没有真实链上交易。"
   };
 
