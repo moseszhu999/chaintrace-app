@@ -144,11 +144,24 @@ local-chain adapter getVisibleCases now uses CaseCreated event summaries
 local-chain adapter getCaseDetail now uses the on-chain event read model
 ```
 
+Adapter-aware pages now wired:
+
+```text
+/dashboard
+/exporter/dashboard
+/register-role
+/exporter/cases/new
+/exporter/cases/[caseId]
+/cases/[caseId]/proof-graph
+/cases/[caseId]/state-machine
+/cases/[caseId]/audit-log
+```
+
 Still pending in the next slice:
 
 ```text
 read role directly from roles(wallet)
-wire pages directly to P1RegistryAdapter instead of direct p1-client-store calls
+replace legacy direct p1-client-store page usage where still present
 replace remaining display-cache reads where contract records/events are available
 ```
 
