@@ -1,15 +1,14 @@
 (function () {
-  function add(id, src, done) {
-    var old = document.getElementById(id);
-    if (old) {
-      if (done) done();
+  function add(id, src, cb) {
+    if (document.getElementById(id)) {
+      if (cb) cb();
       return;
     }
     var s = document.createElement("script");
     s.id = id;
     s.src = src;
     s.defer = true;
-    s.onload = done;
+    s.onload = cb;
     document.body.appendChild(s);
   }
 
@@ -18,21 +17,19 @@
     if (window.ChainTraceP0ProfileUiI18n) window.ChainTraceP0ProfileUiI18n.apply();
     if (window.ChainTraceP0FinalI18n) window.ChainTraceP0FinalI18n.apply();
     if (window.ChainTraceP0ForceI18n) window.ChainTraceP0ForceI18n.apply();
+    if (window.ChainTraceP0IntentI18n) window.ChainTraceP0IntentI18n.apply();
   }
 
   function load() {
-    add("p0c", "assets/p0-contrast-fix.js?v=20260702c1");
-    add("p0b", "assets/p0-business-i18n.js?v=20260702b4", apply);
-    add("p0p", "assets/p0-profile-ui-i18n.js?v=20260702p3", apply);
-    add("p0f", "assets/p0-final-i18n.js?v=20260702f2", apply);
-    add("p0x", "assets/p0-force-i18n.js?v=20260702x1", apply);
+    add("p0c2", "assets/p0-contrast-fix.js?v=c2");
+    add("p0b5", "assets/p0-business-i18n.js?v=b5", apply);
+    add("p0p4", "assets/p0-profile-ui-i18n.js?v=p4", apply);
+    add("p0f3", "assets/p0-final-i18n.js?v=f3", apply);
+    add("p0x2", "assets/p0-force-i18n.js?v=x2", apply);
+    add("p0i1", "assets/p0-intent-i18n.js?v=i1", apply);
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", load);
-  } else {
-    load();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", load);
+  else load();
 })();
