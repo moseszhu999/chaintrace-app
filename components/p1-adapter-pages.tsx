@@ -14,11 +14,77 @@ import {
   P1ContractRegistryCache,
   roleDisplay,
   routeForRole,
-  saveDraftCache
+  saveDraftCache,
+  setCurrentWallet
 } from "@/lib/p1-client-store";
 import { Currency, P1_ROLES, Role, formatMoney, roleLabel } from "@/lib/p1-domain";
 
 const CONTRACT_CASE_STATES = ["DRAFT_INTENT", "PRE_REVIEW", "PROOF_COLLECTED", "GATES_NOT_PASSED"] as const;
+
+export function AdapterLoginPage() {
+  const router = useRouter();
+  const [walletAddress, setWalletAddress] = useState("0xEXporter001");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setMessage("");
+    try {
+      const adapter = getP1RegistryAdapter();
+      const wallet = await adapter.connectWallet(walletAddress);
+      const role = await adapter.getRole(wallet);
+      if (!role) {
+        router.push(`/register-role?wallet=${encodeURIComponent(wallet)}`);
+        return;
+      }
+      setCurrentWallet(wallet);
+      router.push(routeForRole(role));
+    } catch (caught) {
+      setMessage(caught instanceof Error ? caught.message : "WALLET_LOGIN_FAILED");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="entry">
+      <section className="panel" style={{ width: "min(620px, 100%)" }}>
+        <div className="brand-row">
+          <span className="brand-mark">CT</span>
+          <span>ChainTrace P1</span>
+        </div>
+        <h1>Wallet transaction workspace</h1>
+        <p>
+          In mock mode this uses the browser cache. In local-chain mode it reads
+          `ChainTraceP1Registry.roles(wallet)` before routing the wallet into a role workspace.
+        </p>
+        <form className="form" onSubmit={onSubmit}>
+          <label className="field">
+            <span>Wallet address</span>
+            <input value={walletAddress} onChange={(event) => setWalletAddress(event.target.value)} required />
+          </label>
+          {message ? <p className="badge warn">{message}</p> : null}
+          <div className="actions">
+            <button className="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Checking registry role..." : "Continue"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setWalletAddress("0xEXporter001");
+                setMessage("Register the wallet role first if it is not already in the registry.");
+              }}
+            >
+              Demo exporter wallet
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  );
+}
 
 export function AdapterRegisterRolePage({ initialWallet }: { initialWallet?: string }) {
   const router = useRouter();
