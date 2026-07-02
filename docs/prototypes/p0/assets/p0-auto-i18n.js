@@ -18,6 +18,7 @@
     if (window.ChainTraceP0FinalI18n) window.ChainTraceP0FinalI18n.apply();
     if (window.ChainTraceP0ForceI18n) window.ChainTraceP0ForceI18n.apply();
     if (window.ChainTraceP0IntentI18n) window.ChainTraceP0IntentI18n.apply();
+    if (window.ChainTraceP0InspectionI18n) window.ChainTraceP0InspectionI18n.apply();
   }
 
   function load() {
@@ -27,6 +28,7 @@
     add("p0f3", "assets/p0-final-i18n.js?v=f3", apply);
     add("p0x2", "assets/p0-force-i18n.js?v=x2", apply);
     add("p0i1", "assets/p0-intent-i18n.js?v=i1", apply);
+    add("p0inspection", "assets/p0-inspection-i18n.js?v=inspection1", apply);
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
