@@ -143,7 +143,7 @@
   function loadAutoTranslations() {
     if (document.querySelector('script[data-p0-auto-i18n="true"]')) return;
     const script = document.createElement("script");
-    script.src = "assets/p0-auto-i18n.js?v=20260702-fix2";
+    script.src = "assets/p0-auto-i18n.js?v=20260702-loader3";
     script.defer = true;
     script.dataset.p0AutoI18n = "true";
     script.onload = () => window.ChainTraceP0AutoI18n?.apply?.();
