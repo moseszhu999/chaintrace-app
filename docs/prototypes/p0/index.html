@@ -8,80 +8,10 @@
   <link rel="stylesheet" href="assets/p0.css" />
 </head>
 <body data-page="gate">
-  <header class="topbar">
-    <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Role gate prototype</span></span></a>
-    <div class="chips">
-      <span class="chip">Wallet <span class="strong">0x8F...21A</span></span>
-      <span class="chip">Bound role <span class="strong">Exporter</span></span>
-      <span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span>
-    </div>
-    <div class="mode-switch" aria-label="Agent mode selector">
-      <button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button>
-      <button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button>
-      <button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select>
-    </div>
-  </header>
-
+  <header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Role gate prototype</span></span></a><div class="chips"><span class="chip">Wallet <span class="strong">0x8F...21A</span></span><span class="chip">Bound role <span class="strong">Exporter</span></span><span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span></div><div class="mode-switch" aria-label="Agent mode selector"><button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button><button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button><button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div></header>
   <div class="shell">
-    <aside class="side">
-      <div class="side-title">Exporter Flow</div>
-      <a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a>
-      <a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a>
-      <a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a>
-      <a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a>
-      <a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a>
-      <a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a>
-      <a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a>
-      <a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a>
-      <a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a>
-      <a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a>
-      <div class="side-title">Bank Flow</div>
-      <a class="step-link" href="bank-dashboard.html"><span class="step-index">B</span><span>银行审单视角</span></a>
-      <div class="side-title">Inspection Flow</div>
-      <a class="step-link" href="inspector-dashboard.html"><span class="step-index">I</span><span>质检方视角</span></a>
-    </aside>
-
-    <main class="main">
-      <section class="hero">
-        <h1 data-i18n="gate.heroTitle">Wallet recognized. Enter the Exporter workspace.</h1>
-        <p data-i18n="gate.heroCopy">This is not a marketing page. The wallet has already been recognized as an active Exporter account, so the prototype opens the business workspace for creating and tracking a financing case.</p>
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2>Role Gate</h2>
-            <p class="section-sub">One wallet maps to one business role. Agent mode is selectable, but it does not change the role boundary.</p>
-          </div>
-          <span class="badge ok">Active exporter</span>
-        </div>
-        <div class="content main-grid">
-          <div class="card">
-            <div class="card-title">Recognized Business Identity <span class="badge ok">Ready</span></div>
-            <div class="grid-3">
-              <div class="metric"><div class="label">Wallet</div><div class="value">0x8F...21A</div></div>
-              <div class="metric"><div class="label">Role</div><div class="value">Exporter</div></div>
-              <div class="metric"><div class="label">Agent Mode</div><div class="value" data-mode-label>Semi-auto</div></div>
-            </div>
-            <div class="notice" style="margin-top:16px"><strong>Business meaning:</strong> this user can create and manage its own financing cases. It cannot review funding, edit inspection conclusions, or operate platform rules.</div>
-            <div class="action-row">
-              <a class="action primary" href="exporter-profile.html" data-i18n="action.continueProfile">Continue to Exporter Profile</a>
-              <a class="action" href="bank-dashboard.html">进入银行审单视角</a>
-              <a class="action" href="inspector-dashboard.html">进入质检方视角</a>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">What is not shown here</div>
-            <ul class="list">
-              <li><span>Public marketing homepage</span><span class="badge bad">Not P0</span></li>
-              <li><span>Role picker for real users</span><span class="badge bad">Not allowed</span></li>
-              <li><span>Proof/hash product page</span><span class="badge bad">Deferred</span></li>
-              <li><span>Funder or platform controls</span><span class="badge bad">Out of role</span></li>
-            </ul>
-          </div>
-        </div>
-      </section>
-    </main>
+    <aside class="side"><div class="side-title">Exporter Flow</div><a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a><a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a><a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a><a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a><a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a><a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a><a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a><a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a><a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a><a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a><div class="side-title">Bank Flow</div><a class="step-link" href="bank-dashboard.html"><span class="step-index">B</span><span>银行审单视角</span></a><div class="side-title">Inspection Flow</div><a class="step-link" href="inspector-dashboard.html"><span class="step-index">I</span><span>质检方视角</span></a><div class="side-title">Funder Contract Flow</div><a class="step-link" href="funder-pool-dashboard.html"><span class="step-index">F</span><span>资金方合约视角</span></a></aside>
+    <main class="main"><section class="hero"><h1 data-i18n="gate.heroTitle">Wallet recognized. Enter the Exporter workspace.</h1><p data-i18n="gate.heroCopy">This is not a marketing page. The wallet has already been recognized as an active Exporter account, so the prototype opens the business workspace for creating and tracking a financing case.</p></section><section class="section"><div class="section-head"><div><h2>Role Gate</h2><p class="section-sub">One wallet maps to one business role. Agent mode is selectable, but it does not change the role boundary.</p></div><span class="badge ok">Active exporter</span></div><div class="content main-grid"><div class="card"><div class="card-title">Recognized Business Identity <span class="badge ok">Ready</span></div><div class="grid-3"><div class="metric"><div class="label">Wallet</div><div class="value">0x8F...21A</div></div><div class="metric"><div class="label">Role</div><div class="value">Exporter</div></div><div class="metric"><div class="label">Agent Mode</div><div class="value" data-mode-label>Semi-auto</div></div></div><div class="notice" style="margin-top:16px"><strong>Business meaning:</strong> this user can create and manage its own financing cases. It cannot review funding, edit inspection conclusions, or operate platform rules.</div><div class="action-row"><a class="action primary" href="exporter-profile.html" data-i18n="action.continueProfile">Continue to Exporter Profile</a><a class="action" href="bank-dashboard.html">进入银行审单视角</a><a class="action" href="inspector-dashboard.html">进入质检方视角</a><a class="action" href="funder-pool-dashboard.html">进入资金方合约视角</a></div></div><div class="card"><div class="card-title">What is not shown here</div><ul class="list"><li><span>Public marketing homepage</span><span class="badge bad">Not P0</span></li><li><span>Role picker for real users</span><span class="badge bad">Not allowed</span></li><li><span>Proof/hash product page</span><span class="badge bad">Deferred</span></li><li><span>Funder or platform controls</span><span class="badge bad">Out of role</span></li></ul></div></div></section></main>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   <script src="assets/p0.js"></script>
