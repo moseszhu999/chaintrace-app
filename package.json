@@ -3,7 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/prepare-vercel-static.js",
-    "vercel-build": "node scripts/prepare-vercel-static.js"
+    "build": "node scripts/prepare-vercel-static.js && next build",
+    "vercel-build": "node scripts/prepare-vercel-static.js && next build"
+  },
+  "dependencies": {
+    "next": "16.2.9",
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
   }
 }
