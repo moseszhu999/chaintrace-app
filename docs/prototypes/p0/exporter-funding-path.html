@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Exporter Funding Path</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="funding">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Funding path status</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Exporter</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span><span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span></div>
+    <div class="mode-switch"><button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button><button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button><button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">Exporter Flow</div>
+      <a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a>
+      <a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a>
+      <a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a>
+      <a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a>
+      <a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a>
+      <a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a>
+      <a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a>
+      <a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a>
+      <a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a>
+      <a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1 data-i18n="funding.heroTitle">Exporter sees which funding path is active.</h1><p data-i18n="funding.heroCopy">The exporter does not operate the funder workspace, but can see whether the case is on bank-assisted review, pure DeFi, or low-human execution path.</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Funding Path</h2><p class="section-sub">This normal branch uses bank-assisted review followed by DeFi execution check.</p></div><span class="badge info">Bank-assisted + DeFi</span></div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="flow-form" style="margin-bottom:14px">
+              <div class="field"><label>Preferred path</label><select class="select"><option>Bank-assisted + DeFi execution check</option><option>Pure DeFi candidate</option><option>Agent + smart contract low-human path</option><option>Manual review only</option></select></div>
+              <div class="field"><label>Preferred funder</label><select class="select"><option>Example Trade Finance Bank</option><option>Any matched funder</option><option>DeFi automatic pool if eligible</option></select></div>
+              <div class="field"><label>Accept reduced amount?</label><select class="select"><option>Yes, if above USD 90,000</option><option>Yes, any amount above USD 80,000</option><option>No, only requested amount</option></select></div>
+              <div class="field"><label>Manual review threshold</label><select class="select"><option>High risk or dispute only</option><option>Any amount reduction</option><option>Any rule warning</option></select></div>
+            </div>
+            <div class="timeline">
+              <div class="node done"><span class="badge ok">Done</span><h3>Materials</h3><p>Core package and explanation are ready.</p></div>
+              <div class="node done"><span class="badge ok">Pass</span><h3>Inspection</h3><p>Independent fact supports review.</p></div>
+              <div class="node current"><span class="badge info">Review</span><h3>Funder</h3><p>Example Trade Finance Bank reviews case.</p></div>
+              <div class="node"><span class="badge">Next</span><h3>DeFi Check</h3><p>Rules, pool and pause after approval.</p></div>
+              <div class="node"><span class="badge">Pending</span><h3>Result</h3><p>No funding result yet.</p></div>
+            </div>
+            <div class="notice" style="margin-top:16px"><strong>Exporter interpretation:</strong> the case is review-ready. The funder can allow, reject, reduce amount, request more material, or move to manual review.</div>
+            <div class="action-row"><a class="action good" href="exporter-execution-check.html">Funder allowed USD 92,000</a><a class="action warn" href="exporter-result.html">Preview exception result</a></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Path Difference Visible</div>
+            <ul class="list">
+              <li><span>Bank-assisted</span><span class="badge info">Funder decision required</span></li>
+              <li><span>Pure DeFi</span><span class="badge">No bank node</span></li>
+              <li><span>Low-human</span><span class="badge agent">Agent + rule path</span></li>
+              <li><span>Manual escalation</span><span class="badge warn">Dispute or high risk</span></li>
+            </ul>
+            <div class="notice warn" style="margin-top:12px"><strong>Boundary:</strong> exporter can see path and status, but cannot approve its own financing.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

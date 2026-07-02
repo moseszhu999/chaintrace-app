@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Create Financing Intent</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="new">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Create financing intent</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Exporter</span></span><span class="chip">Case status <span class="strong">Draft</span></span><span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span></div>
+    <div class="mode-switch"><button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button><button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button><button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">Exporter Flow</div>
+      <a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a>
+      <a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a>
+      <a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a>
+      <a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a>
+      <a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a>
+      <a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a>
+      <a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a>
+      <a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a>
+      <a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a>
+      <a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1 data-i18n="new.heroTitle">Create financing intent.</h1><p data-i18n="new.heroCopy">The exporter starts with a concrete business request, not a file vault: what trade, how much financing, which timing, and which Agent mode.</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Financing Intent Draft</h2><p class="section-sub">The form is drawn as filled prototype data so reviewers can continue the flow.</p></div><span class="badge info">Draft</span></div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="flow-form">
+              <div class="field"><label>Financing type</label><select class="select"><option>Post-shipment receivable financing</option><option>Purchase order financing</option><option>Invoice financing</option><option>Settlement / guarantee release</option></select></div>
+              <div class="field"><label>Settlement currency</label><select class="select"><option>USD / USDC settlement</option><option>USD bank transfer</option><option>EUR / EURC settlement</option><option>CNY settlement</option></select></div>
+              <div class="field"><label>Requested amount</label><input class="input" value="96000" /></div>
+              <div class="field"><label>Expected funding time</label><select class="select"><option>As soon as possible</option><option>Within 3 business days</option><option>Within 7 business days</option><option>Flexible / negotiable</option></select></div>
+              <div class="field"><label>Buyer</label><input class="input" value="Northstar Retail GmbH" /></div>
+              <div class="field"><label>Buyer country</label><select class="select"><option>Germany</option><option>United States</option><option>Singapore</option><option>Japan</option><option>United Kingdom</option></select></div>
+              <div class="field"><label>Goods category</label><select class="select"><option>Consumer electronics</option><option>Industrial components</option><option>Apparel and textiles</option><option>Food and agricultural goods</option></select></div>
+              <div class="field"><label>Shipment quantity</label><input class="input" value="2,000 units" /></div>
+            </div>
+            <div class="field" style="margin-top:12px"><label>Trade note</label><textarea class="textarea">Smart wearable shipment under confirmed purchase order. Exporter requests financing after shipment documents are prepared.</textarea></div>
+            <div class="action-row"><a class="action primary" href="exporter-case-materials.html">Create case and prepare materials</a><a class="action" href="exporter-dashboard.html">Back to control tower</a></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Agent Setup <span class="badge agent" data-mode-label>Semi-auto</span></div>
+            <ul class="list">
+              <li><span>Manual</span><span class="badge">Every key step confirmed</span></li>
+              <li><span>Semi-auto</span><span class="badge info">Default assist and todos</span></li>
+              <li><span>Full-auto</span><span class="badge warn">Low-risk only</span></li>
+            </ul>
+            <div class="notice"><strong>Boundary:</strong> Agent can prepare checklists and todos, but exporter remains responsible for trade materials.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Exporter Control Tower</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="dashboard">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Exporter control tower</span></span></a>
+    <div class="chips">
+      <span class="chip">Wallet <span class="strong">0x8F...21A</span></span>
+      <span class="chip">Role <span class="strong">Exporter</span></span>
+      <span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span>
+      <span class="chip">Current case <span class="strong">CT-P0-EX-001</span></span>
+    </div>
+    <div class="mode-switch">
+      <button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button>
+      <button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button>
+      <button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select>
+    </div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">Exporter Flow</div>
+      <a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a>
+      <a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a>
+      <a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a>
+      <a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a>
+      <a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a>
+      <a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a>
+      <a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a>
+      <a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a>
+      <a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a>
+      <a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero">
+        <h1 data-i18n="dashboard.heroTitle">Exporter sees one financing case from trade source to funding result.</h1>
+        <p data-i18n="dashboard.heroCopy">The first workspace is the exporter control tower: source trade, evidence package, Agent gaps, inspection facts, funding path, DeFi execution check, and final result.</p>
+      </section>
+      <section class="section">
+        <div class="section-head">
+          <div><h2>Case CT-P0-EX-001</h2><p class="section-sub">Pacific Export LLC requests financing against a smart wearable shipment to Northstar Retail GmbH.</p></div>
+          <span class="badge warn">Materials incomplete</span>
+        </div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="grid-4">
+              <div class="metric"><div class="label">Invoice</div><div class="value">USD 128k</div></div>
+              <div class="metric"><div class="label">PO amount</div><div class="value">USD 120k</div></div>
+              <div class="metric"><div class="label">Requested</div><div class="value">USD 96k</div></div>
+              <div class="metric"><div class="label">Path</div><div class="value">Bank + DeFi</div></div>
+            </div>
+            <div class="timeline">
+              <div class="node done"><span class="badge ok">Done</span><h3>Intent</h3><p>Exporter created financing intent.</p></div>
+              <div class="node warn"><span class="badge warn">Conflict</span><h3>Materials</h3><p>Invoice amount does not match PO.</p></div>
+              <div class="node current"><span class="badge agent">Agent</span><h3>Gap Todo</h3><p>Agent created exporter task.</p></div>
+              <div class="node"><span class="badge">Waiting</span><h3>Inspection</h3><p>Not created until material gap closes.</p></div>
+              <div class="node"><span class="badge">Locked</span><h3>Funding</h3><p>Cannot submit yet.</p></div>
+              <div class="node"><span class="badge">Locked</span><h3>DeFi Check</h3><p>No execution before review.</p></div>
+              <div class="node"><span class="badge">No result</span><h3>Result</h3><p>No funding result yet.</p></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Agent Assist <span class="badge agent" data-mode-label>Semi-auto</span></div>
+            <ul class="list">
+              <li><span>Current gap</span><span class="badge warn">Invoice mismatch</span></li>
+              <li><span>Responsible party</span><span class="badge info">Exporter</span></li>
+              <li><span>Next action</span><span class="badge info">Upload explanation</span></li>
+              <li><span>Submit to review</span><span class="badge bad">Disabled</span></li>
+            </ul>
+            <div class="field" style="margin-top:12px"><label>Current task action</label><select class="select"><option>Upload invoice explanation</option><option>Open material package</option><option>Ask Agent to re-check</option><option>Save and return later</option></select></div>
+            <div class="field" style="margin-top:10px"><label>Task note</label><textarea class="textarea">Need to explain why invoice amount is higher than PO before submitting to review.</textarea></div>
+            <div class="action-row">
+              <a class="action primary" href="exporter-case-new.html">Start from intent</a>
+              <a class="action warn" href="exporter-agent-gap.html">Resolve current gap</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>
