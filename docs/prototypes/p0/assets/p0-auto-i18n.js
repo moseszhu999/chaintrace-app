@@ -34,6 +34,7 @@
     add("p0cryptorailzh", "assets/p0-crypto-rail-locale.js?v=zh1");
     add("p0intentassist", "assets/p0-intent-agent-assist.js?v=intentassist1");
     add("p0operatorrail", "assets/p0-operator-rail.js?v=operatorrail1");
+    add("p0disputerail", "assets/p0-dispute-rail.js?v=disputerail1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
