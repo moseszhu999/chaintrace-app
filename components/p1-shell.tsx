@@ -4,8 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 
-import { clearCurrentUserId, getCurrentUser, loadP1Store } from "@/lib/p1-client-store";
-import { P1Store, Role, roleLabel } from "@/lib/p1-domain";
+import {
+  clearCurrentWallet,
+  getCurrentUser,
+  loadP1RegistryCache,
+  P1ContractRegistryCache
+} from "@/lib/p1-client-store";
+import { Role, roleLabel } from "@/lib/p1-domain";
 
 interface P1ShellProps {
   children: ReactNode;
@@ -14,15 +19,15 @@ interface P1ShellProps {
 
 export function P1Shell({ children, requiredRole }: P1ShellProps) {
   const router = useRouter();
-  const [store, setStore] = useState<P1Store | null>(null);
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const user = useMemo(() => (store ? getCurrentUser(store) : null), [store]);
+  const user = useMemo(() => (cache ? getCurrentUser(cache) : null), [cache]);
 
-  if (!store) {
+  if (!cache) {
     return <main className="entry">Loading P1 workspace...</main>;
   }
 
@@ -74,7 +79,7 @@ export function P1Shell({ children, requiredRole }: P1ShellProps) {
           <span className="badge ok">Role locked</span>
           <button
             onClick={() => {
-              clearCurrentUserId();
+              clearCurrentWallet();
               router.push("/login");
             }}
           >
@@ -93,8 +98,8 @@ export function P1Shell({ children, requiredRole }: P1ShellProps) {
           </Link>
           <div className="nav-label">Boundaries</div>
           <div className="notice">
-            No real wallet signature, chain write, USDC transfer, bank core API,
-            KYB API, insurance API, or customs integration is enabled.
+            P1.1 is frontend plus smart-contract registry. No server database,
+            raw document upload, real financing, or disbursement is enabled.
           </div>
         </aside>
         <main className="content">{children}</main>

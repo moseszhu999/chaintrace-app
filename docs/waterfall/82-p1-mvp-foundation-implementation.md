@@ -18,11 +18,13 @@ The new P1 implementation adds a real Next.js App Router application with:
 - Case state machine at `/cases/[caseId]/state-machine`
 - Case audit log at `/cases/[caseId]/audit-log`
 
-## Persistence Boundary
+## Persistence Boundary Superseded
 
 The first P1 skeleton uses browser `localStorage` for mock persistence so the workflow is usable without a backend service.
 
-The target PostgreSQL schema is recorded in `prisma/schema.prisma` for the next backend implementation step. Runtime code does not yet connect to PostgreSQL, Supabase, Prisma Client, or object storage.
+That original persistence direction is superseded by the P1.1 correction in `83-p1-frontend-contract-persistence.md`.
+
+ChainTrace P1 should not move toward Prisma, PostgreSQL, Supabase, Server Actions, API routes, or a Node backend as the authority layer. The authority layer for the next slice is the smart-contract registry and its events.
 
 ## Product Boundary Preserved
 
@@ -69,10 +71,10 @@ The implementation was verified with:
 
 ## Next Implementation Step
 
-The next P1 slice should replace local mock persistence with a real backend boundary:
+The next P1 slice should replace local mock persistence with a frontend plus smart-contract boundary:
 
-1. Add PostgreSQL or Supabase runtime persistence.
-2. Move case/document/proof mutations behind Server Actions or API routes.
+1. Use wallet transaction semantics for role, case, proof, gate, and state writes.
+2. Store only commitments, hashes, document kind, and event data on chain.
 3. Keep the existing domain tests as the rule baseline.
 4. Add buyer acknowledgment, logistics or inspector proof, and bank review mutations.
 5. Keep `disbursementAllowed=false` until an explicitly approved funding-execution phase.

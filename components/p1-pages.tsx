@@ -5,28 +5,25 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  addContractDocumentProof,
+  ContractBackedCase,
+  ContractBackedDocumentDisplay,
+  createContractBackedCase,
+  getContractCaseDetail,
   getCurrentUser,
-  loadP1Store,
+  getVisibleCases,
+  loadP1RegistryCache,
+  P1ContractRegistryCache,
   registerAndSignIn,
+  roleDisplay,
   routeForRole,
-  saveP1Store,
+  saveDraftCache,
   signInExistingWallet
 } from "@/lib/p1-client-store";
-import {
-  CASE_STATES,
-  Currency,
-  DocumentType,
-  P1_ROLES,
-  P1Store,
-  Role,
-  addTradeDocument,
-  buildCaseState,
-  buildGateChecklist,
-  buildProofGraph,
-  createExporterCase,
-  formatMoney,
-  roleLabel
-} from "@/lib/p1-domain";
+import { ContractDocumentKind, ContractGate } from "@/lib/contracts/types";
+import { Currency, P1_ROLES, Role, formatMoney, roleLabel } from "@/lib/p1-domain";
+
+const CONTRACT_CASE_STATES = ["DRAFT_INTENT", "PRE_REVIEW", "PROOF_COLLECTED", "GATES_NOT_PASSED"] as const;
 
 export function LoginPage() {
   const router = useRouter();
@@ -35,8 +32,8 @@ export function LoginPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const userId = signInExistingWallet(walletAddress);
-    if (!userId) {
+    const wallet = signInExistingWallet(walletAddress);
+    if (!wallet) {
       router.push(`/register-role?wallet=${encodeURIComponent(walletAddress)}`);
       return;
     }
@@ -48,12 +45,13 @@ export function LoginPage() {
       <section className="panel" style={{ width: "min(620px, 100%)" }}>
         <div className="brand-row">
           <span className="brand-mark">CT</span>
-          <span>ChainTrace P1</span>
+          <span>ChainTrace P1.1</span>
         </div>
-        <h1>Mock wallet login</h1>
+        <h1>Wallet transaction workspace</h1>
         <p>
-          This login uses local mock wallet identity only. It does not request a
-          signature and does not connect to a real wallet provider.
+          This P1.1 route uses a wallet-like contract adapter. Role, case,
+          document proof, state, and audit records are derived from registry
+          state and events; browser storage is only a local development cache.
         </p>
         <form className="form" onSubmit={onSubmit}>
           <label className="field">
@@ -69,7 +67,7 @@ export function LoginPage() {
               type="button"
               onClick={() => {
                 setWalletAddress("0xEXporter001");
-                setMessage("Use Register role first if this wallet is new.");
+                setMessage("Register the wallet role first if it is not already in the registry.");
               }}
             >
               Demo exporter wallet
@@ -91,10 +89,8 @@ export function RegisterRolePage({ initialWallet }: { initialWallet?: string }) 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
-      const userId = registerAndSignIn({ email, walletAddress, role });
-      const store = loadP1Store();
-      const user = store.users.find((item) => item.id === userId);
-      router.push(user ? routeForRole(user.role) : "/dashboard");
+      registerAndSignIn({ email, walletAddress, role });
+      router.push(routeForRole(role));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "REGISTRATION_FAILED");
     }
@@ -103,19 +99,19 @@ export function RegisterRolePage({ initialWallet }: { initialWallet?: string }) 
   return (
     <main className="entry">
       <section className="panel" style={{ width: "min(720px, 100%)" }}>
-        <h1>Register one permanent business role</h1>
+        <h1>Register role on P1 registry</h1>
         <p>
-          P1 keeps the core rule: one wallet equals one role and one workspace.
-          Ordinary users cannot change a locked role after registration.
+          One wallet can register one business role. In production this maps to a
+          wallet transaction on `ChainTraceP1Registry.registerRole`.
         </p>
         <form className="form" onSubmit={onSubmit}>
           <div className="grid-2">
             <label className="field">
-              <span>Email</span>
+              <span>Email, local display only</span>
               <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
             </label>
             <label className="field">
-              <span>Mock wallet address</span>
+              <span>Wallet address</span>
               <input value={walletAddress} onChange={(event) => setWalletAddress(event.target.value)} required />
             </label>
           </div>
@@ -131,7 +127,7 @@ export function RegisterRolePage({ initialWallet }: { initialWallet?: string }) 
           </label>
           {error ? <p className="badge bad">{error}</p> : null}
           <button className="primary" type="submit">
-            Lock role and enter workspace
+            Register role transaction
           </button>
         </form>
       </section>
@@ -140,27 +136,16 @@ export function RegisterRolePage({ initialWallet }: { initialWallet?: string }) 
 }
 
 export function DashboardPage() {
-  const [store, setStore] = useState<P1Store | null>(null);
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const user = useMemo(() => (store ? getCurrentUser(store) : null), [store]);
-  const visibleCases = useMemo(() => {
-    if (!store || !user) {
-      return [];
-    }
-    if (user.role === "EXPORTER") {
-      return store.cases.filter((item) => item.exporterId === user.id);
-    }
-    if (user.role === "AUDITOR" || user.role === "OPERATOR" || user.role === "BANK") {
-      return store.cases;
-    }
-    return store.cases.filter((item) => item.buyerId === user.id);
-  }, [store, user]);
+  const user = useMemo(() => (cache ? getCurrentUser(cache) : null), [cache]);
+  const visibleCases = cache && user ? getVisibleCases(cache, user) : [];
 
-  if (!store || !user) {
+  if (!cache || !user) {
     return null;
   }
 
@@ -168,10 +153,10 @@ export function DashboardPage() {
     <>
       <section className="page-head">
         <div>
-          <h1>{roleLabel(user.role)} dashboard</h1>
+          <h1>{roleDisplay(user.role)} dashboard</h1>
           <p>
-            Role-specific workspace with locked wallet identity and no real funds,
-            chain write, or external integration.
+            Contract-backed workspace. Case state, proof graph, and audit log
+            are generated from registry records/events, not a server database.
           </p>
         </div>
         {user.role === "EXPORTER" ? (
@@ -182,16 +167,16 @@ export function DashboardPage() {
       </section>
       <section className="grid-3">
         <div className="metric">
-          <div className="label">Visible cases</div>
+          <div className="label">Visible registry cases</div>
           <div className="value">{visibleCases.length}</div>
         </div>
         <div className="metric">
           <div className="label">Role</div>
-          <div className="value">{roleLabel(user.role)}</div>
+          <div className="value">{roleDisplay(user.role)}</div>
         </div>
         <div className="metric">
-          <div className="label">Funding execution</div>
-          <div className="value">Blocked</div>
+          <div className="label">disbursementAllowed</div>
+          <div className="value">false</div>
         </div>
       </section>
       <CaseList cases={visibleCases} />
@@ -200,21 +185,21 @@ export function DashboardPage() {
 }
 
 export function ExporterDashboardPage() {
-  const [store, setStore] = useState<P1Store | null>(null);
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const user = useMemo(() => (store ? getCurrentUser(store) : null), [store]);
-  const cases = store && user ? store.cases.filter((item) => item.exporterId === user.id) : [];
+  const user = useMemo(() => (cache ? getCurrentUser(cache) : null), [cache]);
+  const cases = cache && user ? getVisibleCases(cache, user) : [];
 
   return (
     <>
       <section className="page-head">
         <div>
-          <h1>Exporter cases</h1>
-          <p>Create financing candidates and package local proof records for review.</p>
+          <h1>Exporter registry cases</h1>
+          <p>Create case commitments and document proof hashes through the P1 registry path.</p>
         </div>
         <Link className="button primary" href="/exporter/cases/new">
           New case
@@ -233,22 +218,22 @@ export function NewExporterCasePage() {
   const [description, setDescription] = useState("Vietnam coffee shipment receivable");
   const [error, setError] = useState("");
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const store = loadP1Store();
-    const user = getCurrentUser(store);
+    const cache = loadP1RegistryCache();
+    const user = getCurrentUser(cache);
     if (!user) {
       router.push("/login");
       return;
     }
     try {
-      const financingCase = createExporterCase(store, user.id, {
+      saveDraftCache("lastCaseForm", { buyerName, amount, currency, description });
+      const financingCase = await createContractBackedCase(cache, user.walletAddress, {
         buyerName,
         amount: Number(amount),
         currency,
         description
       });
-      saveP1Store(store);
       router.push(`/exporter/cases/${financingCase.id}`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "CASE_CREATE_FAILED");
@@ -259,19 +244,22 @@ export function NewExporterCasePage() {
     <>
       <section className="page-head">
         <div>
-          <h1>Create financing candidate</h1>
-          <p>The initial case is saved as DRAFT_INTENT with disbursement blocked.</p>
+          <h1>Create case commitment</h1>
+          <p>
+            The registry receives a `caseCommitment` hash. Buyer name, amount,
+            and description stay in local display cache for this P1 demo.
+          </p>
         </div>
       </section>
       <section className="panel">
         <form className="form" onSubmit={onSubmit}>
           <label className="field">
-            <span>Buyer name</span>
+            <span>Buyer name, local display cache</span>
             <input value={buyerName} onChange={(event) => setBuyerName(event.target.value)} required />
           </label>
           <div className="grid-2">
             <label className="field">
-              <span>Amount</span>
+              <span>Amount, local display cache</span>
               <input type="number" min="1" value={amount} onChange={(event) => setAmount(event.target.value)} required />
             </label>
             <label className="field">
@@ -285,12 +273,12 @@ export function NewExporterCasePage() {
             </label>
           </div>
           <label className="field">
-            <span>Description</span>
+            <span>Description, local display cache</span>
             <textarea value={description} onChange={(event) => setDescription(event.target.value)} required />
           </label>
           {error ? <p className="badge bad">{error}</p> : null}
           <button className="primary" type="submit">
-            Save DRAFT_INTENT case
+            Write case commitment
           </button>
         </form>
       </section>
@@ -299,39 +287,46 @@ export function NewExporterCasePage() {
 }
 
 export function ExporterCaseDetailPage({ caseId }: { caseId: string }) {
-  const [store, setStore] = useState<P1Store | null>(null);
-  const [type, setType] = useState<DocumentType>("INVOICE");
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
+  const [kind, setKind] = useState<ContractDocumentKind>("INVOICE");
   const [fileName, setFileName] = useState("invoice-ct-001.pdf");
+  const [fileType, setFileType] = useState("application/pdf");
+  const [fileSize, setFileSize] = useState("12345");
   const [textSummary, setTextSummary] = useState("Invoice CT-001 for 128,000 USDC, due after port release.");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const user = store ? getCurrentUser(store) : null;
-  const financingCase = store?.cases.find((item) => item.id === caseId);
-  const documents = store?.tradeDocuments.filter((item) => item.caseId === caseId) ?? [];
-  const state = store && financingCase ? buildCaseState(store, financingCase.id) : null;
+  const user = cache ? getCurrentUser(cache) : null;
+  const detail = cache ? getContractCaseDetail(cache, caseId) : null;
 
   async function onAddDocument(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!store || !user) {
+    if (!cache || !user) {
       return;
     }
     try {
-      await addTradeDocument(store, user.id, caseId, { type, fileName, textSummary });
-      saveP1Store(store);
-      setStore({ ...store });
+      await addContractDocumentProof(cache, user.walletAddress, caseId as `0x${string}`, {
+        kind,
+        fileName,
+        fileType,
+        fileSize: Number(fileSize),
+        textSummary
+      });
+      setCache({ ...loadP1RegistryCache() });
       setError("");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "DOCUMENT_ADD_FAILED");
+      setError(caught instanceof Error ? caught.message : "DOCUMENT_PROOF_FAILED");
     }
   }
 
-  if (!financingCase) {
+  if (!detail) {
     return <MissingCase />;
   }
+
+  const { financingCase, documents, state } = detail;
 
   return (
     <>
@@ -354,29 +349,30 @@ export function ExporterCaseDetailPage({ caseId }: { caseId: string }) {
       </section>
       <section className="grid-3">
         <div className="metric">
-          <div className="label">Buyer</div>
+          <div className="label">Buyer display</div>
           <div className="value">{financingCase.buyerName}</div>
         </div>
         <div className="metric">
-          <div className="label">Amount</div>
+          <div className="label">Amount display</div>
           <div className="value">{formatMoney(financingCase.amount, financingCase.currency)}</div>
         </div>
         <div className="metric">
-          <div className="label">Current state</div>
-          <div className="value">{state?.state}</div>
+          <div className="label">Contract state</div>
+          <div className="value">{state.state}</div>
         </div>
       </section>
       <section className="notice">
-        <strong>Execution boundary:</strong> disbursementAllowed is always false in P1.
-        This case can be reviewed and explained, but cannot execute funding.
+        <strong>On-chain privacy boundary:</strong> raw files and plaintext
+        commercial metadata never leave the browser. The registry stores only
+        `caseCommitment`, `documentHash`, `metadataHash`, document kind, and events.
       </section>
       <section className="grid-2">
         <div className="panel">
-          <h2>Add trade material metadata</h2>
+          <h2>Add document proof</h2>
           <form className="form" onSubmit={onAddDocument}>
             <label className="field">
-              <span>Document type</span>
-              <select value={type} onChange={(event) => setType(event.target.value as DocumentType)}>
+              <span>Document kind</span>
+              <select value={kind} onChange={(event) => setKind(event.target.value as ContractDocumentKind)}>
                 <option value="PO">PO</option>
                 <option value="INVOICE">Invoice</option>
                 <option value="PACKING_LIST">Packing list</option>
@@ -385,17 +381,27 @@ export function ExporterCaseDetailPage({ caseId }: { caseId: string }) {
                 <option value="OTHER">Other</option>
               </select>
             </label>
+            <div className="grid-2">
+              <label className="field">
+                <span>File name, local only</span>
+                <input value={fileName} onChange={(event) => setFileName(event.target.value)} required />
+              </label>
+              <label className="field">
+                <span>File type, local only</span>
+                <input value={fileType} onChange={(event) => setFileType(event.target.value)} required />
+              </label>
+            </div>
             <label className="field">
-              <span>File name</span>
-              <input value={fileName} onChange={(event) => setFileName(event.target.value)} required />
+              <span>File size, local only</span>
+              <input type="number" min="1" value={fileSize} onChange={(event) => setFileSize(event.target.value)} required />
             </label>
             <label className="field">
-              <span>Text summary</span>
+              <span>Local proof input, hashed in browser</span>
               <textarea value={textSummary} onChange={(event) => setTextSummary(event.target.value)} required />
             </label>
             {error ? <p className="badge bad">{error}</p> : null}
             <button className="primary" type="submit">
-              Hash and save proof
+              Write document proof
             </button>
           </form>
         </div>
@@ -406,25 +412,24 @@ export function ExporterCaseDetailPage({ caseId }: { caseId: string }) {
 }
 
 export function ProofGraphPage({ caseId }: { caseId: string }) {
-  const [store, setStore] = useState<P1Store | null>(null);
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const financingCase = store?.cases.find((item) => item.id === caseId);
-  if (!store || !financingCase) {
+  const detail = cache ? getContractCaseDetail(cache, caseId) : null;
+  if (!detail) {
     return <MissingCase />;
   }
-  const graph = buildProofGraph(store, caseId);
-  const gates = buildGateChecklist(store, caseId);
+  const { financingCase, graph, gates } = detail;
 
   return (
     <>
       <section className="page-head">
         <div>
           <h1>Proof graph</h1>
-          <p>{financingCase.caseNo} local evidence root: {graph.evidenceRoot}</p>
+          <p>{financingCase.caseNo} from registry document proof events.</p>
         </div>
         <Link className="button" href={`/exporter/cases/${caseId}`}>
           Case detail
@@ -436,7 +441,7 @@ export function ProofGraphPage({ caseId }: { caseId: string }) {
             <thead>
               <tr>
                 <th>Proof</th>
-                <th>Owner</th>
+                <th>Kind</th>
                 <th>Status</th>
                 <th>Hash</th>
               </tr>
@@ -445,12 +450,12 @@ export function ProofGraphPage({ caseId }: { caseId: string }) {
               {graph.nodes.map((node) => (
                 <tr key={node.id}>
                   <td>{node.proofType}</td>
-                  <td>{roleLabel(node.ownerRole)}</td>
+                  <td>{node.kind}</td>
                   <td><StatusBadge status={node.status} /></td>
-                  <td className="hash">{node.hash}</td>
+                  <td className="hash">{node.documentHash}</td>
                 </tr>
               ))}
-              {graph.nodes.length === 0 ? <EmptyRow label="No proof nodes yet." /> : null}
+              {graph.nodes.length === 0 ? <EmptyRow label="No registry proof nodes yet." /> : null}
             </tbody>
           </table>
         </div>
@@ -461,47 +466,43 @@ export function ProofGraphPage({ caseId }: { caseId: string }) {
 }
 
 export function StateMachinePage({ caseId }: { caseId: string }) {
-  const [store, setStore] = useState<P1Store | null>(null);
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const financingCase = store?.cases.find((item) => item.id === caseId);
-  if (!store || !financingCase) {
+  const detail = cache ? getContractCaseDetail(cache, caseId) : null;
+  if (!detail) {
     return <MissingCase />;
   }
-  const state = buildCaseState(store, caseId);
-  const activeIndex = CASE_STATES.indexOf(state.state);
+  const { state } = detail;
+  const activeIndex = CONTRACT_CASE_STATES.indexOf(state.state);
 
   return (
     <>
       <section className="page-head">
         <div>
-          <h1>Case state machine</h1>
+          <h1>Contract state machine</h1>
           <p>{state.explanation}</p>
         </div>
         <span className="badge bad">Funding execution blocked</span>
       </section>
       <section className="panel timeline">
-        {CASE_STATES.map((item, index) => (
+        {CONTRACT_CASE_STATES.map((item, index) => (
           <div className="timeline-item" key={item}>
             <span className={index <= activeIndex ? "dot active" : "dot"} />
             <div>
               <h3>{item}</h3>
-              <p>
-                {item === "FUNDING_EXECUTION_BLOCKED"
-                  ? "Terminal P1 safety boundary: no real funds, chain write, or wallet signature."
-                  : "Derived from the current proof and gate records."}
-              </p>
+              <p>Pre-funding registry state. No disbursed, financed, or settled state exists in P1.1.</p>
             </div>
           </div>
         ))}
       </section>
       <section className="grid-3">
         <div className="metric">
-          <div className="label">Can continue review</div>
-          <div className="value">{state.canContinueReview ? "Yes" : "No"}</div>
+          <div className="label">Source</div>
+          <div className="value">Contract events</div>
         </div>
         <div className="metric">
           <div className="label">Can execute funding</div>
@@ -517,46 +518,48 @@ export function StateMachinePage({ caseId }: { caseId: string }) {
 }
 
 export function AuditLogPage({ caseId }: { caseId: string }) {
-  const [store, setStore] = useState<P1Store | null>(null);
+  const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
 
   useEffect(() => {
-    setStore(loadP1Store());
+    setCache(loadP1RegistryCache());
   }, []);
 
-  const financingCase = store?.cases.find((item) => item.id === caseId);
-  if (!store || !financingCase) {
+  const detail = cache ? getContractCaseDetail(cache, caseId) : null;
+  if (!detail) {
     return <MissingCase />;
   }
-  const entries = store.auditLogs.filter((entry) => entry.caseId === caseId);
+  const { financingCase, auditLog } = detail;
 
   return (
     <>
       <section className="page-head">
         <div>
-          <h1>Audit log</h1>
-          <p>Append-only operational history for {financingCase.caseNo}.</p>
+          <h1>Contract event audit log</h1>
+          <p>Registry event history for {financingCase.caseNo}.</p>
         </div>
       </section>
       <section className="table-panel">
         <table>
           <thead>
             <tr>
-              <th>Time</th>
+              <th>Block</th>
               <th>Actor</th>
               <th>Action</th>
+              <th>Transaction</th>
               <th>Summary</th>
             </tr>
           </thead>
           <tbody>
-            {entries.map((entry) => (
+            {auditLog.map((entry) => (
               <tr key={entry.id}>
-                <td>{new Date(entry.createdAt).toLocaleString()}</td>
-                <td>{roleLabel(entry.actorRole)}</td>
+                <td>{entry.blockNumber.toString()}</td>
+                <td>{entry.actor}</td>
                 <td>{entry.action}</td>
+                <td className="hash">{entry.transactionHash}</td>
                 <td>{entry.summary}</td>
               </tr>
             ))}
-            {entries.length === 0 ? <EmptyRow label="No audit entries yet." /> : null}
+            {auditLog.length === 0 ? <EmptyRow label="No registry events yet." /> : null}
           </tbody>
         </table>
       </section>
@@ -564,16 +567,16 @@ export function AuditLogPage({ caseId }: { caseId: string }) {
   );
 }
 
-function CaseList({ cases }: { cases: Array<{ id: string; caseNo: string; buyerName: string; amount: number; currency: Currency; currentState: string }> }) {
+function CaseList({ cases }: { cases: ContractBackedCase[] }) {
   return (
     <section className="table-panel">
       <table>
         <thead>
           <tr>
             <th>Case</th>
-            <th>Buyer</th>
-            <th>Amount</th>
-            <th>State</th>
+            <th>Buyer display</th>
+            <th>Amount display</th>
+            <th>Commitment</th>
             <th>Open</th>
           </tr>
         </thead>
@@ -583,7 +586,7 @@ function CaseList({ cases }: { cases: Array<{ id: string; caseNo: string; buyerN
               <td>{item.caseNo}</td>
               <td>{item.buyerName}</td>
               <td>{formatMoney(item.amount, item.currency)}</td>
-              <td>{item.currentState}</td>
+              <td className="hash">{item.caseCommitment}</td>
               <td>
                 <Link className="button" href={`/exporter/cases/${item.id}`}>
                   Open
@@ -591,44 +594,44 @@ function CaseList({ cases }: { cases: Array<{ id: string; caseNo: string; buyerN
               </td>
             </tr>
           ))}
-          {cases.length === 0 ? <EmptyRow label="No cases yet." /> : null}
+          {cases.length === 0 ? <EmptyRow label="No registry cases yet." /> : null}
         </tbody>
       </table>
     </section>
   );
 }
 
-function DocumentTable({ documents }: { documents: Array<{ id: string; type: DocumentType; fileName: string; hash: string; textSummary: string }> }) {
+function DocumentTable({ documents }: { documents: ContractBackedDocumentDisplay[] }) {
   return (
     <div className="table-panel">
       <table>
         <thead>
           <tr>
             <th>Document</th>
-            <th>Summary</th>
-            <th>Hash</th>
+            <th>Metadata hash</th>
+            <th>Document hash</th>
           </tr>
         </thead>
         <tbody>
           {documents.map((document) => (
             <tr key={document.id}>
               <td>
-                <strong>{document.type}</strong>
+                <strong>{document.kind}</strong>
                 <br />
-                <span className="label">{document.fileName}</span>
+                <span className="label">{document.fileName} stays local</span>
               </td>
-              <td>{document.textSummary}</td>
-              <td className="hash">{document.hash}</td>
+              <td className="hash">{document.metadataHash}</td>
+              <td className="hash">{document.documentHash}</td>
             </tr>
           ))}
-          {documents.length === 0 ? <EmptyRow label="No documents yet." /> : null}
+          {documents.length === 0 ? <EmptyRow label="No document proofs yet." /> : null}
         </tbody>
       </table>
     </div>
   );
 }
 
-function GateTable({ gates }: { gates: ReturnType<typeof buildGateChecklist> }) {
+function GateTable({ gates }: { gates: ContractGate[] }) {
   return (
     <div className="table-panel">
       <table>
@@ -670,7 +673,7 @@ function MissingCase() {
   return (
     <section className="panel">
       <h1>Case not found</h1>
-      <p>Create a financing candidate first, then open proof graph, state machine, or audit log from the case detail page.</p>
+      <p>Create a case commitment first, then open proof graph, state machine, or audit log from the case detail page.</p>
       <Link className="button primary" href="/exporter/cases/new">
         New exporter case
       </Link>

@@ -1,0 +1,101 @@
+[
+  {
+    "type": "function",
+    "name": "registerRole",
+    "stateMutability": "nonpayable",
+    "inputs": [{ "name": "role", "type": "uint8" }],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "createCase",
+    "stateMutability": "nonpayable",
+    "inputs": [{ "name": "caseCommitment", "type": "bytes32" }],
+    "outputs": [{ "name": "caseId", "type": "bytes32" }]
+  },
+  {
+    "type": "function",
+    "name": "addDocumentProof",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32" },
+      { "name": "documentHash", "type": "bytes32" },
+      { "name": "metadataHash", "type": "bytes32" },
+      { "name": "kind", "type": "uint8" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "recordGateEvaluation",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32" },
+      { "name": "gateHash", "type": "bytes32" },
+      { "name": "passed", "type": "bool" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "transitionCaseState",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32" },
+      { "name": "nextState", "type": "uint8" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "disbursementAllowed",
+    "stateMutability": "pure",
+    "inputs": [{ "name": "caseId", "type": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool" }]
+  },
+  {
+    "type": "event",
+    "name": "RoleRegistered",
+    "inputs": [
+      { "name": "wallet", "type": "address", "indexed": true },
+      { "name": "role", "type": "uint8", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "CaseCreated",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32", "indexed": true },
+      { "name": "creator", "type": "address", "indexed": true },
+      { "name": "caseCommitment", "type": "bytes32", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "DocumentProofAdded",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32", "indexed": true },
+      { "name": "documentHash", "type": "bytes32", "indexed": false },
+      { "name": "metadataHash", "type": "bytes32", "indexed": false },
+      { "name": "kind", "type": "uint8", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "GateEvaluated",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32", "indexed": true },
+      { "name": "gateHash", "type": "bytes32", "indexed": false },
+      { "name": "passed", "type": "bool", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "CaseStateTransitioned",
+    "inputs": [
+      { "name": "caseId", "type": "bytes32", "indexed": true },
+      { "name": "fromState", "type": "uint8", "indexed": false },
+      { "name": "toState", "type": "uint8", "indexed": false }
+    ]
+  }
+]
