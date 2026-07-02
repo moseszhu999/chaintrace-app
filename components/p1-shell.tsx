@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 
+import { getChainTraceMode, getConfiguredChainId, getConfiguredRegistryAddress } from "@/lib/contracts/p1-local-chain-mode";
 import {
   clearCurrentWallet,
   getCurrentUser,
@@ -26,6 +27,8 @@ export function P1Shell({ children, requiredRole }: P1ShellProps) {
   }, []);
 
   const user = useMemo(() => (cache ? getCurrentUser(cache) : null), [cache]);
+  const mode = getChainTraceMode();
+  const registryAddress = getConfiguredRegistryAddress();
 
   if (!cache) {
     return <main className="entry">Loading P1 workspace...</main>;
@@ -36,7 +39,7 @@ export function P1Shell({ children, requiredRole }: P1ShellProps) {
       <main className="entry">
         <section className="panel">
           <h1>Sign in required</h1>
-          <p>A mock wallet session is required before opening a role workspace.</p>
+          <p>A wallet session is required before opening a role workspace.</p>
           <Link className="button primary" href="/login">
             Go to login
           </Link>
@@ -75,6 +78,11 @@ export function P1Shell({ children, requiredRole }: P1ShellProps) {
           </span>
         </Link>
         <div className="toolbar">
+          <span className="badge info">Mode: {mode}</span>
+          {mode === "local-chain" ? <span className="badge info">Chain: {getConfiguredChainId()}</span> : null}
+          {mode === "local-chain" && registryAddress ? (
+            <span className="badge info">Registry: {registryAddress.slice(0, 8)}...{registryAddress.slice(-6)}</span>
+          ) : null}
           <span className="badge info">{user.walletAddress}</span>
           <span className="badge ok">Role locked</span>
           <button
@@ -98,8 +106,9 @@ export function P1Shell({ children, requiredRole }: P1ShellProps) {
           </Link>
           <div className="nav-label">Boundaries</div>
           <div className="notice">
-            P1.1 is frontend plus smart-contract registry. No server database,
-            raw document upload, real financing, or disbursement is enabled.
+            P1 is frontend plus smart-contract registry. Browser storage is only
+            draft/display cache. No server database, raw document upload, real
+            financing, or disbursement is enabled.
           </div>
         </aside>
         <main className="content">{children}</main>
