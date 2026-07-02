@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Trade Evidence Package</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="materials">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Trade evidence package</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Exporter</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span><span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span></div>
+    <div class="mode-switch"><button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button><button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button><button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">Exporter Flow</div>
+      <a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a>
+      <a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a>
+      <a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a>
+      <a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a>
+      <a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a>
+      <a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a>
+      <a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a>
+      <a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a>
+      <a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a>
+      <a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1 data-i18n="materials.heroTitle">Trade evidence is prepared as business evidence, not a file list.</h1><p data-i18n="materials.heroCopy">The exporter sees the core material package and what each document means for financing readiness.</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2 data-i18n="materials.sectionTitle">Evidence Package</h2><p class="section-sub" data-i18n="materials.sectionCopy">This page represents the exporter upload/register screen before Agent checks the package.</p></div><span class="badge warn">Conflict detected</span></div>
+        <div class="content grid-2">
+          <div class="card">
+            <div class="card-title"><span data-i18n="materials.uploaded">Uploaded Materials</span> <span class="badge info">Exporter source</span></div>
+            <div class="flow-form" style="margin-bottom:14px">
+              <div class="field"><label data-i18n="materials.type">Material type</label><select class="select"><option>Commercial invoice</option><option>Purchase contract</option><option>Purchase order</option><option>Packing list</option><option>Supplemental explanation</option></select></div>
+              <div class="field"><label data-i18n="materials.amount">Business amount</label><input class="input" value="128000" /></div>
+              <div class="field"><label data-i18n="materials.currency">Currency</label><select class="select"><option>USD</option><option>USDC</option><option>EUR</option><option>CNY</option></select></div>
+              <div class="field"><label data-i18n="materials.file">Upload file</label><input class="input" type="file" /></div>
+            </div>
+            <table class="table">
+              <thead><tr><th>Material</th><th>Status</th><th>Business use</th></tr></thead>
+              <tbody>
+                <tr><td>Purchase contract</td><td><span class="badge ok">Uploaded</span></td><td>Trade parties and terms.</td></tr>
+                <tr><td>Purchase order</td><td><span class="badge ok">Uploaded</span></td><td>Buyer purchase intent, USD 120,000.</td></tr>
+                <tr><td>Commercial invoice</td><td><span class="badge warn">Uploaded</span></td><td>Payment claim, USD 128,000.</td></tr>
+                <tr><td>Packing list</td><td><span class="badge ok">Uploaded</span></td><td>Quantity and packaging.</td></tr>
+                <tr><td>Inspection report</td><td><span class="badge">Not yet</span></td><td>Independent goods fact.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title"><span data-i18n="materials.agentPrecheck">Agent Pre-check</span> <span class="badge agent">Gap found</span></div>
+            <div class="notice warn"><strong data-i18n="materials.issue">Current issue:</strong> <span data-i18n="materials.issueText">commercial invoice amount is USD 128,000, while the purchase order amount is USD 120,000. The exporter must explain the difference before submission.</span></div>
+            <div class="field" style="margin-top:12px"><label data-i18n="materials.explanation">Exporter explanation draft</label><textarea class="textarea">The invoice includes USD 8,000 in expedited packaging and inspection-related charges agreed after the original purchase order.</textarea></div>
+            <ul class="list" style="margin-top:12px">
+              <li><span>Responsibility</span><span class="badge info">Exporter</span></li>
+              <li><span>Impact</span><span class="badge warn">Cannot submit yet</span></li>
+              <li><span>Required recovery</span><span class="badge info">Explanation or corrected invoice</span></li>
+            </ul>
+            <div class="action-row"><a class="action primary" href="exporter-agent-gap.html" data-i18n="materials.openTodo">Open Agent gap todo</a><a class="action disabled" href="#" data-i18n="materials.submitDisabled">Submit to review disabled</a></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

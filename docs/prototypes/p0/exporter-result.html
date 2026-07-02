@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Exporter Funding Result</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="result">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Funding result</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Exporter</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span><span class="chip">Agent <span class="strong" data-mode-label>Semi-auto</span></span></div>
+    <div class="mode-switch"><button class="mode-btn" data-agent-mode="Manual" data-i18n="mode.manual">Manual</button><button class="mode-btn" data-agent-mode="Semi-auto" data-i18n="mode.semi">Semi-auto</button><button class="mode-btn" data-agent-mode="Full-auto" data-i18n="mode.full">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="en">English</option><option value="zhHans">简体中文</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">Exporter Flow</div>
+      <a class="step-link" data-page-link="gate" href="index.html"><span class="step-index">0</span><span data-i18n="nav.gate">Wallet and role gate</span></a>
+      <a class="step-link" data-page-link="profile" href="exporter-profile.html"><span class="step-index">1</span><span data-i18n="nav.profile">Exporter profile</span></a>
+      <a class="step-link" data-page-link="dashboard" href="exporter-dashboard.html"><span class="step-index">2</span><span data-i18n="nav.dashboard">Exporter control tower</span></a>
+      <a class="step-link" data-page-link="new" href="exporter-case-new.html"><span class="step-index">3</span><span data-i18n="nav.new">Create financing intent</span></a>
+      <a class="step-link" data-page-link="materials" href="exporter-case-materials.html"><span class="step-index">4</span><span data-i18n="nav.materials">Trade evidence package</span></a>
+      <a class="step-link" data-page-link="gap" href="exporter-agent-gap.html"><span class="step-index">5</span><span data-i18n="nav.gap">Agent gap and todo</span></a>
+      <a class="step-link" data-page-link="inspection" href="exporter-inspection-status.html"><span class="step-index">6</span><span data-i18n="nav.inspection">Inspection status</span></a>
+      <a class="step-link" data-page-link="funding" href="exporter-funding-path.html"><span class="step-index">7</span><span data-i18n="nav.funding">Funding path</span></a>
+      <a class="step-link" data-page-link="execution" href="exporter-execution-check.html"><span class="step-index">8</span><span data-i18n="nav.execution">DeFi execution check</span></a>
+      <a class="step-link" data-page-link="result" href="exporter-result.html"><span class="step-index">9</span><span data-i18n="nav.result">Funding result</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1 data-i18n="result.heroTitle">Exporter sees the actual funding result and prior blockers.</h1><p data-i18n="result.heroCopy">This is where the exporter closes the loop: what amount was completed, what path was used, and which blockers were cleared or would stop the flow.</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Funding Result</h2><p class="section-sub">Completed is different from allowed, approved, review-ready, or pool-available.</p></div><span class="badge ok">Completed</span></div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="grid-4">
+              <div class="metric"><div class="label">Requested</div><div class="value">USD 96k</div></div>
+              <div class="metric"><div class="label">Funder allowed</div><div class="value">USD 92k</div></div>
+              <div class="metric"><div class="label">Executed</div><div class="value">USD 92k</div></div>
+              <div class="metric"><div class="label">Result</div><div class="value">Completed</div></div>
+            </div>
+            <div class="flow-form" style="margin-top:14px">
+              <div class="field"><label>Exporter decision on adjusted amount</label><select class="select"><option>Accept USD 92,000 completed amount</option><option>Request review for original USD 96,000</option><option>Close and create new case later</option></select></div>
+              <div class="field"><label>Case follow-up</label><select class="select"><option>Archive with funding summary</option><option>Keep open for post-funding tracking</option><option>Ask Agent to prepare report</option></select></div>
+            </div>
+            <div class="timeline">
+              <div class="node done"><span class="badge ok">Done</span><h3>Intent</h3><p>Financing request created.</p></div>
+              <div class="node done"><span class="badge ok">Done</span><h3>Materials</h3><p>Mismatch explained.</p></div>
+              <div class="node done"><span class="badge ok">Pass</span><h3>Inspection</h3><p>Independent fact submitted.</p></div>
+              <div class="node done"><span class="badge ok">Allowed</span><h3>Funder</h3><p>USD 92,000 allowed.</p></div>
+              <div class="node done"><span class="badge ok">Allowed</span><h3>DeFi Check</h3><p>Rule, pool, pause passed.</p></div>
+              <div class="node done"><span class="badge ok">Completed</span><h3>Result</h3><p>Funding execution completed.</p></div>
+            </div>
+            <div class="action-row"><a class="action primary" href="exporter-dashboard.html" data-i18n="action.backDashboard">Back to dashboard</a><a class="action" href="index.html">Return to role gate</a></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Agent Closing Summary <span class="badge agent" data-mode-label>Semi-auto</span></div>
+            <ul class="list">
+              <li><span>Material conflict</span><span class="badge ok">Resolved by exporter</span></li>
+              <li><span>Inspection</span><span class="badge ok">Pass</span></li>
+              <li><span>Funding decision</span><span class="badge ok">Allowed with reduced amount</span></li>
+              <li><span>Execution</span><span class="badge ok">Completed</span></li>
+            </ul>
+            <div class="field" style="margin-top:12px"><label>Exporter closing note</label><textarea class="textarea">Funding completed at USD 92,000 after funder reduction. Keep case summary available for finance records.</textarea></div>
+          </div>
+        </div>
+      </section>
+      <section class="section" id="exceptions">
+        <div class="section-head"><div><h2>Exporter-visible Exception States</h2><p class="section-sub">The same result page also shows how blockers are explained when the happy path does not complete.</p></div><span class="badge warn">Alternative outcomes</span></div>
+        <div class="content">
+          <div class="flow-form" style="margin-bottom:14px">
+            <div class="field"><label>Exception to inspect</label><select class="select"><option>Pool insufficient</option><option>Inspection dispute</option><option>Rule blocked</option><option>Platform paused</option><option>Need materials</option></select></div>
+            <div class="field"><label>Exporter response preference</label><select class="select"><option>Wait and receive updates</option><option>Ask Agent for next action</option><option>Escalate to funder</option><option>Close current case</option></select></div>
+          </div>
+          <table class="table">
+            <thead><tr><th>State</th><th>Exporter meaning</th><th>Responsible party</th><th>Recovery condition</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge warn">Need materials</span></td><td>More evidence or explanation is required.</td><td>Exporter or fact provider</td><td>Complete the Agent todo.</td></tr>
+              <tr><td><span class="badge bad">Inspection dispute</span></td><td>Goods fact is not clean enough for automatic progress.</td><td>Inspector / funder</td><td>Manual review or supplemental evidence.</td></tr>
+              <tr><td><span class="badge warn">Reduced</span></td><td>Funder allows less than requested.</td><td>Funder</td><td>Exporter accepts adjusted result or reworks case.</td></tr>
+              <tr><td><span class="badge bad">Pool insufficient</span></td><td>Approval exists, but pool cannot execute now.</td><td>Platform / funder</td><td>Pool recovers or case waits.</td></tr>
+              <tr><td><span class="badge bad">Rule blocked</span></td><td>Current rule does not allow execution.</td><td>Platform</td><td>Rule restored, exception handled, or case closed.</td></tr>
+              <tr><td><span class="badge bad">Platform paused</span></td><td>Automation and execution are stopped.</td><td>Platform</td><td>Platform resumes the affected object.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+  <script src="assets/p0-result-exceptions-i18n.js?v=result-exceptions1"></script>
+</body>
+</html>

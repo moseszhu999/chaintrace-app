@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Inspection Task Detail</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="inspector-task-detail">
+  <header class="topbar">
+    <a class="brand" href="inspector-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Inspection task detail</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Inspection provider</span></span><span class="chip">Task <span class="strong">INSP-P0-001</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="inspector-dashboard.html">队列</a><a class="mode-btn active" href="inspector-task-detail.html">任务详情</a><a class="mode-btn" href="inspector-evidence-submit.html">提交事实</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side"><div class="side-title">INSPECTION FLOW</div><a class="step-link" href="inspector-dashboard.html"><span class="step-index">0</span><span>质检任务队列</span></a><a class="step-link active" href="inspector-task-detail.html"><span class="step-index">1</span><span>任务详情</span></a><a class="step-link" href="inspector-evidence-submit.html"><span class="step-index">2</span><span>提交质检事实</span></a><a class="step-link" href="inspector-result.html"><span class="step-index">3</span><span>质检结论结果</span></a></aside>
+    <main class="main">
+      <section class="hero"><h1>质检员先看任务上下文，再决定能否接单。</h1><p>任务详情只给质检所需的货物和地点信息，不展示银行审批细节，也不展示出口商不必要的商业信息。</p></section>
+      <section class="section"><div class="section-head"><div><h2>Task INSP-P0-001</h2><p class="section-sub">检查 Pacific Export LLC 发往 Northstar Retail GmbH 的智能穿戴设备出货。</p></div><span class="badge info">assigned</span></div><div class="content main-grid"><div class="card"><div class="grid-3"><div class="metric"><div class="label">Location</div><div class="value">Long Beach</div></div><div class="metric"><div class="label">Quantity</div><div class="value">2,000</div></div><div class="metric"><div class="label">Priority</div><div class="value">Standard</div></div></div><table class="table" style="margin-top:16px"><thead><tr><th>Item</th><th>Expected</th><th>Check requirement</th></tr></thead><tbody><tr><td>Goods category</td><td>Smart wearable devices</td><td>确认货物类别与包装标签一致</td></tr><tr><td>Quantity</td><td>2,000 units</td><td>确认数量与装箱单一致</td></tr><tr><td>Packaging</td><td>Export cartons</td><td>确认外观和批次标记</td></tr><tr><td>Photos</td><td>Required</td><td>提交现场照片占位</td></tr></tbody></table></div><div class="card"><div class="card-title">Inspector decision <span class="badge warn">human owned</span></div><div class="flow-form" style="grid-template-columns:1fr"><div class="field"><label>Can accept task?</label><select class="select"><option>Accept task</option><option>Request clarification</option><option>Reject assignment</option></select></div><div class="field"><label>Inspector note</label><textarea class="textarea">Task scope is clear. Location and expected quantity are sufficient for field inspection.</textarea></div></div><div class="action-row"><a class="action" href="inspector-dashboard.html">Back to queue</a><a class="action primary" href="inspector-evidence-submit.html">Accept and continue</a></div></div></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

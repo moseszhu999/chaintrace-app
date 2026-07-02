@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Funder Transaction Result</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="funder-tx-result">
+  <header class="topbar">
+    <a class="brand" href="funder-pool-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Funder tx result</span></span></a>
+    <div class="chips"><span class="chip">Wallet <span class="strong">0xLP...9A1</span></span><span class="chip">Candidate <span class="strong">RFC-P0-001</span></span><span class="chip">Tx <span class="strong">simulated</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="funder-pool-dashboard.html">资金池</a><a class="mode-btn" href="funder-contract-console.html">合约交互</a><a class="mode-btn active" href="funder-tx-result.html">结果</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side"><div class="side-title">FUNDER CONTRACT FLOW</div><a class="step-link" href="funder-pool-dashboard.html"><span class="step-index">0</span><span>资金池控制台</span></a><a class="step-link" href="funder-contract-console.html"><span class="step-index">1</span><span>合约交互面板</span></a><a class="step-link active" href="funder-tx-result.html"><span class="step-index">2</span><span>模拟交易结果</span></a></aside>
+    <main class="main">
+      <section class="hero"><h1>资金方合约动作形成可追踪的资金承诺状态。</h1><p>P0 只展示交易预览和模拟结果，不弹出钱包，不发送真实交易。</p></section>
+      <section class="section"><div class="section-head"><div><h2>Transaction preview result</h2><p class="section-sub">这是产品原型中的模拟交易结果。</p></div><span class="badge ok">simulated success</span></div><div class="content main-grid"><div class="card"><div class="grid-4"><div class="metric"><div class="label">Action</div><div class="value">commit</div></div><div class="metric"><div class="label">Amount</div><div class="value">92k USDC</div></div><div class="metric"><div class="label">Candidate</div><div class="value">RFC-P0-001</div></div><div class="metric"><div class="label">Status</div><div class="value">Mocked</div></div></div><div class="timeline"><div class="node done"><span class="badge ok">Read</span><h3>Candidate</h3><p>候选对象 hash 已读取。</p></div><div class="node done"><span class="badge ok">Check</span><h3>Pool</h3><p>资金池余额满足预览条件。</p></div><div class="node current"><span class="badge warn">Mock</span><h3>Wallet tx</h3><p>P0 不弹出钱包，不发送交易。</p></div><div class="node done"><span class="badge info">Handoff</span><h3>Execution check</h3><p>后续页面读取模拟资金承诺状态。</p></div></div><div class="action-row"><a class="action" href="funder-contract-console.html">Back to contract</a><a class="action primary" href="exporter-execution-check.html">Open execution check</a></div></div><div class="card"><div class="card-title">P0 boundary <span class="badge bad">not on-chain</span></div><ul class="list"><li><span>No wallet popup</span><span class="badge bad">no</span></li><li><span>No ABI call</span><span class="badge bad">no</span></li><li><span>No token transfer</span><span class="badge bad">no</span></li><li><span>Contract-native UX</span><span class="badge ok">yes</span></li></ul></div></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

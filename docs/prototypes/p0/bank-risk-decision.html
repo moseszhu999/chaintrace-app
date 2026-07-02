@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Bank Risk Decision</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="bank-risk-decision">
+  <header class="topbar">
+    <a class="brand" href="bank-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Bank decision workspace</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Bank reviewer</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span><span class="chip">Decision <span class="strong">Draft</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="bank-dashboard.html">队列</a><a class="mode-btn" href="bank-case-review.html">证据核验</a><a class="mode-btn active" href="bank-risk-decision.html">审批</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">BANK REVIEW FLOW</div>
+      <a class="step-link" href="bank-dashboard.html"><span class="step-index">0</span><span>审单队列</span></a>
+      <a class="step-link" href="bank-case-review.html"><span class="step-index">1</span><span>案件详情与证据核验</span></a>
+      <a class="step-link active" href="bank-risk-decision.html"><span class="step-index">2</span><span>风险摘要与审批决策</span></a>
+      <a class="step-link" href="bank-decision-result.html"><span class="step-index">3</span><span>银行决策结果</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1>银行决策要看“为什么可以批、为什么要降额、哪里仍需人工负责”。</h1><p>ChainTrace 只把案件整理成可审状态。最终 Allow / Reduce / Return / Reject 都是银行人工决策，不由 Agent 自动执行。</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Risk and decision summary</h2><p class="section-sub">这一页把证据、质检、金额差异和建议动作合并成银行审批草稿。</p></div><span class="badge warn">human approval required</span></div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="grid-3">
+              <div class="metric"><div class="label">Requested</div><div class="value">USD 96k</div></div>
+              <div class="metric"><div class="label">Recommended</div><div class="value">USD 92k</div></div>
+              <div class="metric"><div class="label">Coverage note</div><div class="value">reduce</div></div>
+            </div>
+            <table class="table" style="margin-top:16px"><thead><tr><th>Check</th><th>Result</th><th>Bank meaning</th></tr></thead><tbody><tr><td>Exporter profile</td><td><span class="badge ok">usable</span></td><td>账户与业务资料可用于审单。</td></tr><tr><td>Evidence package</td><td><span class="badge ok">complete</span></td><td>核心材料已经足够进入审批。</td></tr><tr><td>PO / invoice gap</td><td><span class="badge warn">explained</span></td><td>差异有解释，但建议保留人工备注。</td></tr><tr><td>Inspection fact</td><td><span class="badge ok">pass</span></td><td>独立质检事实支持继续。</td></tr><tr><td>Execution readiness</td><td><span class="badge">pending</span></td><td>银行决策后再进入执行条件检查。</td></tr></tbody></table>
+          </div>
+          <div class="card">
+            <div class="card-title">Decision draft <span class="badge agent">reviewer edits</span></div>
+            <div class="flow-form" style="grid-template-columns:1fr">
+              <div class="field"><label>Decision type</label><select class="select"><option>Allow with reduced amount</option><option>Return for more material</option><option>Manual committee review</option><option>Reject case</option></select></div>
+              <div class="field"><label>Approved amount draft</label><input class="input" value="92000" /></div>
+              <div class="field"><label>Decision note</label><textarea class="textarea">Evidence package is readable. Invoice/PO difference is explained. Allow reduced amount subject to execution condition check.</textarea></div>
+            </div>
+            <div class="action-row"><a class="action" href="bank-case-review.html">Back to evidence</a><a class="action primary" href="bank-decision-result.html">Submit decision draft</a></div>
+          </div>
+        </div>
+      </section>
+      <section class="section"><div class="section-head"><div><h2>What the bank owns</h2><p class="section-sub">银行只对自己的审核结论负责，不拥有出口商材料和第三方质检事实。</p></div><span class="badge info">responsibility split</span></div><div class="content grid-3"><div class="card"><div class="card-title">银行负责</div><p>授信判断、金额调整、退回补件、人工升级和审批备注。</p></div><div class="card"><div class="card-title">出口商负责</div><p>贸易材料真实性、差异说明、补充文件和业务承诺。</p></div><div class="card"><div class="card-title">质检方负责</div><p>货物事实、质检结论和对应报告。</p></div></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

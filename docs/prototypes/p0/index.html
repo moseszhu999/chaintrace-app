@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Role Gate</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="gate">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Wallet role gate + enterprise demo control</span></span></a>
+  <div class="chips"><span class="chip">Wallet <span class="strong">0x8F...21A</span></span><span class="chip">Bound role <span class="strong">Exporter</span></span><span class="chip">P0 <span class="strong">static demo</span></span></div>
+  <div class="mode-switch" aria-label="Agent mode selector"><button class="mode-btn" data-agent-mode="Manual">Manual</button><button class="mode-btn" data-agent-mode="Semi-auto">Semi-auto</button><button class="mode-btn" data-agent-mode="Full-auto">Full-auto</button><select class="select lang-select" data-language-select aria-label="Language"><option value="zhHans">简体中文</option><option value="en">English</option><option value="zhHant">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <div class="side-title">Production Role Gate</div>
+    <a class="step-link active" href="index.html"><span class="step-index">0</span><span>钱包角色门禁</span></a>
+    <a class="step-link" href="exporter-dashboard.html"><span class="step-index">✓</span><span>当前钱包可进入：出口商</span></a>
+    <div class="side-title">Sales Close</div>
+    <a class="step-link" href="enterprise-demo-route.html"><span class="step-index">▶</span><span>3 / 8 / 15 分钟演示路线</span></a>
+    <a class="step-link" href="pilot-scope.html"><span class="step-index">ASK</span><span>Pilot Scope / Next Ask</span></a>
+    <div class="side-title">Core Product Layer</div>
+    <a class="step-link" href="proof-graph-dashboard.html"><span class="step-index">★</span><span>Proof Graph / 状态机</span></a>
+    <div class="side-title">Demo-only Role Switcher</div>
+    <a class="step-link" href="kyb-dashboard.html"><span class="step-index">K</span><span>KYB 合规验证</span></a>
+    <a class="step-link" href="oracle-dashboard.html"><span class="step-index">Q</span><span>Oracle 数据方</span></a>
+    <a class="step-link" href="bank-dashboard.html"><span class="step-index">B</span><span>银行审单视角</span></a>
+    <a class="step-link" href="buyer-dashboard.html"><span class="step-index">Y</span><span>买方确认视角</span></a>
+    <a class="step-link" href="physical-dashboard.html"><span class="step-index">P</span><span>仓库 / 港口 / 报关节点</span></a>
+    <a class="step-link" href="inspector-dashboard.html"><span class="step-index">I</span><span>质检方视角</span></a>
+    <a class="step-link" href="logistics-dashboard.html"><span class="step-index">L</span><span>物流方视角</span></a>
+    <a class="step-link" href="funder-pool-dashboard.html"><span class="step-index">F</span><span>资金方合约视角</span></a>
+    <a class="step-link" href="investor-dashboard.html"><span class="step-index">R</span><span>RWA 投资人视角</span></a>
+    <a class="step-link" href="settlement-dashboard.html"><span class="step-index">S</span><span>USDC 结算通道</span></a>
+    <a class="step-link" href="insurer-dashboard.html"><span class="step-index">N</span><span>保险方视角</span></a>
+    <a class="step-link" href="operator-dashboard.html"><span class="step-index">O</span><span>平台运营视角</span></a>
+    <a class="step-link" href="dispute-dashboard.html"><span class="step-index">D</span><span>争议处理台</span></a>
+    <a class="step-link" href="legal-dashboard.html"><span class="step-index">G</span><span>法务 / 仲裁证据包</span></a>
+    <a class="step-link" href="audit-dashboard.html"><span class="step-index">A</span><span>审计合规视角</span></a>
+  </aside>
+  <main class="main">
+    <section class="hero"><h1>ChainTrace P0：从角色门禁到 Pilot Ask 的企业销售演示。</h1><p>真实产品中，一个钱包只绑定一个业务角色。P0 首页同时提供销售路线、核心 Proof Graph、试点下一步和 demo-only 多角色入口。</p></section>
+    <section class="section"><div class="section-head"><div><h2>Sales Close Path</h2><p class="section-sub">先讲清楚，再收试点，不再让客户迷路。</p></div><span class="badge ok">sales-ready</span></div><div class="content grid-3"><div class="card"><div class="card-title">Enterprise Demo Route</div><p>按客户时间选择 3 / 8 / 15 分钟路线，所有路线都收束到 Proof Graph / Case State Machine。</p><div class="action-row"><a class="action primary" href="enterprise-demo-route.html">打开演示路线</a><a class="action" href="demo-executive-3min.html">3 分钟</a><a class="action" href="demo-operator-8min.html">8 分钟</a><a class="action" href="demo-full-15min.html">15 分钟</a></div></div><div class="card"><div class="card-title">Pilot Scope / Next Ask</div><p>客户看完 demo 后，明确要给什么样例、找哪两个联系人、两周交付什么、什么时候进入 P1。</p><div class="action-row"><a class="action primary" href="pilot-scope.html">打开试点范围</a><a class="action" href="pilot-inputs.html">输入清单</a><a class="action" href="pilot-next-ask.html">下一步行动</a></div></div><div class="card"><div class="card-title">Proof Graph / 状态机</div><p>核心产品层：读取 proof、计算 gate、输出 state explanation，明确为什么可以继续审核但不能放款。</p><div class="action-row"><a class="action primary" href="proof-graph-dashboard.html">打开 Proof Graph</a><a class="action" href="case-state-machine.html">状态机</a></div></div></div></section>
+    <section class="section"><div class="section-head"><div><h2>Production Role Gate</h2><p class="section-sub">生产逻辑：一个钱包 = 一个角色 = 一个工作台。当前钱包只允许进入出口商工作台。</p></div><span class="badge ok">production rule</span></div><div class="content main-grid"><div class="card"><div class="grid-3"><div class="metric"><div class="label">Wallet</div><div class="value">0x8F...21A</div></div><div class="metric"><div class="label">Bound role</div><div class="value">Exporter</div></div><div class="metric"><div class="label">Role mutable?</div><div class="value">No</div></div></div><div class="action-row"><a class="action primary" href="exporter-dashboard.html">进入出口商工作台</a><a class="action" href="exporter-profile.html">查看出口商资料</a></div></div><div class="card"><div class="card-title">真实权限边界</div><ul class="list"><li><span>不能进入银行审单</span><span class="badge bad">blocked</span></li><li><span>不能替买方确认付款义务</span><span class="badge bad">blocked</span></li><li><span>不能提交物流或质检事实</span><span class="badge bad">blocked</span></li><li><span>不能操作资金池或平台规则</span><span class="badge bad">blocked</span></li></ul></div></div></section>
+    <section class="section"><div class="section-head"><div><h2>Demo-only Role Switcher</h2><p class="section-sub">以下入口只用于企业销售演示。真实用户登录后不会看到跨角色入口。</p></div><span class="badge warn">demo only</span></div><div class="content grid-3"><div class="card"><div class="card-title">合规 / 金融 / 资本侧</div><div class="action-row"><a class="action" href="kyb-dashboard.html">KYB 合规验证</a><a class="action" href="oracle-dashboard.html">Oracle 数据方</a><a class="action" href="bank-dashboard.html">银行审单</a><a class="action" href="funder-pool-dashboard.html">资金方合约</a><a class="action" href="investor-dashboard.html">RWA 投资人</a><a class="action" href="insurer-dashboard.html">保险方</a><a class="action" href="settlement-dashboard.html">USDC 结算</a></div></div><div class="card"><div class="card-title">贸易 / 物理事实侧</div><div class="action-row"><a class="action" href="buyer-dashboard.html">买方确认</a><a class="action" href="physical-dashboard.html">仓库 / 港口 / 报关</a><a class="action" href="logistics-dashboard.html">物流方</a><a class="action" href="inspector-dashboard.html">质检方</a><a class="action" href="exporter-case-new.html">出口商融资意图</a></div></div><div class="card"><div class="card-title">运营 / 异常 / 审计侧</div><div class="action-row"><a class="action" href="operator-dashboard.html">平台运营</a><a class="action" href="dispute-dashboard.html">争议处理</a><a class="action" href="legal-dashboard.html">法务证据包</a><a class="action" href="audit-dashboard.html">审计合规</a></div></div></div></section>
+    <section class="section"><div class="section-head"><div><h2>P0 红线</h2><p class="section-sub">销售和试点都必须明确这些边界。</p></div><span class="badge bad">no execution</span></div><div class="content"><table class="table"><thead><tr><th>Area</th><th>P0 status</th><th>Meaning</th></tr></thead><tbody><tr><td>Wallet / chain</td><td><span class="badge bad">disabled</span></td><td>不真实签名、不写链、不发交易。</td></tr><tr><td>Funding / settlement</td><td><span class="badge bad">disabled</span></td><td>不真实放款、不转 USDC、不接银行清算。</td></tr><tr><td>KYB / insurance / legal / customs</td><td><span class="badge bad">mock only</span></td><td>不调用真实服务，不产生真实法律或保险责任。</td></tr><tr><td>Pilot</td><td><span class="badge warn">desensitized</span></td><td>只用脱敏样例验证 proof graph 和状态解释。</td></tr></tbody></table></div></section>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="assets/p0.js"></script>
+</body>
+</html>

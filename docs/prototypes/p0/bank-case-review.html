@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Bank Case Review</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="bank-case-review">
+  <header class="topbar">
+    <a class="brand" href="bank-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Bank case review</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Bank reviewer</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span><span class="chip">Status <span class="strong">Review-ready</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="bank-dashboard.html">队列</a><a class="mode-btn active" href="bank-case-review.html">证据核验</a><a class="mode-btn" href="bank-risk-decision.html">审批</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">BANK REVIEW FLOW</div>
+      <a class="step-link" href="bank-dashboard.html"><span class="step-index">0</span><span>审单队列</span></a>
+      <a class="step-link active" href="bank-case-review.html"><span class="step-index">1</span><span>案件详情与证据核验</span></a>
+      <a class="step-link" href="bank-risk-decision.html"><span class="step-index">2</span><span>风险摘要与审批决策</span></a>
+      <a class="step-link" href="bank-decision-result.html"><span class="step-index">3</span><span>银行决策结果</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1>银行先确认案件是否可审。</h1><p>本页把出口商材料、Agent 说明和第三方质检结论放在一个银行审单画面里。银行可以查看事实状态，但不能修改出口商材料或质检结论。</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Case CT-P0-EX-001</h2><p class="section-sub">Pacific Export LLC 对 Northstar Retail GmbH 的智能穿戴设备出货申请融资。</p></div><span class="badge ok">review-ready</span></div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="grid-4">
+              <div class="metric"><div class="label">Invoice</div><div class="value">USD 128k</div></div>
+              <div class="metric"><div class="label">PO amount</div><div class="value">USD 120k</div></div>
+              <div class="metric"><div class="label">Requested</div><div class="value">USD 96k</div></div>
+              <div class="metric"><div class="label">Suggested cap</div><div class="value">USD 92k</div></div>
+            </div>
+            <div class="timeline">
+              <div class="node done"><span class="badge ok">Ready</span><h3>合同</h3><p>贸易双方和付款条款已读取。</p></div>
+              <div class="node done"><span class="badge warn">Explained</span><h3>发票差异</h3><p>USD 8k 差异已有出口商说明。</p></div>
+              <div class="node done"><span class="badge ok">Pass</span><h3>质检事实</h3><p>第三方质检结论支持继续审核。</p></div>
+              <div class="node current"><span class="badge info">Bank review</span><h3>银行核验</h3><p>审核员确认材料是否足够进入决策。</p></div>
+            </div>
+          </div>
+          <div class="card"><div class="card-title">Agent 审单摘要 <span class="badge agent">advisory</span></div><ul class="list"><li><span>主要缺口</span><span class="badge ok">已解释</span></li><li><span>质检状态</span><span class="badge ok">Pass</span></li><li><span>金额建议</span><span class="badge warn">建议降额</span></li><li><span>人工关注</span><span class="badge warn">买方邮件证据</span></li></ul><p class="notice warn" style="margin-top:12px">Agent 只是审单辅助，不替代银行审批。</p></div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-head"><div><h2>Evidence checklist</h2><p class="section-sub">银行看到的是材料状态和业务含义，不展示底层 hash、钱包签名或链上交易。</p></div><span class="badge info">audit package</span></div>
+        <div class="content"><table class="table"><thead><tr><th>Evidence</th><th>Source</th><th>Bank meaning</th><th>Status</th></tr></thead><tbody><tr><td>Purchase contract</td><td>Exporter</td><td>确认贸易关系和付款条款</td><td><span class="badge ok">ready</span></td></tr><tr><td>Purchase order</td><td>Buyer / exporter</td><td>确认采购基准金额</td><td><span class="badge ok">ready</span></td></tr><tr><td>Commercial invoice</td><td>Exporter</td><td>付款请求高于 PO</td><td><span class="badge warn">explained</span></td></tr><tr><td>Inspection report</td><td>Inspection provider</td><td>独立货物事实</td><td><span class="badge ok">pass</span></td></tr></tbody></table><div class="action-row"><a class="action" href="bank-dashboard.html">Back to queue</a><a class="action primary" href="bank-risk-decision.html">Continue to decision</a></div></div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

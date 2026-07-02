@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Funder Contract Console</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="funder-contract-console">
+  <header class="topbar">
+    <a class="brand" href="funder-pool-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Contract interaction console</span></span></a>
+    <div class="chips"><span class="chip">Wallet <span class="strong">0xLP...9A1</span></span><span class="chip">Contract <span class="strong">0xPool...42</span></span><span class="chip">Network <span class="strong">Base Sepolia mock</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="funder-pool-dashboard.html">资金池</a><a class="mode-btn active" href="funder-contract-console.html">合约交互</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side"><div class="side-title">FUNDER CONTRACT FLOW</div><a class="step-link" href="funder-pool-dashboard.html"><span class="step-index">0</span><span>资金池控制台</span></a><a class="step-link active" href="funder-contract-console.html"><span class="step-index">1</span><span>合约交互面板</span></a><a class="step-link" href="funder-tx-result.html"><span class="step-index">2</span><span>模拟交易结果</span></a></aside>
+    <main class="main">
+      <section class="hero"><h1>资金方可以读合约状态，也可以准备写入动作。</h1><p>这页模拟类似 DEX / LP 的交互体验：读取候选资产、检查池子余额、提交资金承诺。P0 按钮只跳转到模拟结果，不调用真实合约。</p></section>
+      <section class="section"><div class="section-head"><div><h2>ReceivablePool contract</h2><p class="section-sub">把贸易融资候选对象当作 contract-readable asset candidate。</p></div><span class="badge warn">mock ABI</span></div><div class="content main-grid"><div class="card"><div class="card-title">Read methods <span class="badge ok">safe</span></div><table class="table"><thead><tr><th>Method</th><th>Input</th><th>Return</th></tr></thead><tbody><tr><td>getCandidate()</td><td>RFC-P0-001</td><td>hash 0xcand...77f</td></tr><tr><td>getEvidenceRoot()</td><td>RFC-P0-001</td><td>0xroot...91e</td></tr><tr><td>availableLiquidity()</td><td>0xPool...42</td><td>620,000 USDC</td></tr><tr><td>isPaused()</td><td>pool</td><td>false</td></tr></tbody></table></div><div class="card"><div class="card-title">Write actions <span class="badge warn">requires wallet</span></div><div class="flow-form" style="grid-template-columns:1fr"><div class="field"><label>Action</label><select class="select"><option>commitLiquidity(candidateId, amount)</option><option>allowCandidate(candidateId, cap)</option><option>withdrawUnusedLiquidity()</option><option>pausePool()</option></select></div><div class="field"><label>Candidate ID</label><input class="input" value="RFC-P0-001" /></div><div class="field"><label>Amount</label><input class="input" value="92000 USDC" /></div><div class="field"><label>Signer wallet</label><input class="input" value="0xLP...9A1" /></div></div><div class="notice warn" style="margin-top:12px"><strong>P0:</strong> This prepares a transaction preview only. No wallet popup, no ABI call, no real transfer.</div><div class="action-row"><a class="action" href="funder-pool-dashboard.html">Back to pool</a><a class="action primary" href="funder-tx-result.html">Preview transaction</a></div></div></div></section>
+      <section class="section"><div class="section-head"><div><h2>Contract event preview</h2><p class="section-sub">资金方关心的是合约事件和资金承诺状态。</p></div><span class="badge info">event model</span></div><div class="content"><pre class="notice" style="white-space:pre-wrap">event LiquidityCommitted(
+  candidateId: RFC-P0-001,
+  funder: 0xLP...9A1,
+  amount: 92000 USDC,
+  evidenceRoot: 0xroot...91e
+)</pre></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

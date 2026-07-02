@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Bank Review Result</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="bank-decision-result">
+  <header class="topbar">
+    <a class="brand" href="bank-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Bank review result</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Bank reviewer</span></span><span class="chip">Case <span class="strong">CT-P0-EX-001</span></span><span class="chip">P0 <span class="strong">static demo</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="bank-dashboard.html">队列</a><a class="mode-btn" href="bank-risk-decision.html">审批</a><a class="mode-btn active" href="bank-decision-result.html">结果</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">BANK REVIEW FLOW</div>
+      <a class="step-link" href="bank-dashboard.html"><span class="step-index">0</span><span>审单队列</span></a>
+      <a class="step-link" href="bank-case-review.html"><span class="step-index">1</span><span>案件详情与证据核验</span></a>
+      <a class="step-link" href="bank-risk-decision.html"><span class="step-index">2</span><span>风险摘要与审批决策</span></a>
+      <a class="step-link active" href="bank-decision-result.html"><span class="step-index">3</span><span>银行决策结果</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1>银行审单结果形成业务摘要。</h1><p>这一页只展示 P0 原型中的结果状态，不代表真实银行系统动作。</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Review result</h2><p class="section-sub">银行视角完成后，出口商流程只接收必要的业务摘要。</p></div><span class="badge ok">recorded</span></div>
+        <div class="content main-grid">
+          <div class="card">
+            <div class="grid-4"><div class="metric"><div class="label">Requested</div><div class="value">USD 96k</div></div><div class="metric"><div class="label">Bank cap</div><div class="value">USD 92k</div></div><div class="metric"><div class="label">Difference</div><div class="value">USD 4k</div></div><div class="metric"><div class="label">State</div><div class="value">Recorded</div></div></div>
+            <div class="timeline"><div class="node done"><span class="badge ok">Done</span><h3>材料</h3><p>核心材料可审。</p></div><div class="node done"><span class="badge ok">Pass</span><h3>质检</h3><p>第三方结论通过。</p></div><div class="node done"><span class="badge ok">Recorded</span><h3>银行摘要</h3><p>形成审核摘要。</p></div><div class="node current"><span class="badge info">Next</span><h3>出口商结果页</h3><p>出口商看到业务结果。</p></div></div>
+            <div class="action-row"><a class="action" href="bank-dashboard.html">返回银行队列</a><a class="action primary" href="exporter-result.html">打开出口商结果页</a></div>
+          </div>
+          <div class="card"><div class="card-title">银行内部备注 <span class="badge warn">人工负责</span></div><div class="field"><label>审核备注</label><textarea class="textarea">材料可读，差异已有说明，建议按较保守金额形成业务摘要。</textarea></div><div class="field" style="margin-top:12px"><label>出口商可见摘要</label><textarea class="textarea">资金方允许 USD 92,000，案件进入下一步业务状态。</textarea></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

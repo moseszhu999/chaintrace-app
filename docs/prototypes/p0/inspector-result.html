@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Inspection Result</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="inspector-result">
+  <header class="topbar">
+    <a class="brand" href="inspector-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Inspection result</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Inspection provider</span></span><span class="chip">Task <span class="strong">INSP-P0-001</span></span><span class="chip">Result <span class="strong">Pass</span></span></div>
+    <div class="mode-switch"><a class="mode-btn" href="inspector-dashboard.html">队列</a><a class="mode-btn" href="inspector-evidence-submit.html">提交事实</a><a class="mode-btn active" href="inspector-result.html">结果</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side"><div class="side-title">INSPECTION FLOW</div><a class="step-link" href="inspector-dashboard.html"><span class="step-index">0</span><span>质检任务队列</span></a><a class="step-link" href="inspector-task-detail.html"><span class="step-index">1</span><span>任务详情</span></a><a class="step-link" href="inspector-evidence-submit.html"><span class="step-index">2</span><span>提交质检事实</span></a><a class="step-link active" href="inspector-result.html"><span class="step-index">3</span><span>质检结论结果</span></a><div class="side-title">VISIBLE TO</div><a class="step-link" href="exporter-inspection-status.html"><span class="step-index">E</span><span>出口商质检状态</span></a><a class="step-link" href="bank-case-review.html"><span class="step-index">B</span><span>银行证据核验</span></a></aside>
+    <main class="main">
+      <section class="hero"><h1>质检结论成为一个独立事实节点。</h1><p>出口商和银行可以看到结论状态，但不能修改质检方提交的事实。P0 只表达状态传递，不做真实报告存证。</p></section>
+      <section class="section"><div class="section-head"><div><h2>Inspection result</h2><p class="section-sub">INSP-P0-001 已形成质检结论，并可被后续审核流程引用。</p></div><span class="badge ok">pass</span></div><div class="content main-grid"><div class="card"><div class="grid-4"><div class="metric"><div class="label">Goods</div><div class="value">Match</div></div><div class="metric"><div class="label">Quantity</div><div class="value">2,000</div></div><div class="metric"><div class="label">Packaging</div><div class="value">OK</div></div><div class="metric"><div class="label">Conclusion</div><div class="value">Pass</div></div></div><div class="timeline"><div class="node done"><span class="badge ok">Done</span><h3>Task accepted</h3><p>质检方接收任务。</p></div><div class="node done"><span class="badge ok">Done</span><h3>Field check</h3><p>货物类别和数量已确认。</p></div><div class="node done"><span class="badge ok">Pass</span><h3>Result</h3><p>质检结论支持继续审核。</p></div><div class="node current"><span class="badge info">Visible</span><h3>Handoff</h3><p>结果同步给出口商和银行视图。</p></div></div><div class="action-row"><a class="action" href="inspector-dashboard.html">返回质检队列</a><a class="action primary" href="exporter-inspection-status.html">查看出口商可见状态</a></div></div><div class="card"><div class="card-title">Inspector summary <span class="badge ok">submitted</span></div><div class="field"><label>Visible summary</label><textarea class="textarea">Goods category and quantity match the task information. Packaging condition is acceptable. Inspection conclusion: Pass.</textarea></div><ul class="list" style="margin-top:12px"><li><span>Exporter can see</span><span class="badge ok">status</span></li><li><span>Bank can see</span><span class="badge ok">fact summary</span></li><li><span>Platform can see</span><span class="badge info">handoff state</span></li></ul></div></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>

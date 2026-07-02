@@ -1,0 +1,15 @@
+public/
+.vercel/
+node_modules/
+.next/
+out/
+dist/
+coverage/
+artifacts/
+cache/
+types/
+deployments/
+*.tsbuildinfo
+.env
+.env.local
+.DS_Store

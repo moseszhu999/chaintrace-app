@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChainTrace P0 Control Tower Prototype V2</title>
+  <style>
+    :root {
+      --bg:#0b1120; --shell:#0f172a; --panel:#111827; --card:#172033; --soft:#1f2937;
+      --text:#e5e7eb; --muted:#94a3b8; --line:#334155; --blue:#38bdf8; --green:#34d399;
+      --amber:#fbbf24; --red:#fb7185; --purple:#a78bfa; --cyan:#22d3ee;
+      --radius:20px; --shadow:0 22px 60px rgba(0,0,0,.34);
+    }
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 15% -10%,rgba(56,189,248,.18),transparent 32%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .app{min-height:100vh;display:grid;grid-template-rows:auto 1fr}.top{position:sticky;top:0;z-index:10;background:rgba(11,17,32,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(148,163,184,.16)}
+    .top-inner{display:grid;grid-template-columns:280px 1fr auto;gap:18px;align-items:center;padding:16px 22px}.brand{display:flex;gap:12px;align-items:center;font-weight:850;letter-spacing:-.03em}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;box-shadow:var(--shadow)}
+    .sub{font-size:12px;color:var(--muted);font-weight:500}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip,.badge{border:1px solid rgba(148,163,184,.2);background:rgba(15,23,42,.62);border-radius:999px;padding:7px 10px;font-size:12px;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}.badge{padding:4px 8px;font-weight:800;font-size:11px}.ok{color:var(--green);border-color:rgba(52,211,153,.38)}.warn{color:var(--amber);border-color:rgba(251,191,36,.4)}.bad{color:var(--red);border-color:rgba(251,113,133,.4)}.info{color:var(--blue);border-color:rgba(56,189,248,.4)}.agent{color:var(--purple);border-color:rgba(167,139,250,.45)}.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--green)}
+    .workspace{display:grid;grid-template-columns:280px 1fr 360px;gap:18px;padding:18px}.rail,.panel{border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.72);border-radius:var(--radius);box-shadow:var(--shadow)}.rail{padding:16px;position:sticky;top:88px;align-self:start}.rail-title{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:10px 8px}
+    button{font:inherit}.tab,.scenario{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:var(--text);padding:12px;border-radius:14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}.tab:hover,.scenario:hover{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.24)}.tab.active,.scenario.active{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.45)}
+    .main{display:grid;gap:18px}.hero{border:1px solid rgba(148,163,184,.16);border-radius:28px;background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(167,139,250,.09)),rgba(15,23,42,.76);padding:24px;box-shadow:var(--shadow)}.hero h1{margin:0 0 8px;font-size:30px;letter-spacing:-.045em}.hero p{margin:0;color:var(--muted);line-height:1.65;max-width:1000px}
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{border:1px solid rgba(148,163,184,.16);background:rgba(23,32,51,.76);border-radius:18px;padding:16px}.label{font-size:12px;color:var(--muted);margin-bottom:6px}.value{font-size:20px;color:white;font-weight:850;letter-spacing:-.03em}.card h3{margin:0 0 10px;font-size:16px}.muted{color:var(--muted)}.small{font-size:12px;line-height:1.55}
+    .flow{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}.node{min-height:120px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.48);border-radius:18px;padding:12px;position:relative}.node.done{border-color:rgba(52,211,153,.46);background:rgba(52,211,153,.07)}.node.active{border-color:rgba(56,189,248,.72);background:rgba(56,189,248,.11)}.node.blocked{border-color:rgba(251,191,36,.62);background:rgba(251,191,36,.08)}.node.failed{border-color:rgba(251,113,133,.62);background:rgba(251,113,133,.08)}.node h4{margin:9px 0 6px;font-size:13px}.node p{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+    .split{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.list{display:grid;gap:10px;margin:0;padding:0;list-style:none}.list li{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid rgba(148,163,184,.13);background:rgba(15,23,42,.38);border-radius:14px;padding:11px 12px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(148,163,184,.13);padding:11px;text-align:left;vertical-align:top}.table th{color:var(--muted);font-size:12px;background:rgba(15,23,42,.42)}.notice{border-left:3px solid var(--blue);background:rgba(56,189,248,.08);padding:12px 14px;border-radius:0 14px 14px 0;line-height:1.55}.warning{border-left-color:var(--amber);background:rgba(251,191,36,.08)}.danger{border-left-color:var(--red);background:rgba(251,113,133,.08)}
+    .side{padding:16px;position:sticky;top:88px;align-self:start}.side-section{border-bottom:1px solid rgba(148,163,184,.12);padding:0 0 16px;margin-bottom:16px}.side-section:last-child{border-bottom:0;margin-bottom:0}.side h3{margin:0 0 12px;font-size:16px}.agent-item{border:1px solid rgba(167,139,250,.22);background:rgba(167,139,250,.08);border-radius:14px;padding:12px;margin-bottom:10px}.agent-item strong{color:white}.actions{display:flex;flex-wrap:wrap;gap:9px}.action{border:1px solid rgba(148,163,184,.22);background:rgba(15,23,42,.46);border-radius:12px;padding:10px 12px;color:var(--text);font-weight:750;font-size:12px}
+    .role-view{display:none}.role-view.active{display:block}.scenario-view{display:none}.scenario-view.active{display:block}.footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+    @media(max-width:1260px){.workspace{grid-template-columns:1fr}.rail,.side{position:static}.cards,.flow,.split{grid-template-columns:1fr}.top-inner{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}}
+    @media(max-width:720px){.workspace{padding:12px}.flow{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.hero h1{font-size:24px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand"><div class="logo">CT</div><div>ChainTrace P0<div class="sub">Interactive Control Tower Prototype V2</div></div></div>
+      <div class="chips">
+        <span class="chip"><span class="dot"></span>Wallet <strong>0xA7...42F1</strong></span>
+        <span class="chip">Role <strong id="topRole">Exporter</strong></span>
+        <span class="chip">Account <strong>Active</strong></span>
+        <span class="chip">Agent <strong>Semi-auto</strong></span>
+        <span class="chip">Path <strong id="topPath">Bank-assisted + DeFi check</strong></span>
+      </div>
+      <div class="sub">Static HTML · no API · no real wallet · no Solidity</div>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="rail">
+      <div class="rail-title">Role workspace</div>
+      <button class="tab active" data-role="exporter">Exporter <span class="badge ok">Core</span></button>
+      <button class="tab" data-role="funder">Funder <span class="badge info">Review</span></button>
+      <button class="tab" data-role="inspector">Inspector <span class="badge ok">Fact</span></button>
+      <button class="tab" data-role="platform">Platform <span class="badge warn">Ops</span></button>
+
+      <div class="rail-title">Scenario</div>
+      <button class="scenario active" data-scenario="normal">Normal funding <span class="badge ok">Completed</span></button>
+      <button class="scenario" data-scenario="material">Material gap <span class="badge warn">Need materials</span></button>
+      <button class="scenario" data-scenario="dispute">Inspection dispute <span class="badge bad">Escalate</span></button>
+      <button class="scenario" data-scenario="pool">Pool insufficient <span class="badge bad">Blocked</span></button>
+      <button class="scenario" data-scenario="pause">Platform paused <span class="badge bad">Stopped</span></button>
+
+      <div class="rail-title">Boundary</div>
+      <div class="card small muted">Agent output is always assistive. Funder decision, inspection conclusion, and contract state remain separate sources.</div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <h1 id="headline">Exporter Control Tower</h1>
+        <p id="headlineText">Exporter sees the full financing path from trade evidence to funding result, with Agent tasks and contract state explained in business language.</p>
+      </section>
+
+      <section class="cards">
+        <div class="card"><div class="label">Exporter</div><div class="value">Pacific Export LLC</div><div class="sub">Business role bound to wallet</div></div>
+        <div class="card"><div class="label">Buyer</div><div class="value">Northstar Retail GmbH</div><div class="sub">Cross-border buyer</div></div>
+        <div class="card"><div class="label">Invoice</div><div class="value">USD 128,000</div><div class="sub">Smart wearable shipment</div></div>
+        <div class="card"><div class="label">Funding result</div><div class="value" id="resultValue">Completed</div><div class="sub" id="resultText">Execution completed after rule and pool check.</div></div>
+      </section>
+
+      <section class="panel card">
+        <h3>Financing Control Flow</h3>
+        <div class="flow" id="flow">
+          <div class="node done"><span class="badge ok">Done</span><h4>Intent</h4><p>Exporter created financing intent.</p></div>
+          <div class="node done" id="nodeMaterials"><span class="badge ok">Complete</span><h4>Materials</h4><p>Contract, PO, invoice and packing list.</p></div>
+          <div class="node done" id="nodeAgent"><span class="badge agent">Checked</span><h4>Agent</h4><p>Gap and risk assistance.</p></div>
+          <div class="node done" id="nodeInspection"><span class="badge ok">Pass</span><h4>Inspection</h4><p>Inspection provider submitted fact.</p></div>
+          <div class="node done" id="nodeFunding"><span class="badge ok">Allowed</span><h4>Funder / DeFi</h4><p>Funding review or rule path.</p></div>
+          <div class="node done" id="nodeContract"><span class="badge ok">Allowed</span><h4>Contract</h4><p>Rule, pool and pause check.</p></div>
+          <div class="node done" id="nodeResult"><span class="badge ok">Completed</span><h4>Result</h4><p>Funding execution completed.</p></div>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="card role-view active" id="view-exporter">
+          <h3>Exporter Workspace</h3>
+          <ul class="list">
+            <li><span>Material package</span><span id="materialState" class="badge ok">Complete</span></li>
+            <li><span>Inspection fact</span><span id="inspectionState" class="badge ok">Pass</span></li>
+            <li><span>Funder decision</span><span id="funderState" class="badge ok">Allowed USD 92,000</span></li>
+            <li><span>Contract state</span><span id="contractState" class="badge ok">Completed</span></li>
+          </ul>
+          <div class="notice" id="exporterNotice"><strong>Exporter message:</strong> funding execution is completed. The result is final for this P0 scenario.</div>
+        </div>
+
+        <div class="card role-view" id="view-funder">
+          <h3>Funder Review Workspace</h3>
+          <table class="table">
+            <tr><th>Evidence</th><td id="funderEvidence">Materials complete; invoice mismatch resolved; inspection Pass.</td></tr>
+            <tr><th>Agent risk hint</th><td id="funderRisk">Moderate buyer concentration. No blocking dispute.</td></tr>
+            <tr><th>Decision</th><td>Allow financing · Reduce amount · Reject · Need materials · Manual review</td></tr>
+            <tr><th>Boundary</th><td>Funder cannot modify exporter materials or inspection conclusion.</td></tr>
+          </table>
+        </div>
+
+        <div class="card role-view" id="view-inspector">
+          <h3>Inspection Provider Workspace</h3>
+          <ul class="list">
+            <li><span>Assigned task</span><span class="badge ok">Smart wearable shipment</span></li>
+            <li><span>Evidence</span><span id="inspectorEvidence" class="badge ok">Report + photos submitted</span></li>
+            <li><span>Conclusion</span><span id="inspectorConclusion" class="badge ok">Pass</span></li>
+            <li><span>Boundary</span><span class="badge warn">Cannot approve funding</span></li>
+          </ul>
+        </div>
+
+        <div class="card role-view" id="view-platform">
+          <h3>Platform Operation Console</h3>
+          <ul class="list">
+            <li><span>Capital pool</span><span id="poolState" class="badge ok">Available</span></li>
+            <li><span>Rule state</span><span id="ruleState" class="badge ok">Active</span></li>
+            <li><span>Platform pause</span><span id="pauseState" class="badge ok">None</span></li>
+            <li><span>Agent automation</span><span id="automationState" class="badge ok">Running</span></li>
+          </ul>
+          <div class="notice warning" id="platformNotice"><strong>Ops boundary:</strong> platform can handle pool, rule, pause and execution failure, but cannot approve funding or forge facts.</div>
+        </div>
+
+        <div class="card">
+          <h3>Scenario Detail</h3>
+          <table class="table">
+            <tr><th>Status</th><td id="scenarioStatus"><span class="badge ok">Completed</span></td></tr>
+            <tr><th>Blocking reason</th><td id="blockingReason">None.</td></tr>
+            <tr><th>Responsible party</th><td id="responsibleParty">System execution record.</td></tr>
+            <tr><th>Next action</th><td id="nextAction">Archive and expose result to exporter.</td></tr>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <aside class="panel side">
+      <div class="side-section">
+        <h3>Agent Assist</h3>
+        <div class="agent-item"><strong id="agentSummaryTitle">Summary</strong><div class="small muted" id="agentSummary">Case completed after funder approval and contract execution check.</div></div>
+        <div class="agent-item"><strong id="agentTaskTitle">Next task</strong><div class="small muted" id="agentTask">No exporter action required.</div></div>
+        <div class="agent-item"><strong>Boundary</strong><div class="small muted">Agent cannot submit inspection conclusion, approve funding, bypass rules, or override platform pause.</div></div>
+      </div>
+      <div class="side-section">
+        <h3>Available business actions</h3>
+        <div class="actions" id="actions"><span class="action">View result</span><span class="action">Download audit trail</span><span class="action">Open case history</span></div>
+      </div>
+      <div class="side-section">
+        <h3>Why this is not old demo</h3>
+        <div class="small muted">Proof/hash can be added later as an evidence feature. The center here is financing control, role workspaces, Agent assistance, contract state and funding result.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  const roleCopy = {
+    exporter: ['Exporter Control Tower','Exporter sees the full financing path from trade evidence to funding result, with Agent tasks and contract state explained in business language.'],
+    funder: ['Funder Review Workspace','Funder reviews evidence, inspection facts and Agent risk hints, then decides without changing facts.'],
+    inspector: ['Inspection Fact Workspace','Inspection provider handles assigned tasks and submits Pass, Fail or Dispute as an external fact source.'],
+    platform: ['Platform Operation Console','Platform monitors exceptions, pool, rules, pause states and Agent automation without becoming the funding approver.']
+  };
+
+  const scenarios = {
+    normal: {result:'Completed', resultText:'Execution completed after rule and pool check.', status:'<span class="badge ok">Completed</span>', block:'None.', owner:'System execution record.', next:'Archive and expose result to exporter.', material:'Complete', materialClass:'badge ok', inspection:'Pass', inspectionClass:'badge ok', funder:'Allowed USD 92,000', contract:'Completed', contractClass:'badge ok', pool:'Available', rule:'Active', pause:'None', automation:'Running', agentSummary:'Case completed after funder approval and contract execution check.', agentTask:'No exporter action required.', notice:'funding execution is completed. The result is final for this P0 scenario.', node:'done' },
+    material: {result:'Waiting for materials', resultText:'Exporter must supplement invoice explanation.', status:'<span class="badge warn">Need materials</span>', block:'Invoice amount mismatch requires explanation.', owner:'Exporter', next:'Submit supplemental explanation, then re-run Agent gap check.', material:'Conflict detected', materialClass:'badge warn', inspection:'Not ready', inspectionClass:'badge warn', funder:'Waiting', contract:'Need materials', contractClass:'badge warn', pool:'Available', rule:'Active', pause:'None', automation:'Stopped by materials', agentSummary:'Agent found a material conflict before inspection and funding review.', agentTask:'Create exporter todo: explain invoice amount mismatch.', notice:'the case is waiting for material supplement. This is not a funding rejection.', node:'material' },
+    dispute: {result:'Need review', resultText:'Inspection dispute blocks low-human path.', status:'<span class="badge bad">Dispute</span>', block:'Inspection conclusion is disputed.', owner:'Inspector + Funder', next:'Manual review and supplemental inspection explanation.', material:'Complete', materialClass:'badge ok', inspection:'Dispute', inspectionClass:'badge bad', funder:'Manual review', contract:'Need review', contractClass:'badge bad', pool:'Available', rule:'Active', pause:'None', automation:'Stopped by dispute', agentSummary:'Agent stopped automation because inspection dispute cannot be adjudicated automatically.', agentTask:'Escalate to inspector and funder human review.', notice:'inspection dispute blocks automatic progress. Agent cannot裁决 dispute.', node:'dispute' },
+    pool: {result:'Pool insufficient', resultText:'Funder allowed financing, but capital pool cannot execute now.', status:'<span class="badge bad">Pool insufficient</span>', block:'Capital pool low balance.', owner:'Platform / Funder', next:'Restore pool, wait, or manually route funding path.', material:'Complete', materialClass:'badge ok', inspection:'Pass', inspectionClass:'badge ok', funder:'Allowed USD 92,000', contract:'Pool insufficient', contractClass:'badge bad', pool:'Low balance', rule:'Active', pause:'None', automation:'Stopped by pool', agentSummary:'Funding is allowed, but pool is insufficient. This is not rejection.', agentTask:'Create platform task: restore capital pool or choose manual route.', notice:'funder approval exists, but pool state blocks execution. Not completed.', node:'pool' },
+    pause: {result:'Platform paused', resultText:'Platform pause blocks execution and Agent automation.', status:'<span class="badge bad">Platform paused</span>', block:'Execution capability paused by platform.', owner:'Platform', next:'Resolve pause reason and re-run execution check.', material:'Complete', materialClass:'badge ok', inspection:'Pass', inspectionClass:'badge ok', funder:'Allowed USD 92,000', contract:'Platform paused', contractClass:'badge bad', pool:'Available', rule:'Active', pause:'Execution paused', automation:'Stopped by pause', agentSummary:'Platform pause is active. Agent automation must stop.', agentTask:'Wait for platform recovery condition.', notice:'platform pause stops execution and Agent automation. It cannot be bypassed.', node:'pause' }
+  };
+
+  function setRole(role){
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.role===role));
+    document.querySelectorAll('.role-view').forEach(v=>v.classList.toggle('active',v.id==='view-'+role));
+    document.getElementById('topRole').textContent = role[0].toUpperCase()+role.slice(1);
+    document.getElementById('headline').textContent = roleCopy[role][0];
+    document.getElementById('headlineText').textContent = roleCopy[role][1];
+  }
+
+  function setScenario(key){
+    const s=scenarios[key];
+    document.querySelectorAll('.scenario').forEach(b=>b.classList.toggle('active',b.dataset.scenario===key));
+    document.getElementById('resultValue').textContent=s.result;
+    document.getElementById('resultText').textContent=s.resultText;
+    document.getElementById('scenarioStatus').innerHTML=s.status;
+    document.getElementById('blockingReason').textContent=s.block;
+    document.getElementById('responsibleParty').textContent=s.owner;
+    document.getElementById('nextAction').textContent=s.next;
+    const material=document.getElementById('materialState'); material.textContent=s.material; material.className=s.materialClass;
+    const inspection=document.getElementById('inspectionState'); inspection.textContent=s.inspection; inspection.className=s.inspectionClass;
+    document.getElementById('funderState').textContent=s.funder;
+    const contract=document.getElementById('contractState'); contract.textContent=s.contract; contract.className=s.contractClass;
+    document.getElementById('poolState').textContent=s.pool;
+    document.getElementById('ruleState').textContent=s.rule;
+    document.getElementById('pauseState').textContent=s.pause;
+    document.getElementById('automationState').textContent=s.automation;
+    document.getElementById('agentSummary').textContent=s.agentSummary;
+    document.getElementById('agentTask').textContent=s.agentTask;
+    document.getElementById('exporterNotice').innerHTML='<strong>Exporter message:</strong> '+s.notice;
+    document.getElementById('funderEvidence').textContent = key==='material' ? 'Material conflict unresolved; funding review waits.' : 'Materials complete; invoice mismatch resolved; inspection '+s.inspection+'.';
+    document.getElementById('funderRisk').textContent = key==='dispute' ? 'Inspection dispute: do not approve automatically.' : key==='pool' ? 'Funding decision allowed, but pool execution is blocked.' : 'Moderate buyer concentration. No blocking dispute.';
+    document.getElementById('inspectorEvidence').textContent = key==='dispute' ? 'Supplement requested' : 'Report + photos submitted';
+    const ic=document.getElementById('inspectorConclusion'); ic.textContent=s.inspection; ic.className=s.inspectionClass;
+    ['nodeMaterials','nodeAgent','nodeInspection','nodeFunding','nodeContract','nodeResult'].forEach(id=>document.getElementById(id).className='node done');
+    if(key==='material'){document.getElementById('nodeMaterials').className='node blocked';document.getElementById('nodeAgent').className='node active';document.getElementById('nodeInspection').className='node';document.getElementById('nodeFunding').className='node';document.getElementById('nodeContract').className='node';document.getElementById('nodeResult').className='node';}
+    if(key==='dispute'){document.getElementById('nodeInspection').className='node failed';document.getElementById('nodeFunding').className='node blocked';document.getElementById('nodeContract').className='node';document.getElementById('nodeResult').className='node';}
+    if(key==='pool'){document.getElementById('nodeContract').className='node failed';document.getElementById('nodeResult').className='node blocked';}
+    if(key==='pause'){document.getElementById('nodeContract').className='node failed';document.getElementById('nodeResult').className='node blocked';}
+    if(key==='normal'){document.getElementById('nodeResult').className='node done';}
+  }
+
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setRole(b.dataset.role)));
+  document.querySelectorAll('.scenario').forEach(b=>b.addEventListener('click',()=>setScenario(b.dataset.scenario)));
+</script>
+</body>
+</html>
