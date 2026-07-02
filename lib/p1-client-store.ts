@@ -89,7 +89,7 @@ export function loadP1RegistryCache(): P1ContractRegistryCache {
     return cache;
   }
   try {
-    return { ...emptyRegistryCache(), ...JSON.parse(raw) } as P1ContractRegistryCache;
+    return parseP1RegistryCache(raw);
   } catch {
     const cache = emptyRegistryCache();
     saveP1RegistryCache(cache);
@@ -101,7 +101,25 @@ export function saveP1RegistryCache(cache: P1ContractRegistryCache): void {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.setItem(REGISTRY_CACHE_KEY, JSON.stringify(cache));
+  window.localStorage.setItem(REGISTRY_CACHE_KEY, serializeP1RegistryCache(cache));
+}
+
+export function serializeP1RegistryCache(cache: P1ContractRegistryCache): string {
+  return JSON.stringify(cache, (_key, value) => {
+    if (typeof value === "bigint") {
+      return value.toString();
+    }
+    return value;
+  });
+}
+
+export function parseP1RegistryCache(raw: string): P1ContractRegistryCache {
+  const parsed = { ...emptyRegistryCache(), ...JSON.parse(raw) } as P1ContractRegistryCache;
+  parsed.events = parsed.events.map((event) => ({
+    ...event,
+    blockNumber: BigInt(event.blockNumber)
+  })) as ChainTraceContractEvent[];
+  return parsed;
 }
 
 export function signInExistingWallet(walletAddress: string): string | null {
