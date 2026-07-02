@@ -15,8 +15,12 @@ import {
   RegisterMockUserInput,
   signInExistingWallet
 } from "@/lib/p1-client-store";
-import { waitForTransactionReceipt, writeContract, getContractEvents } from "@/lib/contracts/chainTraceP1Registry";
-import { DOCUMENT_KIND_TO_CONTRACT_VALUE, ROLE_TO_CONTRACT_VALUE } from "@/lib/contracts/p1-contract-values";
+import { waitForTransactionReceipt, writeContract, getContractEvents, readContract } from "@/lib/contracts/chainTraceP1Registry";
+import {
+  contractValueToRole,
+  DOCUMENT_KIND_TO_CONTRACT_VALUE,
+  ROLE_TO_CONTRACT_VALUE
+} from "@/lib/contracts/p1-contract-values";
 import { buildCaseSummariesFromEvents, buildOnChainCaseReadModel } from "@/lib/contracts/p1-event-read-model";
 import { getChainTraceMode, getConfiguredRegistryAddress, isLocalChainConfigured } from "@/lib/contracts/p1-local-chain-mode";
 import { buildDocumentProofPayload } from "@/lib/contracts/proof-payload";
@@ -94,7 +98,8 @@ export function createLocalChainAdapter(): P1RegistryAdapter {
     },
     async getRole(walletAddress) {
       assertLocalChainConfigured();
-      return displayCache.getRole(walletAddress);
+      const value = await readContract("roles", [walletAddress as `0x${string}`]);
+      return contractValueToRole(normalizeContractEnumValue(value));
     },
     async registerRole(input) {
       assertLocalChainConfigured();
@@ -192,4 +197,14 @@ function assertLocalChainConfigured(): void {
   if (!isLocalChainConfigured() || !getConfiguredRegistryAddress()) {
     throw new Error("LOCAL_CHAIN_REGISTRY_NOT_CONFIGURED");
   }
+}
+
+function normalizeContractEnumValue(value: unknown): number | bigint {
+  if (typeof value === "bigint" || typeof value === "number") {
+    return value;
+  }
+  if (typeof value === "string") {
+    return Number(value);
+  }
+  return 0;
 }
