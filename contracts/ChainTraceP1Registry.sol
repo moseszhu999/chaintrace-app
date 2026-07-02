@@ -53,7 +53,6 @@ contract ChainTraceP1Registry {
     event CaseCreated(bytes32 indexed caseId, address indexed creator, bytes32 caseCommitment);
     event DocumentProofAdded(
         bytes32 indexed caseId,
-        address indexed submitter,
         bytes32 documentHash,
         bytes32 metadataHash,
         DocumentKind kind
@@ -117,7 +116,7 @@ contract ChainTraceP1Registry {
             timestamp: block.timestamp
         }));
 
-        emit DocumentProofAdded(caseId, msg.sender, documentHash, metadataHash, kind);
+        emit DocumentProofAdded(caseId, documentHash, metadataHash, kind);
     }
 
     function recordGateEvaluation(bytes32 caseId, bytes32 gateHash, bool passed) external {
