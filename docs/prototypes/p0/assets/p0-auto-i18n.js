@@ -38,6 +38,7 @@
     add("p0auditrail", "assets/p0-audit-rail.js?v=auditrail1");
     add("p0settlementrail", "assets/p0-settlement-rail.js?v=settlementrail1");
     add("p0settlementcrypto", "assets/p0-settlement-crypto-rail.js?v=settlementcrypto1");
+    add("p0insurerrail", "assets/p0-insurer-rail.js?v=insurerrail1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
