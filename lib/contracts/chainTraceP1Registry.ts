@@ -1,9 +1,13 @@
-import { createPublicClient, http, parseAbiItem } from "viem";
+import { createPublicClient, createWalletClient, custom, http, parseAbiItem } from "viem";
 import { hardhat, mainnet, sepolia } from "viem/chains";
 
 import chainTraceP1RegistryAbi from "@/lib/contracts/abi/ChainTraceP1Registry.json";
 
 export const CHAINTRACE_P1_REGISTRY_ABI = chainTraceP1RegistryAbi;
+
+interface BrowserProvider {
+  request(args: { method: string; params?: unknown[] }): Promise<unknown>;
+}
 
 export function getConfiguredRegistryAddress(): `0x${string}` | null {
   const address = process.env.NEXT_PUBLIC_CHAINTRACE_REGISTRY_ADDRESS;
@@ -26,6 +30,26 @@ export function createChainTracePublicClient() {
     chain,
     transport: http(getConfiguredRpcUrl())
   });
+}
+
+export function getBrowserProvider(): BrowserProvider | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return (window as unknown as { ethereum?: BrowserProvider }).ethereum ?? null;
+}
+
+export async function connectWallet(): Promise<`0x${string}`> {
+  const provider = getBrowserProvider();
+  if (!provider) {
+    throw new Error("BROWSER_WALLET_NOT_AVAILABLE");
+  }
+  const accounts = await provider.request({ method: "eth_requestAccounts" });
+  const account = Array.isArray(accounts) ? accounts[0] : null;
+  if (typeof account !== "string" || !account.startsWith("0x")) {
+    throw new Error("BROWSER_WALLET_ACCOUNT_NOT_FOUND");
+  }
+  return account as `0x${string}`;
 }
 
 export async function readContract(functionName: string, args: unknown[] = []) {
@@ -58,10 +82,29 @@ export async function getContractEvents(fromBlock: bigint = 0n) {
   });
 }
 
-export async function writeContract(): Promise<never> {
-  throw new Error("BROWSER_WALLET_WRITE_NOT_CONFIGURED");
+export async function writeContract(functionName: string, args: unknown[] = []) {
+  const address = getConfiguredRegistryAddress();
+  const provider = getBrowserProvider();
+  if (!address) {
+    throw new Error("CHAINTRACE_REGISTRY_ADDRESS_NOT_CONFIGURED");
+  }
+  if (!provider) {
+    throw new Error("BROWSER_WALLET_NOT_AVAILABLE");
+  }
+  const account = await connectWallet();
+  const client = createWalletClient({
+    chain: hardhat,
+    transport: custom(provider)
+  });
+  return client.writeContract({
+    address,
+    abi: CHAINTRACE_P1_REGISTRY_ABI,
+    functionName,
+    args,
+    account
+  });
 }
 
-export async function waitForTransactionReceipt(): Promise<never> {
-  throw new Error("BROWSER_WALLET_WRITE_NOT_CONFIGURED");
+export async function waitForTransactionReceipt(hash: `0x${string}`) {
+  return createChainTracePublicClient().waitForTransactionReceipt({ hash });
 }
