@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ChainTrace P0 Enterprise Sales Demo V8</title>
+<style>
+:root {
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef4f7;
+  --ink: #101828;
+  --muted: #667085;
+  --line: #d0d5dd;
+  --teal: #0f766e;
+  --blue: #026aa2;
+  --indigo: #3538cd;
+  --green: #039855;
+  --amber: #b54708;
+  --red: #b42318;
+  --shadow: 0 18px 48px rgba(16, 24, 40, 0.12);
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button { font: inherit; }
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+.top-inner {
+  display: grid;
+  grid-template-columns: 280px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 850;
+}
+.mark {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: white;
+  letter-spacing: 0;
+}
+.sub, .muted { color: var(--muted); }
+.sub { font-size: 12px; line-height: 1.45; }
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip, .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.badge {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 760;
+}
+.ok { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+.info { color: var(--blue); border-color: #b9e6fe; background: #f0f9ff; }
+.agent { color: var(--indigo); border-color: #c7d7fe; background: #eef4ff; }
+.warn { color: var(--amber); border-color: #fedf89; background: #fffaeb; }
+.bad { color: var(--red); border-color: #fecdca; background: #fef3f2; }
+.shell {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+  gap: 18px;
+  padding: 18px;
+}
+.panel, .section, .metric, .value-card, .node, .close-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+.left, .right {
+  position: sticky;
+  top: 78px;
+  align-self: start;
+  padding: 14px;
+}
+.main {
+  display: grid;
+  gap: 18px;
+}
+.eyebrow {
+  margin: 10px 4px 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.nav-button {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  padding: 11px 12px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+}
+.nav-button:hover { border-color: #98a2b3; background: #f9fafb; }
+.nav-button.active {
+  border-color: var(--teal);
+  background: #f0fdfa;
+}
+.small-label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) 0.75fr;
+  gap: 18px;
+  padding: 22px;
+  background: #111827;
+  color: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+h1, h2, h3, h4, p { margin-top: 0; }
+h1 {
+  margin-bottom: 10px;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+h2 { margin-bottom: 10px; font-size: 20px; }
+h3 { margin-bottom: 10px; font-size: 16px; }
+h4 { margin-bottom: 7px; font-size: 13px; }
+p { line-height: 1.55; }
+.hero p { color: #d0d5dd; margin-bottom: 0; }
+.hero-aside {
+  display: grid;
+  gap: 10px;
+}
+.hero-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 13px;
+}
+.hero-line:last-child { border-bottom: 0; }
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.metric { padding: 14px; min-height: 116px; }
+.metric strong {
+  display: block;
+  margin: 6px 0 4px;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.section { padding: 18px; }
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+  gap: 18px;
+}
+.flow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 9px;
+}
+.node {
+  min-height: 126px;
+  padding: 12px;
+  background: #fbfcfd;
+}
+.node.active {
+  border-color: var(--teal);
+  background: #f0fdfa;
+  box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.22);
+}
+.node.done {
+  border-color: #75e0a7;
+  background: #f6fef9;
+}
+.node.blocked {
+  border-color: #fedf89;
+  background: #fffaeb;
+}
+.node p, .value-card p, .close-box p {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 0;
+}
+.deal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.deal-line {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px;
+  background: #fbfcfd;
+}
+.deal-line b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.value-card {
+  padding: 14px;
+  min-height: 176px;
+}
+.value-card.active {
+  border-color: var(--indigo);
+  box-shadow: inset 0 0 0 1px rgba(53, 56, 205, 0.18);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table th, .table td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.table th {
+  color: var(--muted);
+  width: 34%;
+  background: #fbfcfd;
+}
+.close-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.close-box {
+  padding: 14px;
+  min-height: 154px;
+}
+.note {
+  border-left: 3px solid var(--teal);
+  background: #f0fdfa;
+  padding: 12px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.warning-note {
+  border-left-color: var(--amber);
+  background: #fffaeb;
+}
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.action {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 720;
+}
+.action:hover { border-color: var(--teal); color: var(--teal); }
+.log {
+  display: grid;
+  gap: 8px;
+  max-height: 230px;
+  overflow: auto;
+}
+.log div {
+  border-left: 2px solid var(--blue);
+  padding: 4px 0 4px 9px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eaecf0;
+}
+.progress span {
+  display: block;
+  width: 20%;
+  height: 100%;
+  background: var(--teal);
+}
+@media (max-width: 1280px) {
+  .shell { grid-template-columns: 1fr; }
+  .left, .right { position: static; }
+  .top-inner, .hero, .split { grid-template-columns: 1fr; }
+  .metrics, .value-grid, .close-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .shell { padding: 12px; }
+  .top-inner { padding: 12px; }
+  h1 { font-size: 26px; }
+  .metrics, .value-grid, .close-grid, .flow, .deal-grid, .actions { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="mark">CT</div>
+      <div>
+        ChainTrace P0
+        <div class="sub">Enterprise Sales Demo Prototype V8</div>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip">Route <b id="routeTop">3-minute pitch</b></span>
+      <span class="chip">Stage <b id="stageTop">1 / 5</b></span>
+      <span class="chip">Center <b>Financing control tower</b></span>
+      <span class="chip">Result <b id="resultTop">Preparing</b></span>
+    </div>
+    <div class="sub">Static HTML only. No API, wallet, database, chain transaction, ABI or Solidity.</div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="panel left">
+    <div class="eyebrow">Demo route</div>
+    <button class="nav-button route active" data-route="short">
+      <span>3-minute pitch<span class="small-label">Problem, control tower, close ask</span></span>
+      <span class="badge info">Fast</span>
+    </button>
+    <button class="nav-button route" data-route="standard">
+      <span>8-minute product demo<span class="small-label">Walk through case, roles, blockers</span></span>
+      <span class="badge ok">Default</span>
+    </button>
+    <button class="nav-button route" data-route="deep">
+      <span>15-minute deep dive<span class="small-label">Execution guard, boundaries, pilot scope</span></span>
+      <span class="badge warn">Detail</span>
+    </button>
+
+    <div class="eyebrow">Storyboard</div>
+    <button class="nav-button step active" data-step="0">
+      <span>1. Enterprise pain<span class="small-label">Material back-and-forth blocks funding</span></span>
+      <span class="badge bad">Gap</span>
+    </button>
+    <button class="nav-button step" data-step="1">
+      <span>2. Case starts<span class="small-label">Exporter intent plus trade materials</span></span>
+      <span class="badge info">Intent</span>
+    </button>
+    <button class="nav-button step" data-step="2">
+      <span>3. Facts and review<span class="small-label">Agent gap check, inspection, funder review</span></span>
+      <span class="badge agent">Assist</span>
+    </button>
+    <button class="nav-button step" data-step="3">
+      <span>4. Execution guard<span class="small-label">Rule, pool, pause and path readiness</span></span>
+      <span class="badge warn">Guard</span>
+    </button>
+    <button class="nav-button step" data-step="4">
+      <span>5. Pilot close<span class="small-label">Why now, why ChainTrace, next ask</span></span>
+      <span class="badge ok">Close</span>
+    </button>
+
+    <div class="eyebrow">P0 boundary</div>
+    <div class="note warning-note">
+      Allowed is not Completed. Funder approved is not funded. Inspection Pass is not funding approval. The demo closes only when the funding result is Completed.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div>
+        <span class="badge ok">Agent Native + Crypto Native Control Tower</span>
+        <h1 id="headline">Enterprise trade finance loses time because every fact lives somewhere else.</h1>
+        <p id="heroCopy">ChainTrace turns one financing case into a shared operating view: evidence gaps, inspection facts, funder review, execution conditions, Agent actions, blockers and funding result.</p>
+      </div>
+      <div class="hero-aside">
+        <div class="hero-line"><span>Case</span><b>CT-P0-AR-001</b></div>
+        <div class="hero-line"><span>Exporter</span><b>Vietnam Components Co.</b></div>
+        <div class="hero-line"><span>Financing ask</span><b>USD 96,000</b></div>
+        <div class="hero-line"><span>Route emphasis</span><b id="routeFocus">Executive wedge</b></div>
+      </div>
+    </section>
+
+    <section class="metrics">
+      <div class="metric">
+        <span class="badge info">Customer</span>
+        <strong id="metricCustomer">Fewer loops</strong>
+        <div class="sub">Reduce material back-and-forth before review.</div>
+      </div>
+      <div class="metric">
+        <span class="badge ok">Funder</span>
+        <strong id="metricFunder">Review-ready</strong>
+        <div class="sub">Pre-review package and source boundaries.</div>
+      </div>
+      <div class="metric">
+        <span class="badge warn">Operator</span>
+        <strong id="metricOperator">Blocker owner</strong>
+        <div class="sub">Every pause, rule or pool issue has an owner.</div>
+      </div>
+      <div class="metric">
+        <span class="badge agent">Investor</span>
+        <strong id="metricInvestor">Case graph</strong>
+        <div class="sub">Workflow wedge toward supply-chain fact data.</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Live financing control tower</h2>
+      <div class="flow">
+        <div class="node active" id="node0">
+          <span class="badge bad">Pain</span>
+          <h4>Scattered materials</h4>
+          <p>Exporter, buyer, inspector and funder each hold partial facts.</p>
+        </div>
+        <div class="node" id="node1">
+          <span class="badge info">Intent</span>
+          <h4>Financing case</h4>
+          <p>Exporter opens one receivable financing request.</p>
+        </div>
+        <div class="node" id="node2">
+          <span class="badge agent">Agent</span>
+          <h4>Gap check</h4>
+          <p>Agent summarizes gaps and creates role-owned tasks.</p>
+        </div>
+        <div class="node" id="node3">
+          <span class="badge ok">Facts</span>
+          <h4>Inspection and review</h4>
+          <p>Inspection fact supports review but does not approve funding.</p>
+        </div>
+        <div class="node" id="node4">
+          <span class="badge warn">Execution</span>
+          <h4>Rule, pool, pause</h4>
+          <p>Contract state guards execution without judging trade truth.</p>
+        </div>
+        <div class="node" id="node5">
+          <span class="badge ok">Result</span>
+          <h4>Funding completed</h4>
+          <p>Completed is the final funding result, not just Allowed.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="split">
+      <div class="section">
+        <h2 id="workspaceTitle">Enterprise sales angle</h2>
+        <div class="deal-grid">
+          <div class="deal-line">
+            <b>Business question</b>
+            <span class="sub" id="businessQuestion">Can this receivable become a review-ready financing case?</span>
+          </div>
+          <div class="deal-line">
+            <b>Current blocker</b>
+            <span class="sub" id="currentBlocker">Trade materials are scattered across email, PDFs and manual checks.</span>
+          </div>
+          <div class="deal-line">
+            <b>Responsible owner</b>
+            <span class="sub" id="owner">Exporter and Agent assist.</span>
+          </div>
+          <div class="deal-line">
+            <b>Next action</b>
+            <span class="sub" id="nextAction">Create a ChainTrace case and run material gap check.</span>
+          </div>
+        </div>
+        <div class="note" style="margin-top: 12px" id="talkTrack">
+          Open with the operational problem: no party has one clean view of readiness, responsibility and funding result.
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Route-specific talk track</h2>
+        <table class="table">
+          <tr><th>Primary buyer</th><td id="primaryBuyer">Exporter leadership, funder innovation team, platform operator.</td></tr>
+          <tr><th>Proof point</th><td id="proofPoint">A real case room links materials, facts, review, execution guards and funding state.</td></tr>
+          <tr><th>Close</th><td id="closeLine">Ask for a bounded pilot around one trade corridor and one receivable workflow.</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Value panels by stakeholder</h2>
+      <div class="value-grid">
+        <div class="value-card active" id="valueExporter">
+          <span class="badge info">Exporter / Customer</span>
+          <h3>Less blind chasing</h3>
+          <p>Reduce material back-and-forth, show why funding is blocked, and make the next owner visible.</p>
+        </div>
+        <div class="value-card" id="valueFunder">
+          <span class="badge ok">Funder / Bank</span>
+          <h3>Cleaner pre-review</h3>
+          <p>See evidence completeness, risk hints, inspection source and audit trail before committing review time.</p>
+        </div>
+        <div class="value-card" id="valueOperator">
+          <span class="badge warn">Platform / Operator</span>
+          <h3>Operational blocker control</h3>
+          <p>Track pool availability, rule version, platform pause, owner assignment and recovery condition.</p>
+        </div>
+        <div class="value-card" id="valueInvestor">
+          <span class="badge agent">Investor</span>
+          <h3>Workflow wedge and data moat</h3>
+          <p>Start with a painful financing workflow and compound a role-based case graph over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Demo close screen</h2>
+      <div class="close-grid">
+        <div class="close-box">
+          <span class="badge bad">Why now</span>
+          <h3>Trade finance needs explainable automation</h3>
+          <p>SMEs need faster preparation while funders need clearer source boundaries and auditability.</p>
+        </div>
+        <div class="close-box">
+          <span class="badge info">Why ChainTrace</span>
+          <h3>Control tower, not a vault</h3>
+          <p>The product joins case state, Agent actions, facts, review, execution conditions and funding result.</p>
+        </div>
+        <div class="close-box">
+          <span class="badge warn">P0 pilot scope</span>
+          <h3>One corridor, one workflow</h3>
+          <p>Exporter intent, trade materials, Agent gap check, inspection fact, funder review and execution readiness.</p>
+        </div>
+        <div class="close-box">
+          <span class="badge ok">Next pilot ask</span>
+          <h3>Run 5 to 10 cases</h3>
+          <p>Validate readiness speed, blocker clarity, review package quality and final funding-state explanation.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="panel right">
+    <div class="eyebrow">Speaker note</div>
+    <div class="note" id="speakerNote">
+      Start from the buyer problem. ChainTrace is useful before deep integrations because it organizes the financing case.
+    </div>
+
+    <div class="eyebrow">Objection answer</div>
+    <div class="note warning-note" id="objection">
+      This is not a chatbot and not a proof/hash homepage. Agent assists the workflow; proof can support evidence later.
+    </div>
+
+    <div class="eyebrow">Presenter actions</div>
+    <div class="actions">
+      <button class="action" data-action="Show material gap">Show gap</button>
+      <button class="action" data-action="Explain owner">Explain owner</button>
+      <button class="action" data-action="Show execution guard">Show guard</button>
+      <button class="action" data-action="Close pilot ask">Close ask</button>
+    </div>
+
+    <div class="eyebrow">Progress</div>
+    <div class="progress"><span id="progressBar"></span></div>
+
+    <div class="eyebrow">Live demo log</div>
+    <div class="log" id="logBox">
+      <div>Demo ready. Choose route and storyboard stage.</div>
+    </div>
+
+    <div class="eyebrow">Hard boundary</div>
+    <div class="sub">
+      No real API, wallet connection, database write, Solidity, ABI, chain transaction, production auth, funding execution or platform approval backend is included in this prototype.
+    </div>
+  </aside>
+</div>
+
+<script>
+const routes = {
+  short: {
+    label: "3-minute pitch",
+    focus: "Executive wedge",
+    buyer: "Exporter founder, bank sponsor, investor partner.",
+    proof: "One screen shows readiness, blocker, owner, next action and result.",
+    close: "Ask for a fast pilot with one corridor and a small case set."
+  },
+  standard: {
+    label: "8-minute product demo",
+    focus: "Product workflow",
+    buyer: "Exporter operations, funder reviewer, platform operator.",
+    proof: "Walk from intent to materials, Agent gap check, inspection fact, review and execution readiness.",
+    close: "Ask for a pilot that measures preparation time, review package quality and blocker clarity."
+  },
+  deep: {
+    label: "15-minute deep dive",
+    focus: "Boundary and pilot detail",
+    buyer: "Risk, compliance, product, operations and venture stakeholders.",
+    proof: "Separate fact sources, Agent permissions, funder decision, contract guardrails and funding result semantics.",
+    close: "Ask for 5 to 10 controlled cases with clear roles, manual fallback and no real fund movement in prototype."
+  }
+};
+
+const stages = [
+  {
+    headline: "Enterprise trade finance loses time because every fact lives somewhere else.",
+    copy: "ChainTrace turns one financing case into a shared operating view: evidence gaps, inspection facts, funder review, execution conditions, Agent actions, blockers and funding result.",
+    result: "Preparing",
+    question: "Can this receivable become a review-ready financing case?",
+    blocker: "Trade materials are scattered across email, PDFs and manual checks.",
+    owner: "Exporter and Agent assist.",
+    action: "Create a ChainTrace case and run material gap check.",
+    talk: "Open with the operational problem: no party has one clean view of readiness, responsibility and funding result.",
+    note: "Start from the buyer problem. ChainTrace is useful before deep integrations because it organizes the financing case.",
+    objection: "This is not a chatbot and not a proof/hash homepage. Agent assists the workflow; proof can support evidence later.",
+    activeValue: "valueExporter",
+    activeNode: 0
+  },
+  {
+    headline: "The exporter starts from financing intent, not from a wallet demo.",
+    copy: "The case begins with buyer, invoice, requested amount, expected settlement and uploaded trade materials. The control tower keeps the financing goal visible.",
+    result: "Need materials",
+    question: "What must be complete before a funder or DeFi path can evaluate the case?",
+    blocker: "Invoice value and packing list quantity need explanation before review.",
+    owner: "Exporter.",
+    action: "Submit supplemental explanation without overwriting original materials.",
+    talk: "Show that P0 is a financing case workflow. Materials complete is still not funding success.",
+    note: "The exporter sees what is missing and why it blocks readiness, not just a file upload list.",
+    objection: "No wallet connection is required in this prototype. Single wallet single role remains a boundary for later implementation.",
+    activeValue: "valueExporter",
+    activeNode: 1
+  },
+  {
+    headline: "Agent, inspection and funder review stay in separate lanes.",
+    copy: "Agent detects gaps and recommends next actions. Inspection provides independent goods facts. Funder review can allow financing, but Allowed still is not Completed.",
+    result: "Allowed",
+    question: "Which facts support review and which party is allowed to create them?",
+    blocker: "Execution has not run; funder allowance is not final funding.",
+    owner: "Funder, inspector and execution layer.",
+    action: "Confirm inspection source and review conditions before execution check.",
+    talk: "This is where credibility comes from: Agent cannot forge evidence, inspector owns inspection fact, funder owns review.",
+    note: "Emphasize separation: Inspection Pass supports review but does not approve funding.",
+    objection: "The Agent creates summaries, tasks and explanations. It does not approve funding or submit inspection conclusions.",
+    activeValue: "valueFunder",
+    activeNode: 3
+  },
+  {
+    headline: "Crypto-native execution is a guardrail, not magic lending.",
+    copy: "Rule active, pool available, platform not paused, materials complete and inspection acceptable are shown as execution conditions before any funding result.",
+    result: "Execution check",
+    question: "Are the contract, rule, pool and pause states ready for this case?",
+    blocker: "Pool and rule checks must pass before completion.",
+    owner: "Platform operator and execution layer.",
+    action: "Run rule, pool and pause check; escalate if blocked.",
+    talk: "Contract state is visible as a business condition. It does not judge trade truth and does not replace funder review.",
+    note: "Use this stage for bank and operator audiences. It explains DeFi without pretending to automate judgment.",
+    objection: "Contract or rule state can allow, block, fail or complete execution. It cannot decide whether a shipment is real.",
+    activeValue: "valueOperator",
+    activeNode: 4
+  },
+  {
+    headline: "The pilot closes on a funding result and a bounded next ask.",
+    copy: "P0 proves one operating loop: exporter intent, materials, Agent gap check, inspection fact, funder review, execution readiness and final funding-state explanation.",
+    result: "Completed",
+    question: "What should a pilot prove without overbuilding the platform?",
+    blocker: "None for the demo case; future blockers remain visible and owned.",
+    owner: "Pilot team.",
+    action: "Run 5 to 10 controlled cases in one corridor.",
+    talk: "Close with scope discipline: not a generic dashboard, not approval backend, not real fund execution in prototype.",
+    note: "Ask for a concrete pilot: corridor, cases, roles, success metrics and manual fallback.",
+    objection: "The vision can expand into supply-chain fact infrastructure, but P0 is deliberately scoped to financing control tower outcomes.",
+    activeValue: "valueInvestor",
+    activeNode: 5
+  }
+];
+
+let currentRoute = "short";
+let currentStage = 0;
+
+function log(message) {
+  const time = new Date().toLocaleTimeString();
+  logBox.innerHTML = "<div>" + time + " - " + message + "</div>" + logBox.innerHTML;
+}
+
+function setRoute(routeKey) {
+  currentRoute = routeKey;
+  const route = routes[routeKey];
+  document.querySelectorAll(".route").forEach((button) => {
+    button.classList.toggle("active", button.dataset.route === routeKey);
+  });
+  routeTop.textContent = route.label;
+  routeFocus.textContent = route.focus;
+  primaryBuyer.textContent = route.buyer;
+  proofPoint.textContent = route.proof;
+  closeLine.textContent = route.close;
+  log("Route set to " + route.label);
+}
+
+function setStage(index) {
+  currentStage = index;
+  const stage = stages[index];
+  document.querySelectorAll(".step").forEach((button) => {
+    button.classList.toggle("active", Number(button.dataset.step) === index);
+  });
+  stageTop.textContent = (index + 1) + " / " + stages.length;
+  resultTop.textContent = stage.result;
+  headline.textContent = stage.headline;
+  heroCopy.textContent = stage.copy;
+  businessQuestion.textContent = stage.question;
+  currentBlocker.textContent = stage.blocker;
+  owner.textContent = stage.owner;
+  nextAction.textContent = stage.action;
+  talkTrack.textContent = stage.talk;
+  speakerNote.textContent = stage.note;
+  objection.textContent = stage.objection;
+  progressBar.style.width = ((index + 1) / stages.length * 100) + "%";
+  document.querySelectorAll(".value-card").forEach((card) => card.classList.remove("active"));
+  document.getElementById(stage.activeValue).classList.add("active");
+  for (let i = 0; i < 6; i += 1) {
+    const node = document.getElementById("node" + i);
+    node.classList.remove("active", "done", "blocked");
+    if (i < stage.activeNode) node.classList.add("done");
+    if (i === stage.activeNode) node.classList.add(index === 1 ? "blocked" : "active");
+  }
+  log("Stage " + (index + 1) + ": " + stage.result);
+}
+
+document.querySelectorAll(".route").forEach((button) => {
+  button.addEventListener("click", () => setRoute(button.dataset.route));
+});
+document.querySelectorAll(".step").forEach((button) => {
+  button.addEventListener("click", () => setStage(Number(button.dataset.step)));
+});
+document.querySelectorAll("[data-action]").forEach((button) => {
+  button.addEventListener("click", () => log("Presenter action: " + button.dataset.action));
+});
+
+setRoute(currentRoute);
+setStage(currentStage);
+</script>
+</body>
+</html>
