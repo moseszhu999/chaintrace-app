@@ -52,6 +52,7 @@
     add("p0proofgraphrail", "assets/p0-proof-graph-rail.js?v=proofgraphrail1");
     add("p0proofgraphcrypto", "assets/p0-proof-graph-crypto-rail.js?v=proofgraphcrypto1");
     add("p0salesdemorail", "assets/p0-sales-demo-rail.js?v=salesdemo1");
+    add("p0pilotrail", "assets/p0-pilot-rail.js?v=pilotrail1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
