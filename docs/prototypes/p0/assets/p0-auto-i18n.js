@@ -39,6 +39,8 @@
     add("p0settlementrail", "assets/p0-settlement-rail.js?v=settlementrail1");
     add("p0settlementcrypto", "assets/p0-settlement-crypto-rail.js?v=settlementcrypto1");
     add("p0insurerrail", "assets/p0-insurer-rail.js?v=insurerrail1");
+    add("p0investorrail", "assets/p0-investor-rail.js?v=investorrail1");
+    add("p0investorcrypto", "assets/p0-investor-crypto-rail.js?v=investorcrypto1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
