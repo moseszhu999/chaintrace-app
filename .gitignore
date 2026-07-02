@@ -8,6 +8,7 @@ coverage/
 artifacts/
 cache/
 types/
+deployments/
 *.tsbuildinfo
 .env
 .env.local
