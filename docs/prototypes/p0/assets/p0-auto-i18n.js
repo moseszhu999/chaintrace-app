@@ -1,24 +1,32 @@
 (function () {
-  function loadBusinessPatch() {
-    if (document.querySelector('script[data-p0-business-i18n="true"]')) {
-      window.ChainTraceP0BusinessI18n?.apply?.();
+  function addScript(id, src, onload) {
+    if (document.getElementById(id)) {
+      if (onload) onload();
       return;
     }
-    const script = document.createElement("script");
-    script.src = "assets/p0-business-i18n.js?v=20260702-business1";
+    var script = document.createElement("script");
+    script.id = id;
+    script.src = src;
     script.defer = true;
-    script.dataset.p0BusinessI18n = "true";
-    script.onload = () => window.ChainTraceP0BusinessI18n?.apply?.();
+    script.onload = onload;
     document.body.appendChild(script);
   }
 
-  window.ChainTraceP0AutoI18n = {
-    apply: loadBusinessPatch
-  };
+  function applyAll() {
+    if (window.ChainTraceP0BusinessI18n) window.ChainTraceP0BusinessI18n.apply();
+    if (window.ChainTraceP0ProfileUiI18n) window.ChainTraceP0ProfileUiI18n.apply();
+  }
+
+  function loadAll() {
+    addScript("p0-business-i18n-loader", "assets/p0-business-i18n.js?v=20260702-business2", applyAll);
+    addScript("p0-profile-ui-i18n-loader", "assets/p0-profile-ui-i18n.js?v=20260702-profile1", applyAll);
+  }
+
+  window.ChainTraceP0AutoI18n = { apply: loadAll };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadBusinessPatch);
+    document.addEventListener("DOMContentLoaded", loadAll);
   } else {
-    loadBusinessPatch();
+    loadAll();
   }
 })();
