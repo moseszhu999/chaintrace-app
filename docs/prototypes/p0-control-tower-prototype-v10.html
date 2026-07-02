@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ChainTrace P0 Control Tower Business Walkthrough Prototype V10</title>
+<style>
+:root {
+  --bg: #f4f7fb;
+  --ink: #172033;
+  --muted: #667085;
+  --line: #d9e2ec;
+  --card: #ffffff;
+  --blue: #026aa2;
+  --teal: #0f766e;
+  --green: #039855;
+  --amber: #b54708;
+  --red: #b42318;
+  --purple: #5925dc;
+  --slate: #344054;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.wrap { max-width: 1480px; margin: 0 auto; padding: 20px; }
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(244, 247, 251, .96);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+.top-inner {
+  max-width: 1480px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 20px;
+}
+h1, h2, h3, h4, p { margin-top: 0; }
+h1 { font-size: 30px; line-height: 1.12; margin-bottom: 6px; letter-spacing: 0; }
+h2 { font-size: 20px; margin-bottom: 12px; }
+h3 { font-size: 16px; margin-bottom: 8px; }
+h4 { font-size: 13px; margin-bottom: 7px; }
+p { line-height: 1.56; }
+.muted, .sub { color: var(--muted); }
+.sub { font-size: 12px; line-height: 1.45; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.chip, .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.tag { padding: 4px 8px; font-size: 11px; font-weight: 760; }
+.blue { color: var(--blue); border-color: #b9e6fe; background: #f0f9ff; }
+.teal { color: var(--teal); border-color: #99f6e4; background: #f0fdfa; }
+.green { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+.amber { color: var(--amber); border-color: #fedf89; background: #fffaeb; }
+.red { color: var(--red); border-color: #fecdca; background: #fef3f2; }
+.purple { color: var(--purple); border-color: #d9d6fe; background: #f4f3ff; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+.hero-main {
+  background: #111827;
+  color: white;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 18px 48px rgba(16, 24, 40, .18);
+}
+.hero-main p { color: #d0d5dd; margin-bottom: 0; }
+.card, .panel, .node, .lane, .decision, .role-card, .path-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+.panel { padding: 16px; }
+.hero-side { display: grid; gap: 10px; }
+.fact {
+  display: grid;
+  grid-template-columns: 136px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.fact:last-child { border-bottom: 0; }
+.fact b { font-size: 13px; }
+.section { margin: 18px 0; }
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.lane {
+  padding: 14px;
+  overflow-x: auto;
+}
+.flow {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(132px, 1fr));
+  gap: 8px;
+  min-width: 1320px;
+}
+.node {
+  min-height: 142px;
+  padding: 11px;
+  background: #fbfcfd;
+  position: relative;
+}
+.node:after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: var(--line);
+}
+.node:last-child:after { display: none; }
+.node p { font-size: 12px; color: var(--muted); margin-bottom: 0; }
+.node-core { border-color: #b9e6fe; background: #f0f9ff; }
+.node-fact { border-color: #abefc6; background: #ecfdf3; }
+.node-wait { border-color: #fedf89; background: #fffaeb; }
+.node-block { border-color: #fecdca; background: #fef3f2; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.card, .role-card, .path-card, .decision { padding: 14px; }
+.role-card { min-height: 214px; }
+.path-card { min-height: 210px; }
+.decision { min-height: 158px; }
+.role-card p, .path-card p, .decision p { color: var(--muted); font-size: 12px; margin-bottom: 0; }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table th, .table td {
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.table th {
+  width: 28%;
+  color: var(--muted);
+  background: #fbfcfd;
+}
+.board {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 12px;
+}
+.steps {
+  display: grid;
+  gap: 8px;
+}
+.step {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 54px;
+}
+.step b { display: block; font-size: 13px; margin-bottom: 2px; }
+.step span { color: var(--muted); font-size: 12px; }
+.callout {
+  border-left: 4px solid var(--teal);
+  background: #f0fdfa;
+  border-radius: 0 8px 8px 0;
+  padding: 12px;
+  line-height: 1.55;
+  font-size: 13px;
+}
+.callout.warn { border-left-color: var(--amber); background: #fffaeb; color: var(--ink); }
+.callout.danger { border-left-color: var(--red); background: #fef3f2; color: var(--ink); }
+.checklist {
+  display: grid;
+  gap: 8px;
+}
+.check {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+}
+.check span:first-child { font-size: 13px; }
+.footer { text-align: center; padding: 18px; color: var(--muted); font-size: 12px; }
+@media (max-width: 1120px) {
+  .top-inner, .hero, .grid-2, .grid-3, .grid-4, .board { grid-template-columns: 1fr; }
+  .chips { justify-content: flex-start; }
+}
+@media (max-width: 680px) {
+  .wrap { padding: 12px; }
+  h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div>
+      <h1>ChainTrace P0 Control Tower Business Walkthrough Prototype V10</h1>
+      <div class="sub">Static visual prototype for waterfall business review. Not implementation. Not formally frozen.</div>
+    </div>
+    <div class="chips">
+      <span class="chip">Stage <b>Prototype design</b></span>
+      <span class="chip">Object <b>P0 control tower</b></span>
+      <span class="chip">Status <b>Ready for walkthrough refinement</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-main">
+      <span class="tag teal">P0 = Agent Native + Crypto Native supply-chain finance control tower</span>
+      <h2 style="font-size:34px;line-height:1.12;margin-top:14px">A business user should understand the case, blocker, owner, path and funding result without reading technical internals.</h2>
+      <p>
+        V10 turns V9 into a more explicit walkthrough board. The first screen shows the whole financing lane, the role boundaries, path differences,
+        Agent limits, DeFi business outputs, exception recovery and deferred scope in one reviewable artifact.
+      </p>
+    </div>
+    <div class="panel hero-side">
+      <div class="fact"><span class="sub">Prototype</span><b>docs/prototypes/p0-control-tower-prototype-v10.html</b></div>
+      <div class="fact"><span class="sub">Review object</span><b>One cross-border receivable financing case</b></div>
+      <div class="fact"><span class="sub">Starts after</span><b>Wallet role binding / business workspace entry</b></div>
+      <div class="fact"><span class="sub">Not included</span><b>API, DB, Solidity, wallet signature, hash/proof product page</b></div>
+      <div class="callout warn">
+        This is not a sales demo and not a website implementation. It is a business prototype used to decide whether P0 control tower expression is understandable.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>1. End-to-end financing control tower lane</h2>
+      <span class="tag blue">source to funding result</span>
+    </div>
+    <div class="lane">
+      <div class="flow">
+        <div class="node node-core">
+          <span class="tag blue">P0</span>
+          <h4>Exporter financing intent</h4>
+          <p>Exporter starts a receivable financing / settlement case with buyer, goods, amount, route and requested outcome.</p>
+        </div>
+        <div class="node node-core">
+          <span class="tag amber">Need material</span>
+          <h4>Trade materials</h4>
+          <p>Contract, PO, invoice, packing list and supplement notes are reviewed as business evidence, not as a generic file list.</p>
+        </div>
+        <div class="node node-core">
+          <span class="tag purple">Agent</span>
+          <h4>Agent gap check</h4>
+          <p>Agent summarizes case context, finds gaps, creates role-owned to-dos and explains next action.</p>
+        </div>
+        <div class="node node-fact">
+          <span class="tag green">Fact</span>
+          <h4>Inspection fact</h4>
+          <p>Inspector confirms pass, fail or dispute. Inspection supports review but never approves funding.</p>
+        </div>
+        <div class="node node-fact">
+          <span class="tag green">P1 node</span>
+          <h4>Logistics / customs / insurance</h4>
+          <p>P0 keeps these as visible nodes or placeholders. Full workflows remain deferred.</p>
+        </div>
+        <div class="node node-fact">
+          <span class="tag green">P1 node</span>
+          <h4>Buyer confirmation</h4>
+          <p>Buyer confirmation, dispute and payment responsibility are visible as business facts, not a full buyer system.</p>
+        </div>
+        <div class="node node-wait">
+          <span class="tag amber">Path-specific</span>
+          <h4>Funder review</h4>
+          <p>Only active in bank-assisted path. Funder may request materials, reject, or allow pilot review.</p>
+        </div>
+        <div class="node node-wait">
+          <span class="tag amber">Execution guard</span>
+          <h4>DeFi business check</h4>
+          <p>Rule active, pool available, platform not paused and conditions satisfied. Contract does not judge trade truth.</p>
+        </div>
+        <div class="node node-wait">
+          <span class="tag amber">Ops</span>
+          <h4>Platform operation</h4>
+          <p>Platform sees pool, rules, pause, failures and Agent backlog, but cannot forge facts or approve for a funder.</p>
+        </div>
+        <div class="node node-block">
+          <span class="tag red">Exception</span>
+          <h4>Blocker and recovery</h4>
+          <p>Every blocked or failed state must show reason, owner, recovery condition and next step.</p>
+        </div>
+        <div class="node node-core">
+          <span class="tag teal">Result</span>
+          <h4>Funding result</h4>
+          <p>Preparing, need materials, under review, allowed, blocked, failed, completed or rejected are distinct.</p>
+        </div>
+        <div class="node node-core">
+          <span class="tag teal">Boundary</span>
+          <h4>Completed only when funded</h4>
+          <p>Allowed is not completed. Funder allowed is not funded. Inspection pass is not funding approval.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section board">
+    <div>
+      <h2>2. Walkthrough order</h2>
+      <div class="steps">
+        <div class="step"><b>1. Positioning</b><span>Control tower, not landing page.</span></div>
+        <div class="step"><b>2. Full-chain lane</b><span>Source, facts, review, execution, result.</span></div>
+        <div class="step"><b>3. Exporter view</b><span>Own case, blocker and next action.</span></div>
+        <div class="step"><b>4. Bank-assisted path</b><span>Funder review before execution check.</span></div>
+        <div class="step"><b>5. Pure DeFi path</b><span>No bank gate; rule and pool driven.</span></div>
+        <div class="step"><b>6. Low-human path</b><span>Agent + contract, disputes to human.</span></div>
+        <div class="step"><b>7. Fact-party nodes</b><span>Facts only, not funding decisions.</span></div>
+        <div class="step"><b>8. Platform view</b><span>Operations, not fact forgery.</span></div>
+        <div class="step"><b>9. Exception recovery</b><span>Reason, owner, next step.</span></div>
+        <div class="step"><b>10. Permission isolation</b><span>Blocked actions explained.</span></div>
+        <div class="step"><b>11. Deferred boundary</b><span>No API, DB, Solidity, wallet, hash/proof.</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>What the reviewer should understand in 3 minutes</h2>
+      <table class="table">
+        <tr><th>Product</th><td>ChainTrace P0 is a supply-chain finance control tower centered on one financing / settlement case.</td></tr>
+        <tr><th>Main user question</th><td>Where is the case now, why is it blocked, who owns the next action and what is the funding result?</td></tr>
+        <tr><th>Agent Native</th><td>Agent summarizes, checks gaps, creates to-dos, suggests next action and escalates. It does not approve or create facts.</td></tr>
+        <tr><th>Crypto Native</th><td>DeFi contract state is shown as business output: allow, wait, block, pool insufficient, paused, failed, completed.</td></tr>
+        <tr><th>Review result</th><td>If any stage cannot be understood in business language, the prototype is not ready to freeze.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>3. Role views and hard boundaries</h2>
+      <span class="tag purple">single wallet single role</span>
+    </div>
+    <div class="grid-4">
+      <div class="role-card">
+        <span class="tag blue">Exporter</span>
+        <h3>Creates and fixes the case</h3>
+        <p>Can see own case, trade materials, material gap, Agent to-do, fact progress and funding result. Cannot see unrelated cases or edit fact-party conclusions.</p>
+      </div>
+      <div class="role-card">
+        <span class="tag amber">Funder / bank</span>
+        <h3>Reviews related cases</h3>
+        <p>Can review relevant packages, request more information, allow pilot review or reject. Cannot modify inspection, logistics, buyer or insurance facts.</p>
+      </div>
+      <div class="role-card">
+        <span class="tag green">Fact party</span>
+        <h3>Confirms assigned facts</h3>
+        <p>Inspector, logistics, customs, insurance and buyer roles only see their assigned node and necessary context. They do not decide financing.</p>
+      </div>
+      <div class="role-card">
+        <span class="tag red">Platform operator</span>
+        <h3>Handles operational blockers</h3>
+        <p>Can view rules, pool, pause, execution failure and Agent backlog. Cannot forge exporter evidence, fact-party conclusions or funder approval.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>4. Path difference panels</h2>
+      <span class="tag amber">do not collapse into one bank approval path</span>
+    </div>
+    <div class="grid-3">
+      <div class="path-card">
+        <span class="tag amber">Bank-assisted</span>
+        <h3>Funder review is required</h3>
+        <p>Funder reviews material completeness and facts, can request more information, approve for pilot review or reject. DeFi still checks rule, pool and pause after allowance.</p>
+        <div class="callout warn" style="margin-top:12px">Do not show bank allowance as completed funding.</div>
+      </div>
+      <div class="path-card">
+        <span class="tag blue">Pure DeFi</span>
+        <h3>Bank review is skipped</h3>
+        <p>Facts, rules, pool state and guarantee conditions drive execution. If conditions are incomplete, the result is waiting, blocked or failed, not silent approval.</p>
+        <div class="callout warn" style="margin-top:12px">Do not force pure DeFi to wait for bank approval.</div>
+      </div>
+      <div class="path-card">
+        <span class="tag purple">Low-human</span>
+        <h3>Agent and contract handle low-risk flow</h3>
+        <p>Agent can advance low-risk, authorized, rule-clear tasks. Major dispute, high risk, legal responsibility and execution failure go to human review.</p>
+        <div class="callout warn" style="margin-top:12px">Do not let Agent decide major disputes.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section grid-2">
+    <div class="panel">
+      <h2>5. Agent boundary</h2>
+      <table class="table">
+        <tr><th>Can do</th><td>Summarize case, detect material gaps, create role-owned tasks, explain state, recommend next action, escalate exceptions.</td></tr>
+        <tr><th>Cannot do</th><td>Forge evidence, approve funding, submit inspection conclusion, judge disputes, bypass rules, change role permissions.</td></tr>
+        <tr><th>Walkthrough test</th><td>Every Agent output must point back to visible material, fact, role, rule or exception.</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>6. DeFi business output</h2>
+      <table class="table">
+        <tr><th>Outputs</th><td>Allowed, not allowed, waiting condition, rule blocked, pool insufficient, platform paused, execution failed, completed.</td></tr>
+        <tr><th>Cannot do</th><td>Judge trade truth, approve funding, create facts, resolve disputes or replace platform recovery.</td></tr>
+        <tr><th>Walkthrough test</th><td>Every DeFi state must be explainable without Solidity, ABI, wallet signature or transaction detail.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>7. Exception recovery matrix</h2>
+      <span class="tag red">blocked is not a dead end</span>
+    </div>
+    <div class="panel">
+      <table class="table">
+        <tr><th>Material gap</th><td>Exporter owns supplement. Agent creates to-do with completion standard.</td></tr>
+        <tr><th>Inspection dispute</th><td>Fact party and related business role own clarification. Automation pauses.</td></tr>
+        <tr><th>Funder needs more info</th><td>Funder request creates responsible task; exporter or fact party responds.</td></tr>
+        <tr><th>Rule blocked</th><td>Platform or responsible role handles rule explanation and recovery condition.</td></tr>
+        <tr><th>Pool insufficient</th><td>Platform / pool operation handles availability, currency and pause state.</td></tr>
+        <tr><th>Platform paused</th><td>Platform explains reason, impact range and restore condition.</td></tr>
+        <tr><th>Execution failed</th><td>Platform handles failure explanation and next action; user sees result is not completed.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>8. Freeze and deferred boundary board</h2>
+      <span class="tag red">prototype design only</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>Can be reviewed now</h3>
+        <div class="checklist">
+          <div class="check"><span>Product positioning as control tower</span><span class="tag teal">review</span></div>
+          <div class="check"><span>Source-to-result lane</span><span class="tag teal">review</span></div>
+          <div class="check"><span>Role boundary</span><span class="tag teal">review</span></div>
+          <div class="check"><span>Path difference</span><span class="tag teal">review</span></div>
+          <div class="check"><span>Agent boundary</span><span class="tag teal">review</span></div>
+          <div class="check"><span>DeFi business output</span><span class="tag teal">review</span></div>
+          <div class="check"><span>Exception recovery</span><span class="tag teal">review</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Must stay deferred</h3>
+        <div class="checklist">
+          <div class="check"><span>Frontend app, route or component implementation</span><span class="tag red">defer</span></div>
+          <div class="check"><span>API endpoint, HTTP method or JSON schema</span><span class="tag red">defer</span></div>
+          <div class="check"><span>Database schema, table, field or index</span><span class="tag red">defer</span></div>
+          <div class="check"><span>Solidity, ABI, deployment or gas</span><span class="tag red">defer</span></div>
+          <div class="check"><span>Wallet signature flow</span><span class="tag red">defer</span></div>
+          <div class="check"><span>Hash/proof product page</span><span class="tag red">defer</span></div>
+          <div class="check"><span>Old app/components/lib/contracts/scripts inheritance</span><span class="tag red">defer</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panel">
+      <h2>9. V10 walkthrough conclusion</h2>
+      <div class="callout">
+        V10 is designed to make the P0 prototype understandable before formal review. It does not freeze the business expression by itself.
+        The next valid step is to run the formal walkthrough against V10 and record actual findings in the waterfall review documents.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  ChainTrace P0 waterfall artifact · static visual prototype · no implementation claim · not formally frozen
+</footer>
+</body>
+</html>
