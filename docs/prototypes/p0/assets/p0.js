@@ -79,6 +79,20 @@
     return "mode.semi";
   }
 
+  function injectP0CssFixes() {
+    if (document.getElementById("p0-bootstrap-contrast-fix")) return;
+    const style = document.createElement("style");
+    style.id = "p0-bootstrap-contrast-fix";
+    style.textContent = `
+      body, .hero, .section, .card, .card-title, .timeline, .node, .list li, .notice, .table, .table td { color: var(--text) !important; }
+      .card { --bs-card-color: var(--text); --bs-card-bg: rgba(23,42,67,.78); }
+      .card-title, .section h2, .node h3, .node h4 { color: var(--text) !important; }
+      .section-sub, .muted, .metric .label, .node p, .field label, .table th { color: var(--muted) !important; }
+      .select option { color: #0b1220; background: #ffffff; }
+    `;
+    document.head.appendChild(style);
+  }
+
   function setMode(mode) {
     localStorage.setItem(modeKey, mode);
     document.querySelectorAll("[data-agent-mode]").forEach((button) => {
@@ -101,12 +115,13 @@
       else console.warn("Missing i18n key", target.dataset.i18n, language);
     });
     setMode(localStorage.getItem(modeKey) || fallbackMode);
+    setTimeout(() => window.ChainTraceP0AutoI18n?.apply?.(), 0);
   }
 
   function initMode() {
     setMode(localStorage.getItem(modeKey) || fallbackMode);
     document.querySelectorAll("[data-agent-mode]").forEach((button) => {
-      button.addEventListener("click", () => setMode(button.dataset.agentMode));
+      button.addEventListener("click", () => setMode(button.datasetAgentMode || button.dataset.agentMode));
     });
   }
 
@@ -126,14 +141,17 @@
   }
 
   function loadAutoTranslations() {
-    if (document.querySelector('script[src="assets/p0-auto-i18n.js"]')) return;
+    if (document.querySelector('script[data-p0-auto-i18n="true"]')) return;
     const script = document.createElement("script");
-    script.src = "assets/p0-auto-i18n.js";
+    script.src = "assets/p0-auto-i18n.js?v=20260702-fix2";
     script.defer = true;
+    script.dataset.p0AutoI18n = "true";
+    script.onload = () => window.ChainTraceP0AutoI18n?.apply?.();
     document.body.appendChild(script);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    injectP0CssFixes();
     initLanguage();
     initMode();
     initActivePage();
