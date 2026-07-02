@@ -31,6 +31,7 @@
     add("p0inspection", "assets/p0-inspection-i18n.js?v=inspection1", apply);
     add("p0agentrail", "assets/p0-agent-rail.js?v=agentrail1");
     add("p0cryptorail", "assets/p0-crypto-rail.js?v=cryptorail1");
+    add("p0intentassist", "assets/p0-intent-agent-assist.js?v=intentassist1");
   }
 
   window.ChainTraceP0AutoI18n = { apply: load };
