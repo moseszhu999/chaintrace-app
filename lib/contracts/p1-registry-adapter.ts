@@ -24,6 +24,7 @@ import { Hex32 } from "@/lib/contracts/types";
 import { Currency, Role } from "@/lib/p1-domain";
 
 export type ContractCaseDetail = ReturnType<typeof getContractCaseDetail>;
+export type P1AdapterCaseDetail = ContractCaseDetail;
 
 export interface P1RegistryAdapter {
   mode: "mock" | "local-chain";
@@ -38,7 +39,7 @@ export interface P1RegistryAdapter {
     input: AddContractDocumentProofInput
   ): Promise<ContractBackedDocumentDisplay>;
   getVisibleCases(walletAddress: string, role: Role): Promise<ContractBackedCase[]>;
-  getCaseDetail(caseId: string): Promise<ContractCaseDetail>;
+  getCaseDetail(caseId: string): Promise<P1AdapterCaseDetail>;
 }
 
 export function getP1RegistryAdapter(): P1RegistryAdapter {
