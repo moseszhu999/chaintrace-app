@@ -136,6 +136,8 @@ Each local-chain write uses browser wallet transaction submission and waits for 
 Implemented local-chain reads:
 
 ```text
+getRole reads ChainTraceP1Registry.roles(wallet)
+login uses adapter.getRole before routing
 getContractEvents reads RoleRegistered / CaseCreated / DocumentProofAdded / GateEvaluated / CaseStateTransitioned
 projectRawRegistryEvents converts raw contract logs into ChainTrace typed events
 buildCaseSummariesFromEvents rebuilds the case list from CaseCreated events
@@ -147,6 +149,7 @@ local-chain adapter getCaseDetail now uses the on-chain event read model
 Adapter-aware pages now wired:
 
 ```text
+/login
 /dashboard
 /exporter/dashboard
 /register-role
@@ -160,9 +163,9 @@ Adapter-aware pages now wired:
 Still pending in the next slice:
 
 ```text
-read role directly from roles(wallet)
 replace legacy direct p1-client-store page usage where still present
 replace remaining display-cache reads where contract records/events are available
+harden wallet address validation before roles(wallet) read
 ```
 
 ## Verification
