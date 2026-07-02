@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
-import { getP1RegistryAdapter } from "@/lib/contracts/p1-registry-adapter";
+import { getP1RegistryAdapter, type P1AdapterCaseDetail } from "@/lib/contracts/p1-registry-adapter";
 import { ContractDocumentKind, ContractGate } from "@/lib/contracts/types";
 import {
   ContractBackedCase,
@@ -216,7 +216,7 @@ export function AdapterNewExporterCasePage() {
 
 export function AdapterExporterCaseDetailPage({ caseId }: { caseId: string }) {
   const [cache, setCache] = useState<P1ContractRegistryCache | null>(null);
-  const [detail, setDetail] = useState<Awaited<ReturnType<ReturnType<typeof getP1RegistryAdapter>["getCaseDetail"]>> | null>(null);
+  const [detail, setDetail] = useState<P1AdapterCaseDetail>(null);
   const [kind, setKind] = useState<ContractDocumentKind>("INVOICE");
   const [fileName, setFileName] = useState("invoice-ct-001.pdf");
   const [fileType, setFileType] = useState("application/pdf");
@@ -262,10 +262,6 @@ export function AdapterExporterCaseDetailPage({ caseId }: { caseId: string }) {
 
   if (!cache || !detail) {
     return null;
-  }
-
-  if (!detail) {
-    return <MissingCase />;
   }
 
   const { financingCase, documents, state } = detail;
@@ -432,7 +428,7 @@ function useAdapterCases() {
 }
 
 function useAdapterCaseDetail(caseId: string) {
-  const [detail, setDetail] = useState<Awaited<ReturnType<ReturnType<typeof getP1RegistryAdapter>["getCaseDetail"]>> | null>(null);
+  const [detail, setDetail] = useState<P1AdapterCaseDetail>(null);
   useEffect(() => {
     void getP1RegistryAdapter().getCaseDetail(caseId).then(setDetail);
   }, [caseId]);
