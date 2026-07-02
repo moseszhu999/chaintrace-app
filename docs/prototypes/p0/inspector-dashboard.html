@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChainTrace P0 Prototype - Inspection Dashboard</title>
+  <link rel="stylesheet" href="assets/p0.css" />
+</head>
+<body data-page="inspector-dashboard">
+  <header class="topbar">
+    <a class="brand" href="inspector-dashboard.html"><span class="brand-mark">CT</span><span>ChainTrace P0<span class="small muted" style="display:block">Inspection provider workspace</span></span></a>
+    <div class="chips"><span class="chip">Role <span class="strong">Inspection provider</span></span><span class="chip">Provider <span class="strong">Atlas Inspection Co.</span></span><span class="chip">P0 <span class="strong">static demo</span></span></div>
+    <div class="mode-switch"><a class="mode-btn active" href="inspector-dashboard.html">质检视角</a><a class="mode-btn" href="exporter-inspection-status.html">出口商质检状态</a></div>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-title">INSPECTION FLOW</div>
+      <a class="step-link active" href="inspector-dashboard.html"><span class="step-index">0</span><span>质检任务队列</span></a>
+      <a class="step-link" href="inspector-task-detail.html"><span class="step-index">1</span><span>任务详情</span></a>
+      <a class="step-link" href="inspector-evidence-submit.html"><span class="step-index">2</span><span>提交质检事实</span></a>
+      <a class="step-link" href="inspector-result.html"><span class="step-index">3</span><span>质检结论结果</span></a>
+      <div class="side-title">RELATED</div>
+      <a class="step-link" href="exporter-inspection-status.html"><span class="step-index">E</span><span>出口商看到的质检状态</span></a>
+      <a class="step-link" href="bank-case-review.html"><span class="step-index">B</span><span>银行证据核验</span></a>
+    </aside>
+    <main class="main">
+      <section class="hero"><h1>质检方只负责货物事实，不负责融资结论。</h1><p>质检视角接收来自案件的检查任务，确认地点、货物、数量和证据要求，然后提交独立质检事实。P0 不连接真实质检系统、不上传真实照片、不做真实报告签章。</p></section>
+      <section class="section">
+        <div class="section-head"><div><h2>Inspection task queue</h2><p class="section-sub">质检方看到的是待处理任务，而不是银行审批或出口商融资流程。</p></div><span class="badge warn">2 open</span></div>
+        <div class="content">
+          <div class="grid-4"><div class="card metric"><div class="label">待接收</div><div class="value">1</div></div><div class="card metric"><div class="label">待提交</div><div class="value">1</div></div><div class="card metric"><div class="label">已完成</div><div class="value">4</div></div><div class="card metric"><div class="label">争议</div><div class="value">0</div></div></div>
+          <table class="table" style="margin-top:16px"><thead><tr><th>Task</th><th>Case</th><th>Exporter</th><th>Location</th><th>Priority</th><th>Status</th><th>Next</th></tr></thead><tbody><tr><td>INSP-P0-001</td><td>CT-P0-EX-001</td><td>Pacific Export LLC</td><td>Long Beach warehouse, CA</td><td><span class="badge warn">standard</span></td><td><span class="badge info">assigned</span></td><td><a class="action primary" href="inspector-task-detail.html">Open task</a></td></tr><tr><td>INSP-P0-002</td><td>CT-P0-EX-003</td><td>Nova Parts SG</td><td>Hamburg yard</td><td><span class="badge bad">urgent</span></td><td><span class="badge warn">need re-check</span></td><td><a class="action">View</a></td></tr></tbody></table>
+        </div>
+      </section>
+      <section class="section"><div class="section-head"><div><h2>质检视角 P0 边界</h2><p class="section-sub">质检方拥有事实结论，不拥有融资审批。</p></div><span class="badge info">fact owner</span></div><div class="content grid-3"><div class="card"><div class="card-title">可以做</div><p>查看任务、确认货物信息、填写检查结果、提交结论。</p></div><div class="card"><div class="card-title">不能做</div><p>不能改出口商材料，不能批融资，不能替银行做风险决策。</p></div><div class="card"><div class="card-title">输出</div><p>输出给出口商和银行可见的质检事实节点。</p></div></div></section>
+    </main>
+  </div>
+  <script src="assets/p0.js"></script>
+</body>
+</html>
